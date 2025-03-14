@@ -1,7 +1,7 @@
 # PomoloBee
 "PomoloBee - Bee Smart Know Your Apple" , allows farmers to estimate apple harvest yield
 
-![PomoloBee Logo](https://raw.githubusercontent.com/your-username/your-repo/main/documentation/PomoloBee.webp)
+<img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/documentation/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
 
 
 # Documentation 
