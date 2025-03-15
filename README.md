@@ -4,11 +4,15 @@
 <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/documentation/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
 
 
-# Documentation 
+## Documentation 
 
 📚 **Documentation:** [Documentation](documentation/) for more details.  
 
-📖 **Scope and Requirements:** [Requirements](documentation/requirements.md)  
+📖 **Scope and Requirements:** [Requirements](documentation/Requirements.md)
+📖 **API , Interface definition:** [API](documentation/API.md) 
+📖 **Data Model:** [Data Model](documentation/DataModel.md) 
+📖 **Workflow:** [Workflow](documentation/Workflow.md)   
+📖 **ML Specification:** [MLSpecification](documentation/MLSpecification.md)   
 ---
 
 ## **📌 Project Definition: PomoloBee – Bee Smart, Know Your Apple**
@@ -16,6 +20,42 @@
 ### **🔹 Goal:**  
 Develop an **Android app** (Kotlin + Android Studio) that allows farmers to estimate **apple harvest yield** using AI-based **video or image analysis**. The system will use a **cloud-based backend (VPS)** to process data and provide accurate results.  
 
+### 🌍 Data Flow in PomoloBee
+
+The following diagram illustrates the interaction between the **PomoloBee App**, **Django Backend**, and **ML Processing Service**.
+
+```mermaid
+graph TD
+
+  %% Define Components %%
+  subgraph Android App
+    MobileApp["📱 PomoloBee App"]
+  end
+
+  subgraph Backend
+    DjangoServer["🌐 Django Backend"]
+    Database["📂 PostgreSQL Database"]
+  end
+
+  subgraph ML System
+    MLService["🖥️ ML Model (Flask/FastAPI)"]
+  end
+
+  subgraph Storage
+    FileSystem["🖼️ Image Storage"]
+  end
+
+  %% Data Flow %%
+  MobileApp -- "📤 Upload Image & Raw ID" --> DjangoServer
+  DjangoServer -- "📂 Save Image" --> FileSystem
+  DjangoServer -- "🔄 Send Image to ML" --> MLService
+  MLService -- "🔢 Detect Apples & Confidence Score" --> DjangoServer
+  DjangoServer -- "📄 Update Image History & Store Results" --> Database
+  MobileApp -- "📥 Check Processing Status" --> DjangoServer
+  DjangoServer -- "📄 Return Status (Done/In Progress)" --> MobileApp
+  MobileApp -- "📥 Fetch Estimation Results" --> DjangoServer
+  DjangoServer -- "📄 Provide Yield Data" --> MobileApp
+```
 ---
 
 ## **📍 Features & Functionalities**
