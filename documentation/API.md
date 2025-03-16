@@ -1,5 +1,20 @@
 # **📜 API Interface Definition**
 
+
+---
+## Table of Content
+<!-- TOC -->
+- [**📜 API Interface Definition**](#api-interface-definition)
+  - [Table of Content](#table-of-content)
+    - [**Introduction**  ](#introduction)
+  - [**1️⃣ API DJANGO <-> APP**  ](#1-api-django--app)
+  - [**2️⃣ API DJANGO <-> ML**  ](#2-api-django--ml)
+  - [**3️⃣ Process Image API (Django to ML)**  ](#3-process-image-api-django-to-ml)
+  - [**4️⃣ Store `confidence_score` in Database**  ](#4-store-confidencescore-in-database)
+  - [**5️⃣ ML Processing Status API**  ](#5-ml-processing-status-api)
+<!-- TOC END -->
+---
+
 ### **Introduction**  
 This document defines the API interface for the Pomolobee project, specifying:  
 - API calls and data exchanged  

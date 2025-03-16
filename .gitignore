@@ -1,0 +1,50 @@
+# gitignore in root github PomoloBee project regrouping PomoloBeeApp, PomoloBeeDjango and PomoloBeeML
+
+
+# ---- IGNORE ANDROID STUDIO PROJECT (PomoloBeeApp) ----
+PomoloBeeApp/.gradle/
+PomoloBeeApp/.idea/
+PomoloBeeApp/local.properties
+PomoloBeeApp/.DS_Store
+PomoloBeeApp/build/
+PomoloBeeApp/captures/
+PomoloBeeApp/app/build/
+PomoloBeeApp/.externalNativeBuild/
+PomoloBeeApp/.cxx/
+PomoloBeeApp/.settings/
+PomoloBeeApp/gradle/
+PomoloBeeApp/out/
+
+# ---- IGNORE DJANGO PROJECT (PomoloBeeDjango) ----
+PomoloBeeDjango/__pycache__/
+PomoloBeeDjango/db.sqlite3
+PomoloBeeDjango/media/
+PomoloBeeDjango/staticfiles/
+PomoloBeeDjango/.vscode/
+PomoloBeeDjango/.DS_Store
+PomoloBeeDjango/venv/
+PomoloBeeDjango/.env
+
+# ---- IGNORE ML PROJECT (PomoloBeeML) ----
+PomoloBeeML/__pycache__/
+PomoloBeeML/.DS_Store
+PomoloBeeML/venv/
+PomoloBeeML/.vscode/
+PomoloBeeML/models/
+PomoloBeeML/logs/
+PomoloBeeML/.env
+
+# ---- GLOBAL IGNORE (For All Subprojects) ----
+*.log
+*.pyc
+*.pyo
+*.sqlite3
+*.swp
+*.swo
+*.iml
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+to_ignore

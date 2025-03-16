@@ -4,6 +4,24 @@
 <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/documentation/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
 
 
+
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _13 hours_ (Auto-generated)
+---
+## **Table of content**
+
+<!-- TOC -->
+- [PomoloBee](#pomolobee)
+  - [**Table of content**](#table-of-content)
+  - [Documentation ](#documentation)
+  - [**📌 Project Definition: PomoloBee – Bee Smart, Know Your Apple**](#project-definition-pomolobee--bee-smart-know-your-apple)
+    - [**🔹 Goal:**  ](#goal)
+    - [🌍 Data Flow in PomoloBee](#data-flow-in-pomolobee)
+  - [**📍 Features & Functionalities**](#features--functionalities)
+    - [**1️⃣ Mobile App (Frontend – Android)**](#1-mobile-app-frontend--android)
+    - [**2️⃣ Cloud Backend (VPS – Django or Flask API)**](#2-cloud-backend-vps--django-or-flask-api)
+    - [**3️⃣ Machine Learning Model (AI for Apple Detection)**](#3-machine-learning-model-ai-for-apple-detection)
+<!-- TOC END -->
+
 ## Documentation 
 
 📚 **Documentation:** [Documentation](documentation/) for more details.  

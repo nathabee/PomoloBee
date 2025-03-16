@@ -1,18 +1,27 @@
 # **📜 Pomolobee Workflow Document**  
 
 ## **Table of Contents**  
-1. **Workflow Summary**  
-   - Case: App initializes data  
-   - Case: App requests estimation based on a picture  
-   - Case: App displays data  
-2. **Detailed Requirements**  
-   - In the App  
-   - In the ML Model  
-   - In Django Backend  
-3. **Explanation of Calculation**  
-4. **API Design**  
-   - API Call Order  
-   - Polling Strategy  
+<!-- TOC -->
+- [**📜 Pomolobee Workflow Document**  ](#pomolobee-workflow-document)
+  - [**Table of Contents**  ](#table-of-contents)
+  - [Diagramme](#diagramme)
+  - [**🌍 Data Flow**](#data-flow)
+  - [**1. Workflow Summary**  ](#1-workflow-summary)
+    - [**📌 Case: App Initializes Data**  ](#case-app-initializes-data)
+    - [**📌 Case: App Requests Estimation Based on a Picture**  ](#case-app-requests-estimation-based-on-a-picture)
+    - [**📌 Case: App Displays Data**  ](#case-app-displays-data)
+  - [**2. Detailed Requirements**  ](#2-detailed-requirements)
+    - [**App Requirements**  ](#app-requirements)
+    - [**ML Model Requirements**  ](#ml-model-requirements)
+    - [**Django Backend Requirements**  ](#django-backend-requirements)
+  - [**3. Explanation of Calculation**  ](#3-explanation-of-calculation)
+    - [**📌 How Yield is Estimated**  ](#how-yield-is-estimated)
+  - [**4. API Design**  ](#4-api-design)
+    - [**API Call Order**  ](#api-call-order)
+    - [**Polling Strategy**  ](#polling-strategy)
+  - [**Error Handling Strategy**  ](#error-handling-strategy)
+<!-- TOC END -->
+
 
 ---
 ## Diagramme

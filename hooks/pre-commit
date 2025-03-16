@@ -1,0 +1,35 @@
+#!/bin/sh
+
+if ! git diff --cached --name-only | grep -q 'documentation/WORKLOG.md'; then
+  echo "Please update documentation/WORKLOG.md before committing."
+  exit 1
+fi
+
+# Functionality to check and update Table of Contents in all Markdown files in the documentation directory
+for file in $(git diff --cached --name-only | grep '^documentation/.*\.md$'); do
+  if grep -q '<!-- TOC -->' "$file"; then
+    echo "Updating Table of Contents for $file"
+    python3 scripts/create_tabcont.py "$file" 3
+    
+    # Ensure file is staged again after modification
+    git add "$file"
+  fi
+done
+
+# Update README table of contents regardless of staging status
+if grep -q '<!-- TOC -->' README.md; then
+  echo "Updating Table of Contents for README.md"
+  python3 scripts/create_tabcont.py README.md 3
+  
+  # Ensure README is staged for commit
+  git add README.md
+fi
+
+# Update the work log hours before committing
+./scripts/update-hours.sh
+
+# Ensure both WORKLOG.md and README.md are staged **AFTER** modification
+if git diff --name-only | grep -q 'documentation/WORKLOG.md'; then
+  git add documentation/WORKLOG.md
+  git add README.md
+fi

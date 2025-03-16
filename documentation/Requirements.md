@@ -5,6 +5,21 @@
 
 ### **🔹 Goal:**  
 Develop an **Android app** (Kotlin + Android Studio) that allows farmers to estimate **apple harvest yield** using AI-based **video or image analysis**. The system will use a **cloud-based backend (VPS)** to process data and provide accurate results.  
+---
+## Table of Content
+<!-- TOC -->
+- [PomoloBee](#pomolobee)
+  - [**📌 Project Definition: PomoloBee – Bee Smart, Know Your Apple**](#project-definition-pomolobee--bee-smart-know-your-apple)
+    - [**🔹 Goal:**  ](#goal)
+  - [Table of Content](#table-of-content)
+  - [**📍 Features & Functionalities**](#features--functionalities)
+    - [**1️⃣ Mobile App (Frontend – Android)**](#1-mobile-app-frontend--android)
+    - [**2️⃣ Cloud Backend (VPS – Django or Flask API)**](#2-cloud-backend-vps--django-or-flask-api)
+    - [**3️⃣ Machine Learning Model (AI for Apple Detection)**](#3-machine-learning-model-ai-for-apple-detection)
+  - [**📊 Data Flow Summary**](#data-flow-summary)
+  - [**📅 Project Milestones**](#project-milestones)
+  - [**📝 Open Questions for Refinement**](#open-questions-for-refinement)
+<!-- TOC END -->
 
 ---
 
