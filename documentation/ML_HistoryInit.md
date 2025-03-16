@@ -2,16 +2,23 @@
 - This document is used for me to trace how i created this repository initialisation when all project was empty, for the next time i make a project. It serves only information purposes.
 
  
-
-You're setting up **three development projects**:  
-✔ **PomologieDjango** (Django Backend)  
-✔ **PomologieML** (ML API with Flask/FastAPI)  
-✔ **PomologieApp** (Android Studio)    
-
-in this doc we explain, the original setup of
+ in this doc we explain, the original setup of
 | **Project**         | **Technology** | **Setup Command** |
 |--------------------|--------------|----------------|
 | **PomologieML** (ML API) | Flask + OpenCV | `python app.py` |
+
+---
+## Table of Content
+<!-- TOC -->
+- [Initialisation history ](#initialisation-history)
+  - [Table of Content](#table-of-content)
+  - [**2️⃣ Initializing PomologieML (ML API with Flask/FastAPI)**](#2-initializing-pomologieml-ml-api-with-flaskfastapi)
+    - [**📌 Step 1: Create PomologieML Project**](#step-1-create-pomologieml-project)
+    - [**📌 Step 2: Create Flask ML API**](#step-2-create-flask-ml-api)
+    - [**📌 Step 3: Run the ML API**](#step-3-run-the-ml-api)
+<!-- TOC END -->
+
+---
 
 --- 
 ## **2️⃣ Initializing PomologieML (ML API with Flask/FastAPI)**

@@ -10,8 +10,8 @@
   - [**1️⃣ API DJANGO <-> APP**  ](#1-api-django--app)
   - [**2️⃣ API DJANGO <-> ML**  ](#2-api-django--ml)
   - [**3️⃣ Process Image API (Django to ML)**  ](#3-process-image-api-django-to-ml)
-  - [**4️⃣ Store `confidence_score` in Database**  ](#4-store-confidencescore-in-database)
   - [**5️⃣ ML Processing Status API**  ](#5-ml-processing-status-api)
+    - [**📌 Updated API Endpoints (`views.py`)**](#updated-api-endpoints-viewspy)
 <!-- TOC END -->
 ---
 
@@ -28,6 +28,9 @@ This document defines the API interface for the Pomolobee project, specifying:
 - `GET /api/images/{image_id}/status` → Checks if ML has processed the image  
 - `GET /api/estimations/{image_id}` → Retrieves the estimation results  
 
+| `GET /api/fields/` | fetch all fields |
+| `GET /api/fields/{field_id}/raws/` |to fetch raws for a given field | 
+
 ---
 
 ## **2️⃣ API DJANGO <-> ML**  
@@ -43,51 +46,7 @@ This document defines the API interface for the Pomolobee project, specifying:
 📌 **Step 3: ML detects apples & returns results**  
 
 ✅ **Django View: Sends Image to ML API**
-```python
-import requests
-from django.http import JsonResponse
-
-ML_API_URL = "http://ml-server:5001/process-image"
-
-def process_image(request):
-    if request.method == 'POST' and request.FILES.get('image'):
-        files = {'image': request.FILES['image']}
-        response = requests.post(ML_API_URL, files=files)
-
-        if response.status_code == 200:
-            ml_data = response.json()
-
-            # Save ML results in ImageHistory
-            image_history = ImageHistory.objects.create(
-                image_path=f"/images/{request.FILES['image'].name}",
-                nb_apfel=ml_data.get("nb_apfel"),
-                confidence_score=ml_data.get("confidence_score"),
-                processed=True
-            )
-            return JsonResponse(ml_data)
-        else:
-            return JsonResponse({"error": "ML processing failed"}, status=500)
-```
-
----
-
-## **4️⃣ Store `confidence_score` in Database**  
-Your current ML API **returns confidence_score**, but Django needs to store it.
-
-✅ **Fix: Update ImageHistory Model**
-```python
-class ImageHistory(models.Model):
-    id = models.AutoField(primary_key=True)
-    image_path = models.CharField(max_length=255)  # Store path or URL of the image
-    nb_apfel = models.FloatField(null=True, blank=True)  # Apples detected by ML
-    confidence_score = models.FloatField(null=True, blank=True)  # ML confidence score
-    processed = models.BooleanField(default=False)  # Has the ML processed this image?
-
-    def __str__(self):
-        return f"Image {self.id} - {self.image_path}"
-```
-
-✅ **Fix: Store confidence_score after ML Processing**
+ 
 ```python
 def process_image(request):
     if request.method == 'POST' and request.FILES.get('image'):
@@ -129,3 +88,75 @@ def get_ml_status(request, image_id):
 ```
 
 --- 
+
+
+### **📌 Updated API Endpoints (`views.py`)**
+#### **1️⃣ Fetch All Fields**
+```python
+from django.http import JsonResponse
+from .models import Field
+
+def get_fields(request):
+    fields = Field.objects.all().values("id", "short_name", "name", "description", "orientation")
+    return JsonResponse({"fields": list(fields)})
+```
+✅ **API Endpoint:**
+```
+GET /api/fields/
+```
+
+---
+
+#### **2️⃣ Fetch All Raws for a Given Field**
+```python
+from django.http import JsonResponse
+from .models import Raw
+
+def get_raws_by_field(request, field_id):
+    raws = Raw.objects.filter(field_id=field_id).values("id", "short_name", "name", "nb_plant", "fruit_id")
+    return JsonResponse({"raws": list(raws)})
+```
+✅ **API Endpoint:**
+```
+GET /api/fields/{field_id}/raws/
+```
+
+---
+
+
+#### **3️⃣ Modify Image Upload API to Require `raw_id`**
+```python
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+def upload_image(request):
+    if request.method == 'POST':
+        try:
+            image_file = request.FILES.get('image')
+            raw_id = request.POST.get('raw_id')
+
+            if not image_file or not raw_id:
+                return JsonResponse({"error": "Image and raw_id are required"}, status=400)
+
+            image_history = ImageHistory.objects.create(
+                image_path=f"/images/{image_file.name}",
+                raw_id=raw_id
+            )
+
+            return JsonResponse({"message": "Image uploaded successfully", "image_id": image_history.id})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+```
+✅ **API Endpoint:**
+```
+POST /api/images/
+```
+✅ **Updated Payload:**
+```json
+{
+    "image": "apple_picture.jpg",
+    "raw_id": 3
+}
+```

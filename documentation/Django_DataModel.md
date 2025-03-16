@@ -1,3 +1,17 @@
+---
+## Table of Content
+<!-- TOC -->
+  - [Table of Content](#table-of-content)
+- [Defines a Field (Agricultural Field)](#defines-a-field-agricultural-field)
+- [Defines a Raw (a section in a field)](#defines-a-raw-a-section-in-a-field)
+- [Defines a Fruit Type](#defines-a-fruit-type)
+- [Image storage for estimation analysis](#image-storage-for-estimation-analysis)
+- [History of Raw Analysis (Processed Data)](#history-of-raw-analysis-processed-data)
+- [History of Yield Estimations](#history-of-yield-estimations)
+<!-- TOC END -->
+
+---
+
 from django.db import models
 
 # Defines a Field (Agricultural Field)
@@ -17,7 +31,10 @@ class Raw(models.Model):
     short_name = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=255)
     nb_plant = models.IntegerField()  # Number of plants in the raw
-    fruit = models.ForeignKey('Fruit', on_delete=models.CASCADE, related_name='raws')
+    fruit = models.ForeignKey('Fruit', on_delete=models.CASCADE, related_name='raws')  # ✅ One raw → One fruit
+    field = models.ForeignKey('Field', on_delete=models.CASCADE, related_name='raws')  # ✅ One field → Many raws
+
+
 
     def __str__(self):
         return self.name
@@ -44,9 +61,13 @@ class ImageHistory(models.Model):
     nb_apfel = models.FloatField(null=True, blank=True)  # Number of apples detected by ML
     confidence_score = models.FloatField(null=True, blank=True)  # Store ML confidence
     processed = models.BooleanField(default=False)  # Flag if ML has processed the image
+    raw = models.ForeignKey('Raw', on_delete=models.CASCADE, related_name='images')  # ✅ New: Links image to a raw
 
     def __str__(self):
-        return f"Image {self.id} - {self.image_path}"
+        return f"Image {self.id} - {self.raw.name if self.raw else 'No Raw'}"
+
+ 
+
 
 
 # History of Raw Analysis (Processed Data)
