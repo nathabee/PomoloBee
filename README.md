@@ -5,7 +5,7 @@
 
 
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _16 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _17 hours_ (Auto-generated)
 ---
 ## **Table of content**
 

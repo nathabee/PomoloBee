@@ -10,6 +10,9 @@
     - [**📌 Case: App Initializes Data**  ](#case-app-initializes-data)
     - [**📌 Case: App Requests Estimation Based on a Picture**  ](#case-app-requests-estimation-based-on-a-picture)
     - [**📌 Case: App Displays Data**  ](#case-app-displays-data)
+  - [**1️⃣ API DJANGO -> APP**  ](#1-api-django--app)
+  - [**2️⃣ API DJANGO <-> ML**  ](#2-api-django--ml)
+  - [**3️⃣ Process Image API (Django to ML)**  ](#3-process-image-api-django-to-ml)
   - [**2. Detailed Requirements**  ](#2-detailed-requirements)
     - [**App Requirements**  ](#app-requirements)
     - [**ML Model Requirements**  ](#ml-model-requirements)
@@ -45,15 +48,19 @@ graph TD
     FileSystem["🖼️ Image Storage"]
   end
 
+  MobileApp -- "📍 Fetch Available Fields & Raws" --> DjangoServer
+  DjangoServer -- "📄 Provide Field & Raw Data" --> MobileApp
   MobileApp -- "📤 Upload Image & Raw ID" --> DjangoServer
   DjangoServer -- "📂 Save Image" --> FileSystem
   DjangoServer -- "🔄 Send Image to ML" --> MLService
   MLService -- "🔢 Detect Apples & Confidence Score" --> DjangoServer
   DjangoServer -- "📄 Update Image History & Store Results" --> Database
+  MobileApp -- "📥 Fetch All Uploaded Images" --> DjangoServer
   MobileApp -- "📥 Check Processing Status" --> DjangoServer
-  DjangoServer -- "📄 Return Status (Done/In Progress)" --> MobileApp
+  DjangoServer -- "📄 Return Status (Done/In Progress/Failed)" --> MobileApp
   MobileApp -- "📥 Fetch Estimation Results" --> DjangoServer
-  DjangoServer -- "📄 Provide Yield Data" --> MobileApp
+  DjangoServer -- "📄 Provide Yield Data & Save to History" --> MobileApp
+  MobileApp -- "📥 Fetch Estimation History" --> DjangoServer
 ```
 
 ## **1. Workflow Summary**  
@@ -120,6 +127,33 @@ graph TD
 
 ---
 
+## **1️⃣ API DJANGO -> APP**  
+**Endpoints for communication between Django and the App:**  
+- `POST /api/images/` → Uploads an image & starts ML processing  
+- `GET /api/images/{image_id}/status` → Checks if ML has processed the image  
+- `GET /api/estimations/{image_id}` → Retrieves the estimation results  
+
+| `GET /api/fields/` | fetch all fields |
+| `GET /api/fields/{field_id}/raws/` |to fetch raws for a given field | 
+
+
+---
+
+## **2️⃣ API DJANGO <-> ML**  
+**Endpoints for communication between Django and the ML model:**  
+- `POST /process-image/` → Django sends an image to ML for processing  
+- ML returns: `nb_apfel` (number of apples detected) and `confidence_score`  
+
+---
+
+## **3️⃣ Process Image API (Django to ML)**  
+📌 **Step 1: App uploads image** → `POST /api/images/`  
+📌 **Step 2: Django sends image to ML API** → `POST /process-image/`  
+📌 **Step 3: ML detects apples & returns results**  
+
+✅ **Django View: Sends Image to ML API**
+ 
+---
 ## **2. Detailed Requirements**  
 
 ### **App Requirements**  

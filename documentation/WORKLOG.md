@@ -1,7 +1,7 @@
 
 # Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _16 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _17 hours_ (Auto-generated)
 ---
 ## **Table of content**
 
@@ -47,7 +47,7 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 ### Mars 16, 2025
-- **Hours Worked**: 9 hours
+- **Hours Worked**: 10 hours
 - **Tasks**:
   - Create Documentation : WORKLOG
   - convert logo in vector image : from png to svg using Krita und Inkscape
@@ -61,7 +61,7 @@ This document tracks the number of hours worked each day and provides a brief de
   - definition of UI and Screen in specification  [specification App](App_Specification.md)
   - modification modele add raw in image  [specification API](API.md)
   - correction django modele to support raw for image and foreign kew to field from raw [Data Model](Django_DataModel.md)
-  - 
+  - synchronised API with Workflow and DataModel   [specification API](API.md)
 - **Theme**:  App Initialization 
 - **Progress**: Code compile need to be tested- UI not coded. Empty App
 - **PendingAnomalies**: 
