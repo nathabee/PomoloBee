@@ -5,7 +5,7 @@
     <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/documentation/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
 </p>
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _20 hours_ (Auto-generated)  
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _22 hours_ (Auto-generated)  
 
 ---
 
@@ -22,6 +22,8 @@
     - [**1️⃣ Mobile App (Frontend – Android)**  ](#1-mobile-app-frontend--android)
     - [**2️⃣ Cloud Backend (VPS – Django or Flask API)**  ](#2-cloud-backend-vps--django-or-flask-api)
     - [**📅 Updated Milestones**  ](#updated-milestones)
+  - [**Installation**  ](#installation)
+    - [install PomoloBeeDjango on the VPS](#install-pomolobeedjango-on-the-vps)
 <!-- TOC END -->
 
 ---
@@ -128,4 +130,41 @@ graph TD
 - **Video-based Optical Flow Tracking.**  
 - **Export yield estimations (CSV, PDF reports).**  
 
+
+---
+
+## **Installation**  
+
+clone github :
+git clone https://github.com/nathabee/PomoloBee.git
+- PomoloBeeApp : code for android studio
+- PomoloBeeDjango : code for the backend in the VPS
+- PomoloBeeML
+
+
+### install PomoloBeeDjango on the VPS
+- copy the PomoloBeeDjango folder in you seveur
+- install database : see **Django PostgreSQL specification** [Django_PostgreSQL](documentation/Django_PostgreSQL.md)  
+
+- **Create a virtual environment and activate**:
+   ```bash
+   cd PomoloBeeDjango
+   python3 -m venv venv 
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+- **create a PomoloBeeDjango/.env file containing the correct**
+
+   ```bash
+  SECRET_KEY=your-very-secret-key
+  DEBUG=True
+
+  # Database Configuration
+  DATABASE_NAME=pomolobee
+  DATABASE_USER=pomolo_user
+  DATABASE_PASSWORD=your-secure-db-password
+  DATABASE_HOST=localhost
+  DATABASE_PORT=5432
+
+   ```
 ---

@@ -1,7 +1,7 @@
 
 # Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _20 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _22 hours_ (Auto-generated)
 ---
 ## **Table of content**
 
@@ -76,10 +76,12 @@ This document tracks the number of hours worked each day and provides a brief de
 ## Week 2 (Dates: from Mars 17 to Mars 23, 2025)
 
 ### Mars 17, 2025
-- **Hours Worked**: 3 hours
+- **Hours Worked**: 5 hours
 - **Tasks**:
   - Refined App Documentation :   [specification App](App_Specification.md) and  [specification API](API.md)
   - sync other doc : Requirements and README
+  - initialise empty PomoloBeeDjango with python venv, dotenv [Django HistoryInit](Django_HistoryInit.md)
+  - creation postgreSQL database  [Django PostgresSQL](Django_PostgresSQL.md)
 - **Theme**: Project Initialization 
 
 

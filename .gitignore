@@ -48,3 +48,9 @@ PomoloBeeML/.env
 Thumbs.db
 
 to_ignore
+venv/
+.env
+
+# remove wrongfull addedd: 
+# git rm -r --cached my_error_path/
+ 
