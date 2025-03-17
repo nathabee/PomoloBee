@@ -1,7 +1,7 @@
 
 # Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _22 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _24 hours_ (Auto-generated)
 ---
 ## **Table of content**
 
@@ -15,6 +15,7 @@
     - [Mars 16, 2025](#mars-16-2025)
   - [Week 2 (Dates: from Mars 17 to Mars 23, 2025)](#week-2-dates-from-mars-17-to-mars-23-2025)
     - [Mars 17, 2025](#mars-17-2025)
+    - [Mars 18, 2025](#mars-18-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
 
@@ -76,15 +77,24 @@ This document tracks the number of hours worked each day and provides a brief de
 ## Week 2 (Dates: from Mars 17 to Mars 23, 2025)
 
 ### Mars 17, 2025
-- **Hours Worked**: 5 hours
+- **Hours Worked**: 7 hours
 - **Tasks**:
   - Refined App Documentation :   [specification App](App_Specification.md) and  [specification API](API.md)
   - sync other doc : Requirements and README
   - initialise empty PomoloBeeDjango with python venv, dotenv [Django HistoryInit](Django_HistoryInit.md)
   - creation postgreSQL database  [Django PostgresSQL](Django_PostgresSQL.md)
+  - creation PomoloBeeDjango/core/models.py and admin.py
+  - initialisation raws fields fruits table  core/fixtures/initial_TABLEs.json and  python manage.py loaddata core/fixtures/initial_TABLE.json
+  - keep updating documentation to explain table creation and initialisation [Django HistoryInit](Django_HistoryInit.md)
 - **Theme**: Project Initialization 
 
 
+
+### Mars 18, 2025
+- **Hours Worked**: 0 hours
+- **Tasks**:
+  -  
+- **Theme**: Project Initialization 
 
  
  

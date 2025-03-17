@@ -8,6 +8,7 @@
 - [Image storage for estimation analysis](#image-storage-for-estimation-analysis)
 - [History of Raw Analysis (Processed Data)](#history-of-raw-analysis-processed-data)
 - [History of Yield Estimations](#history-of-yield-estimations)
+- [Data example ](#data-example)
 <!-- TOC END -->
 
 ---
@@ -45,7 +46,7 @@ class Fruit(models.Model):
     short_name = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    yield_start_date = models.DateField()
+    yield_start_date = models.DateField()  
     yield_end_date = models.DateField()
     yield_avg_kg = models.FloatField()  # Average yield per plant
     fruit_avg_kg = models.FloatField()  # Average weight of individual fruit
@@ -113,3 +114,15 @@ class HistoryEstimation(models.Model):
     def __str__(self):
         return f"Estimation {self.id} - {self.raw.name}"
 
+
+# Data example 
+Fruit :
+
+| Description                      | Yield Start Date | Yield End Date | Yield Avg (kg/tree) | Fruit Avg (kg/fruit) |
+|----------------------------------|-----------------|---------------|----------------------|----------------------|
+| **Cultivar Swing on CG1**        | 2025-09-15  | 2025-10-05 | 40               | 0.2            |
+| **Cultivar Ladina on CG1**       | 2025-09-25 | 2025-10-15   | 35               | 0.22            |
+| **Cultivar Gallwa on CG1**       | 2025-09-15  | 2025-10-05 | 45               | 0.24            |
+| **Cultivar Pitch on M9**         | 2025-09-01 |  2025-09-25| 55               | 0.18            |
+| **Cultivar Pixie on CG1**        | 2025-09-25 | 2025-10-15    | 30               | 0.16            |
+| **Cultivar Early Crunch on M9 Nakab** | 2025-08-05   | 2025-08-25    | 50               | 0.17            |
