@@ -1,10 +1,16 @@
 # PomoloBee
  
 
+
 ## **📌 Project Definition: PomoloBee – Bee Smart, Know Your Apple**
 
 ### **🔹 Goal:**  
 Develop an **Android app** (Kotlin + Android Studio) that allows farmers to estimate **apple harvest yield** using AI-based **video or image analysis**. The system will use a **cloud-based backend (VPS)** to process data and provide accurate results.  
+
+The **PomoloBee** app will now focus **only on image-based apple yield estimation**.  
+- **Video-based processing has been postponed to a future milestone**.  
+- **Offline-first functionality is now a core feature**, allowing farmers to store images locally and manually sync data when online.  
+
 ---
 ## Table of Content
 <!-- TOC -->
@@ -14,96 +20,121 @@ Develop an **Android app** (Kotlin + Android Studio) that allows farmers to esti
   - [Table of Content](#table-of-content)
   - [**📍 Features & Functionalities**](#features--functionalities)
     - [**1️⃣ Mobile App (Frontend – Android)**](#1-mobile-app-frontend--android)
-    - [**2️⃣ Cloud Backend (VPS – Django or Flask API)**](#2-cloud-backend-vps--django-or-flask-api)
+    - [**2️⃣ Cloud Backend (Django API)**](#2-cloud-backend-django-api)
     - [**3️⃣ Machine Learning Model (AI for Apple Detection)**](#3-machine-learning-model-ai-for-apple-detection)
-  - [**📊 Data Flow Summary**](#data-flow-summary)
-  - [**📅 Project Milestones**](#project-milestones)
-  - [**📝 Open Questions for Refinement**](#open-questions-for-refinement)
+    - [**4️⃣ Offline Mode & Storage**](#4-offline-mode--storage)
+  - [**📊 Updated Data Flow**](#updated-data-flow)
+  - [**📅 Updated Milestones**](#updated-milestones)
+    - [✅ **Phase 1 – MVP (Current)**  ](#phase-1--mvp-current)
+    - [🚀 **Phase 2 – AI Enhancements & Manual Input**  ](#phase-2--ai-enhancements--manual-input)
+    - [🌍 **Phase 3 – Advanced Features & Video Processing**  ](#phase-3--advanced-features--video-processing)
 <!-- TOC END -->
+ 
 
 ---
 
 ## **📍 Features & Functionalities**
 ### **1️⃣ Mobile App (Frontend – Android)**
 📱 **User Actions:**  
-✅ **Record or Upload Video** – User walks through the orchard while capturing video.  
-✅ **Take a Picture** – Alternative to video for quick analysis.  
-✅ **Mark Orchard Parameters** – Farmer defines start and end of a tree row (e.g., with red markers).  
-✅ **Enter Field Data** – Total orchard row length, tree count, sample apple size.  
-✅ **Receive Harvest Estimate** – Displays apple count and estimated yield.  
+✅ **Take a Picture** – User captures images of apple trees for yield estimation.  
+✅ **Store Images Offline** – Images are **stored locally first** before uploading.  
+✅ **Select Orchard Location** – Farmers select field, raw, and tree count.  
+✅ **Analyze Image (Local or Cloud)** – Farmers can **choose between local analysis or backend processing**.  
+✅ **Receive Harvest Estimate** – Displays **apple count, confidence score, and estimated yield**.  
 
 🔧 **Tech Stack:**  
 - **Language:** Kotlin  
-- **Networking:** Retrofit (API calls to VPS)  
-- **UI:** Jetpack Compose or XML-based UI  
+- **Storage:** Jetpack DataStore for local image storage.  
+- **Networking:** Retrofit (API calls to VPS).  
+- **UI:** Jetpack Compose.  
 
 ---
-
-### **2️⃣ Cloud Backend (VPS – Django or Flask API)**
+  
+### **2️⃣ Cloud Backend (Django API)**
 🌐 **Server Responsibilities:**  
-✅ **Receive video/image uploads from the app**  
-✅ **Extract key frames from video** (1 per second or as needed)  
-✅ **Apple Detection & Counting (AI Model)**  
-   - Detects apples in images  
-   - Differentiates between growth stages (small green vs. ripe apples)  
-   - Avoids duplicate counting using **Optical Flow Tracking**  
-✅ **Calculate Total Yield Estimate**  
-   - Uses detected apples per meter to scale up yield  
-✅ **Return Results to the App**  
+✅ **Receive image uploads from the app.**  
+✅ **Detect apples & count them using an AI model.**  
+✅ **Return results to the app.**  
+✅ **Allow reprocessing if AI results seem inaccurate.**  
 
 🔧 **Tech Stack:**  
-- **Backend Framework:** Django REST Framework or Flask  
-- **ML Processing:** OpenCV, YOLOv8, TensorFlow/PyTorch  
-- **Storage:** PostgreSQL (optional for storing farmer data)  
-- **Hosting:** VPS with GPU support (if needed for AI acceleration)  
+- **Backend Framework:** Django REST Framework.  
+- **ML Processing:** OpenCV, YOLOv8.  
+- **Storage:** PostgreSQL (for user data & image metadata).  
+- **Hosting:** VPS.  
 
 ---
-
+  
 ### **3️⃣ Machine Learning Model (AI for Apple Detection)**
 🤖 **AI Tasks:**  
-✅ **Detect Apples** – Identify apples at different growth stages (small, green, ripe).  
-✅ **Estimate Maturity** – Classify apple color & size for ripeness assessment.  
-✅ **Prevent Duplicate Counting** – Use **Optical Flow Tracking** for movement tracking.  
-✅ **Calibrate Accuracy** – Farmer can input **reference apple size** for model correction.  
+✅ **Detect Apples in Images** – Identify apples using object detection.  
+✅ **Estimate Yield** – Predict apple count per tree row.  
+❌ **(Postponed to Phase 2)** – Apple maturity classification (color-based).  
 
 🔧 **Tech Stack:**  
-- **Object Detection Model:** YOLOv8 (best for real-time detection)  
-- **Color & Maturity Analysis:** HSV color filtering  
-- **Tracking & Counting:** Optical Flow (Lucas-Kanade or Farneback)  
+- **Object Detection Model:** YOLOv8.  
+- **AI Processing Mode:** Backend API (local AI optional).  
+
+---
+  
+### **4️⃣ Offline Mode & Storage**
+✅ **Jetpack DataStore stores unsent images.**  
+✅ **Manual sync instead of automatic upload.**  
+✅ **Local AI model (optional) for offline estimation.**  
+
+---
+  
+## **📊 Updated Data Flow**
+1️⃣ **User captures an image** (offline storage enabled).  
+2️⃣ **User selects a field & raw** (manual input).  
+3️⃣ **User uploads the image when online OR runs local AI analysis.**  
+4️⃣ **AI detects apples & estimates yield.**  
+5️⃣ **Backend sends results back to the app.**  
+6️⃣ **User reviews yield estimation & history.**  
+
+---
+  
+## **📅 Updated Milestones**
+
+### ✅ **Phase 1 – MVP (Current)**  
+- **Offline image storage & manual upload.**  
+- **Basic apple detection model (YOLOv8).**  
+- **Simple backend API (Django + PostgreSQL).**  
+- **Basic processing screen to show estimation results.**  
 
 ---
 
-## **📊 Data Flow Summary**
-1️⃣ **App captures a video or image.**  
-2️⃣ **Uploads to VPS for processing.**  
-3️⃣ **AI detects apples & analyzes yield.**  
-4️⃣ **Backend sends results back to the app.**  
-5️⃣ **User receives insights & adjusts manual input for accuracy.**  
+### 🚀 **Phase 2 – AI Enhancements & Manual Input**  
+🔹 **Local AI Model for Offline Estimation**  
+   - Farmers can analyze images **without internet** using an **on-device AI model** (OpenCV + TensorFlow Lite).  
+   - Allows instant feedback instead of waiting for backend processing.  
+
+
+🔹 **Manual Override of AI Results**  
+   - Farmers can **adjust AI-detected apple count** if it seems inaccurate.  
+   - New **"Manual Input Mode"** in **ResultScreen** (editable apple count & weight).  
+
+🔹 **Updated Sync & Processing Workflow**  
+   - Farmers can **choose between local processing and backend processing**.  
+   - Option in **SettingsScreen** to disable backend processing and use **offline-only mode**.  
 
 ---
 
-## **📅 Project Milestones**
-🔹 **Phase 1 – Prototype (MVP)** 🛠  
-✅ Basic app UI (Video upload, API calls).  
-✅ Backend API to receive files.  
-✅ Simple apple detection model (initial dataset).  
+### 🌍 **Phase 3 – Advanced Features & Video Processing**  
+🔹 **Historical Tracking & Yield Comparison**  
+   - Farmers can **view past yield estimations** in a new **"HistoryScreen"**.  
+   - Advanced comparison: **AI yield vs. manually recorded actual harvest.**  
 
-🔹 **Phase 2 – AI Refinement & Accuracy Tuning** 🎯  
-✅ Improve apple recognition across different lighting conditions.  
-✅ Implement Optical Flow tracking to prevent double counting.  
-✅ Add maturity grading based on color analysis.  
+🔹 **Full Video-Based Apple Detection & Tracking**  
+   - Use **Optical Flow Tracking (Lucas-Kanade or Farneback)** to **avoid duplicate counting in videos**.  
+   - Farmers can **record video while walking through the orchard** instead of taking individual pictures.  
 
-🔹 **Phase 3 – Full Deployment & Scaling** 🚀  
-✅ Optimize app for offline field usage.  
-✅ Deploy backend on a scalable VPS.  
-✅ Field testing with farmers for accuracy validation.  
-
----
-
-## **📝 Open Questions for Refinement**
-1. Should we support **offline processing** (limited AI on-device)?  
-2. Do farmers need **manual input override** if AI results seem wrong?  
-3. Would you like **historical tracking** (compare past yields in-app)?  
+🔹 **Integration with Smart Farming Tools**  
+   - **Export yield estimations** as **CSV or PDF reports**.  
+   - **Potential API integration** with other farming tools. 
+   
+🔹 **Apple Maturity Classification (Color-Based Analysis)**  
+   - Detects **green vs. ripe apples** based on **HSV color filtering**.  
+   - Helps farmers **estimate ideal harvest time**.   
 
 ---
- 

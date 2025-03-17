@@ -1,7 +1,7 @@
 
 # Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _17 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _20 hours_ (Auto-generated)
 ---
 ## **Table of content**
 
@@ -13,6 +13,8 @@
     - [Mars 14, 2025](#mars-14-2025)
     - [Mars 15, 2025](#mars-15-2025)
     - [Mars 16, 2025](#mars-16-2025)
+  - [Week 2 (Dates: from Mars 17 to Mars 23, 2025)](#week-2-dates-from-mars-17-to-mars-23-2025)
+    - [Mars 17, 2025](#mars-17-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
 
@@ -61,11 +63,25 @@ This document tracks the number of hours worked each day and provides a brief de
   - definition of UI and Screen in specification  [specification App](App_Specification.md)
   - modification modele add raw in image  [specification API](API.md)
   - correction django modele to support raw for image and foreign kew to field from raw [Data Model](Django_DataModel.md)
-  - synchronised API with Workflow and DataModel   [specification API](API.md)
+  - synchronised API with Workflow and DataModel   [specification API](API.md) 
 - **Theme**:  App Initialization 
 - **Progress**: Code compile need to be tested- UI not coded. Empty App
 - **PendingAnomalies**: 
     - About screen to be done - Home Remode- dev must nbe done like UI def 
+
+
+ 
+---
+
+## Week 2 (Dates: from Mars 17 to Mars 23, 2025)
+
+### Mars 17, 2025
+- **Hours Worked**: 3 hours
+- **Tasks**:
+  - Refined App Documentation :   [specification App](App_Specification.md) and  [specification API](API.md)
+  - sync other doc : Requirements and README
+- **Theme**: Project Initialization 
+
 
 
  

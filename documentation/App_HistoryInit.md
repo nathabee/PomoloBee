@@ -17,6 +17,7 @@
   - [**STEP 4: User Preferences (Jetpack DataStore)**](#step-4-user-preferences-jetpack-datastore)
   - [**STEP 5: UI/UX Improvements**](#step-5-uiux-improvements)
   - [**STEP 6: include a App Theme and a special Font](#step-6-include-a-app-theme-and-a-special-font)
+  - [**STEP 7: define specification](#step-7-define-specification)
   - [Testing and Deployment**](#testing-and-deployment)
 <!-- TOC END -->
 
@@ -90,7 +91,14 @@ import de.nathabee.pomolobee.ui.theme.PomoloBeeTheme
             }
 
 
+---
 
+## **STEP 7: define specification
+- creation data modele for Django 
+- define workflow
+- define API format
+- create detailled specification for the App (screen, workflow)
+- define UI for App
 
 
 ## Testing and Deployment**

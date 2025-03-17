@@ -10,16 +10,11 @@ This document defines the API interface for the Pomolobee project, specifying:
 - [**📜 API Interface Definition**](#api-interface-definition)
   - [**Overview**](#overview)
   - [Table of Content](#table-of-content)
-  - [**📌 List of All API Endpoints**](#list-of-all-api-endpoints)
+  - [**📌 List of All API Endpoints** ](#list-of-all-api-endpoints)
   - [**📌 API Endpoint Specifications**](#api-endpoint-specifications)
   - [**📌 Fetching Orchard Data API Endpoints**](#fetching-orchard-data-api-endpoints)
     - [**1️⃣ Fetch All Fields (Orchards)**](#1-fetch-all-fields-orchards)
-    - [**2️⃣ Fetch Details of a Specific Field**](#2-fetch-details-of-a-specific-field)
-    - [**3️⃣ Fetch All Raws (Tree Rows) in a Field**](#3-fetch-all-raws-tree-rows-in-a-field)
-    - [**4️⃣ Fetch Details of a Specific Raw**](#4-fetch-details-of-a-specific-raw)
     - [**5️⃣ Fetch All Available Fruit Types**](#5-fetch-all-available-fruit-types)
-    - [**6️⃣ Fetch Details of a Specific Fruit Type**](#6-fetch-details-of-a-specific-fruit-type)
-    - [**7️⃣ Fetch All Orchard Data for Offline Use**](#7-fetch-all-orchard-data-for-offline-use)
     - [**1️⃣ Fetch All Fields & Their Raw Data (Location Selection)**](#1-fetch-all-fields--their-raw-data-location-selection)
     - [**2️⃣ Upload an Image for Processing**](#2-upload-an-image-for-processing)
     - [**3️⃣ Check Image Processing Status**](#3-check-image-processing-status)
@@ -43,38 +38,37 @@ This document defines the API interface for the Pomolobee project, specifying:
 <!-- TOC END -->
 ---
 
-## **📌 List of All API Endpoints**
-| **Category** | **Endpoints** | **Purpose** | **Caller → Receiver** |
-|-------------|--------------|-------------|----------------------|
-| **Fetching Orchard Data** | `GET /api/fields/` | Fetch all available fields (orchards). | **App → Django Backend** |
-| | `GET /api/fields/{field_id}/` | Fetch details of a single field. | **App → Django Backend** |
-| | `GET /api/fields/{field_id}/raws/` | Fetch all tree rows (`Raws`) within a field. | **App → Django Backend** |
-| | `GET /api/raws/{raw_id}/` | Fetch details of a specific raw. | **App → Django Backend** |
-| | `GET /api/fruits/` | Fetch all available fruit types. | **App → Django Backend** |
-| | `GET /api/fruits/{fruit_id}/` | Fetch details of a specific fruit type. | **App → Django Backend** |
-| | `GET /api/static_data/` | Fetch orchard details (`Fields`, `Raws`, `Fruits`) for offline use. | **App → Django Backend** |
-| **Location Selection API (Merged Fields & Raws Data)** | `GET /api/locations/` | Fetch all fields and their raw data. | **App → Django Backend** |
-| **Uploading Images** | `POST /api/images/` | Upload an image for processing (includes `raw_id`). | **App → Django Backend** |
-| **Checking Processing Status** | `GET /api/images/{image_id}/status/` | Check if ML has processed the image. | **App → Django Backend** |
-| **Fetching Estimation Results** | `GET /api/estimations/{image_id}/` | Fetch ML detection results (apple count, confidence, yield). | **App → Django Backend** |
-| | `GET /api/latest_estimations/` | Fetch latest completed estimations. | **App → Django Backend** |
-| **Fetching Image List** | `GET /api/images/` | Fetch all uploaded images with their status. | **App → Django Backend** |
-| **Fetching Image Details** | `GET /api/images/{image_id}/details/` | Retrieves metadata of a specific uploaded image. | **App → Django Backend** |
-| **Deleting an Image** | `DELETE /api/images/{image_id}/` | Delete an uploaded image from the server. | **App → Django Backend** |
-| **Fetching History of Estimations** | `GET /api/history/` | Fetch past estimation records. | **App → Django Backend** |
-| **Fetching Single Historical Record** | `GET /api/history/{history_id}/` | Retrieve a detailed past estimation result. | **App → Django Backend** |
-| **Fetching Processing Errors** | `GET /api/images/{image_id}/error_log` | Fetch errors related to image processing. | **App → Django Backend** |
-| **Request Retry for ML Processing** | `POST /api/retry_processing/` | Request to retry ML processing if it failed. | **App → Django Backend** |
-| **Updating Raw Details** | `PATCH /api/raws/{raw_id}/` | Modify details of a raw (e.g., tree count). | **App → Django Backend** |
-| **Updating Field Information** | `PATCH /api/fields/{field_id}/` | Modify details of a field (e.g., name, orientation). | **App → Django Backend** |
-| **Django → ML API Calls** | `POST /process-image/` | Django sends an image to the ML model for processing. | **Django → ML Model** |
-| | `GET /api/images/{image_id}/ml_result` | ML returns detection results to Django. | **Django → ML Model** |
-| **ML Model Debugging** | `GET /api/ml/version/` | Fetch the current ML model version. | **App → Django Backend** |
-| **Polling Strategy** | `GET /api/images/{image_id}/status/` | App checks processing status every minute. | **App → Django Backend** |
-| **Error Handling** | `GET /api/images/{image_id}/error_log` | Fetch errors related to image processing. | **App → Django Backend** |
-| | `POST /api/retry_processing/` | Request Django to retry ML processing if it failed. | **App → Django Backend** |
+## **📌 List of All API Endpoints** 
+
+| **Category** | **Endpoints** | **Purpose** | **Caller → Receiver** | **Screen Used In** (**Button Triggering API Call**) |
+|-------------|--------------|-------------|----------------------|----------------------------------------|
+| **Fetching Orchard Data** | `GET /api/fields/` | Fetch all available fields (orchards). | **App → Django Backend** | **SettingsScreen (🔄 Sync Data Button)** |
+| | `GET /api/fruits/` | Fetch all available fruit types. | **App → Django Backend** | **SettingsScreen (🔄 Sync Data Button)** |
+| **Location Selection API** | `GET /api/locations/` | Fetch orchard and field details for offline use. | **App → Django Backend** | **SettingsScreen (🔄 Sync Data Button)** |
+| **Uploading Images (On Demand)** | `POST /api/images/` | Upload an image for processing (includes `raw_id`). | **App → Django Backend** | **ProcessingScreen (📤 Analyze Button)** |
+| **Checking Processing Status** | `GET /api/images/{image_id}/status/` | Check if ML has processed the image. | **App → Django Backend** | **ProcessingScreen (🔄 Refresh Status Button)** |
+| **Fetching Estimation Results** | `GET /api/estimations/{image_id}/` | Fetch ML detection results (apple count, confidence, yield). | **App → Django Backend** | **ResultScreen (🔄 Load Estimation Button)** |
+| | `GET /api/latest_estimations/` | Fetch latest completed estimations. | **App → Django Backend** | **ResultScreen (🔄 Load Latest Estimations Button)** |
+| **Fetching Image List** | `GET /api/images/` | Fetch all uploaded images with their status. | **App → Django Backend** | **ProcessingScreen (🔄 Refresh Status Button)** |
+| **Fetching Image Details** | `GET /api/images/{image_id}/details/` | Retrieves metadata of a specific uploaded image. | **App → Django Backend** | **ProcessingScreen, ResultScreen (Clicking on Image Row)** |
+| **Deleting an Image** | `DELETE /api/images/{image_id}/` | Delete an uploaded image from the server. | **App → Django Backend** | **ProcessingScreen (🗑️ Delete Image Button)** |
+| **Fetching History of Estimations** | `GET /api/history/` | Fetch past estimation records. | **App → Django Backend** | **ResultScreen (📜 View History Button)** |
+| **Fetching Single Historical Record** | `GET /api/history/{history_id}/` | Retrieve a detailed past estimation result. | **App → Django Backend** | **ResultScreen (📜 View Detailed History Button)** |
+| **Fetching Processing Errors** | `GET /api/images/{image_id}/error_log` | Fetch errors related to image processing. | **App → Django Backend** | **ProcessingScreen (⚠️ View Error Log Button)** |
+| **Request Retry for ML Processing** | `POST /api/retry_processing/` | Request to retry ML processing if it failed. | **App → Django Backend** | **ProcessingScreen (🔄 Retry Processing Button)** |
+| **Updating Raw Details** | `PATCH /api/raws/{raw_id}/` | Modify details of a raw (e.g., tree count). | **App → Django Backend** | **SettingsScreen (✏️ Edit Raw Button & 💾 Save Button)** |
+| **Updating Field Information** | `PATCH /api/fields/{field_id}/` | Modify details of a field (e.g., name, orientation). | **App → Django Backend** | **SettingsScreen (✏️ Edit Field Button & 💾 Save Button)** |
+| **Django → ML API Calls** | `POST /process-image/` | Django sends an image to the ML model for processing. | **Django → ML Model** | **Backend Processing (Automated)** |
+| | `GET /api/images/{image_id}/ml_result` | ML returns detection results to Django. | **Django → ML Model** | **Backend Processing (Automated)** |
+| **ML Model Debugging** | `GET /api/ml/version/` | Fetch the current ML model version. | **App → Django Backend** | **SettingsScreen (🐛 Debug ML Version Button)** |
+| **Polling Strategy** | `GET /api/images/{image_id}/status/` | App checks processing status every minute. | **App → Django Backend** | **ProcessingScreen (⏳ Auto-Polling Every Minute)** |
+| **Error Handling** | `GET /api/images/{image_id}/error_log` | Fetch errors related to image processing. | **App → Django Backend** | **ProcessingScreen (⚠️ View Error Log Button)** |
+| | `POST /api/retry_processing/` | Request Django to retry ML processing if it failed. | **App → Django Backend** | **ProcessingScreen (🔄 Retry Processing Button)** |
 
 ---
+ 
+
+ 
 
 ## **📌 API Endpoint Specifications**
 
@@ -113,129 +107,6 @@ GET /api/fields/
             "orientation": "S"
         }
     ]
-}
-```
-
----
-
-### **2️⃣ Fetch Details of a Specific Field**
-📌 **Purpose:** Retrieve detailed information about a single field.
-
-✅ **Endpoint:**  
-```
-GET /api/fields/{field_id}/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `field_id` | `integer` | ✅ Yes | Unique ID of the field. |
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "id": 1,
-    "short_name": "North_Field",
-    "name": "North Orchard",
-    "description": "Main orchard section for apples.",
-    "orientation": "N"
-}
-```
-
-✅ **Response (Error - 404 Not Found)**
-```json
-{
-    "error": "Field not found."
-}
-```
-
----
-
-### **3️⃣ Fetch All Raws (Tree Rows) in a Field**
-📌 **Purpose:** Retrieve all tree rows (`Raws`) belonging to a specific field.
-
-✅ **Endpoint:**  
-```
-GET /api/fields/{field_id}/raws/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `field_id` | `integer` | ✅ Yes | Unique ID of the field. |
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "field_id": 1,
-    "field_name": "North Orchard",
-    "raws": [
-        {
-            "id": 101,
-            "short_name": "Row_A",
-            "name": "Row A",
-            "nb_plant": 50,
-            "fruit_id": 5,
-            "fruit_type": "Golden Apple"
-        },
-        {
-            "id": 102,
-            "short_name": "Row_B",
-            "name": "Row B",
-            "nb_plant": 40,
-            "fruit_id": 6,
-            "fruit_type": "Red Apple"
-        }
-    ]
-}
-```
-
-✅ **Response (Error - 404 Not Found)**
-```json
-{
-    "error": "Field not found or no raws available."
-}
-```
-
----
-
-### **4️⃣ Fetch Details of a Specific Raw**
-📌 **Purpose:** Retrieve details of a specific tree row (`Raw`).
-
-✅ **Endpoint:**  
-```
-GET /api/raws/{raw_id}/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `raw_id` | `integer` | ✅ Yes | Unique ID of the raw. |
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "id": 101,
-    "short_name": "Row_A",
-    "name": "Row A",
-    "nb_plant": 50,
-    "fruit_id": 5,
-    "fruit_type": "Golden Apple",
-    "field_id": 1,
-    "field_name": "North Orchard"
-}
-```
-
-✅ **Response (Error - 404 Not Found)**
-```json
-{
-    "error": "Raw not found."
 }
 ```
 
@@ -280,92 +151,6 @@ GET /api/fruits/
 ```
 
 ---
-
-### **6️⃣ Fetch Details of a Specific Fruit Type**
-📌 **Purpose:** Retrieve details of a specific fruit type.
-
-✅ **Endpoint:**  
-```
-GET /api/fruits/{fruit_id}/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `fruit_id` | `integer` | ✅ Yes | Unique ID of the fruit type. |
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "id": 5,
-    "short_name": "Golden_Apple",
-    "name": "Golden Apple",
-    "description": "Sweet yellow apples, ripe in autumn.",
-    "yield_start_date": "2024-09-01",
-    "yield_end_date": "2024-10-15",
-    "yield_avg_kg": 2.5,
-    "fruit_avg_kg": 0.3
-}
-```
-
-✅ **Response (Error - 404 Not Found)**
-```json
-{
-    "error": "Fruit type not found."
-}
-```
-
----
-
-### **7️⃣ Fetch All Orchard Data for Offline Use**
-📌 **Purpose:** Retrieve **all relevant orchard data** (`Fields`, `Raws`, `Fruits`) for offline use.
-
-✅ **Endpoint:**  
-```
-GET /api/static_data/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "fields": [
-        {
-            "id": 1,
-            "short_name": "North_Field",
-            "name": "North Orchard",
-            "description": "Main orchard section for apples.",
-            "orientation": "N"
-        }
-    ],
-    "raws": [
-        {
-            "id": 101,
-            "short_name": "Row_A",
-            "name": "Row A",
-            "nb_plant": 50,
-            "fruit_id": 5,
-            "fruit_type": "Golden Apple",
-            "field_id": 1
-        }
-    ],
-    "fruits": [
-        {
-            "id": 5,
-            "short_name": "Golden_Apple",
-            "name": "Golden Apple",
-            "description": "Sweet yellow apples, ripe in autumn.",
-            "yield_start_date": "2024-09-01",
-            "yield_end_date": "2024-10-15",
-            "yield_avg_kg": 2.5,
-            "fruit_avg_kg": 0.3
-        }
-    ]
-}
-```
 
  ############################################
 

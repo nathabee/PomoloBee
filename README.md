@@ -1,51 +1,54 @@
-# PomoloBee
-"PomoloBee - Bee Smart Know Your Apple" , allows farmers to estimate apple harvest yield
+# PomoloBee  
+"PomoloBee - Bee Smart Know Your Apple" allows farmers to estimate apple harvest yield.
 
-<img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/documentation/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
+<p align="center">
+    <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/documentation/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
+</p>
 
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _20 hours_ (Auto-generated)  
 
-
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _17 hours_ (Auto-generated)
 ---
-## **Table of content**
+
+## **Table of Content**  
 
 <!-- TOC -->
-- [PomoloBee](#pomolobee)
-  - [**Table of content**](#table-of-content)
-  - [Documentation ](#documentation)
-  - [**📌 Project Definition: PomoloBee – Bee Smart, Know Your Apple**](#project-definition-pomolobee--bee-smart-know-your-apple)
+- [PomoloBee  ](#pomolobee)
+  - [**Table of Content**  ](#table-of-content)
+  - [**📚 Documentation**  ](#documentation)
+  - [**📌 Project Definition: PomoloBee – Bee Smart, Know Your Apple**  ](#project-definition-pomolobee--bee-smart-know-your-apple)
     - [**🔹 Goal:**  ](#goal)
-    - [🌍 Data Flow in PomoloBee](#data-flow-in-pomolobee)
-  - [**📍 Features & Functionalities**](#features--functionalities)
-    - [**1️⃣ Mobile App (Frontend – Android)**](#1-mobile-app-frontend--android)
-    - [**2️⃣ Cloud Backend (VPS – Django or Flask API)**](#2-cloud-backend-vps--django-or-flask-api)
-    - [**3️⃣ Machine Learning Model (AI for Apple Detection)**](#3-machine-learning-model-ai-for-apple-detection)
+    - [🌍 **Data Flow in PomoloBee**  ](#data-flow-in-pomolobee)
+  - [**📍 Features & Functionalities**  ](#features--functionalities)
+    - [**1️⃣ Mobile App (Frontend – Android)**  ](#1-mobile-app-frontend--android)
+    - [**2️⃣ Cloud Backend (VPS – Django or Flask API)**  ](#2-cloud-backend-vps--django-or-flask-api)
+    - [**📅 Updated Milestones**  ](#updated-milestones)
 <!-- TOC END -->
 
-## Documentation 
-
-📚 **Documentation:** [Documentation](documentation/) for more details.  
-
-📖 **Scope and Requirements:** [Requirements](documentation/Requirements.md)
-📖 **API , Interface definition:** [API](documentation/API.md) 
-📖 **Data Model:** [Data Model](documentation/DataModel.md) 
-📖 **Workflow:** [Workflow](documentation/Workflow.md)   
-📖 **ML Specification:** [MLSpecification](documentation/MLSpecification.md)   
 ---
 
-## **📌 Project Definition: PomoloBee – Bee Smart, Know Your Apple**
+## **📚 Documentation**  
+
+📖 **Scope and Requirements:** [Requirements](documentation/Requirements.md)  
+📖 **API, Interface Definition:** [API](documentation/API.md)  
+📖 **Data Model:** [Data Model](documentation/DataModel.md)  
+📖 **Workflow:** [Workflow](documentation/Workflow.md)  
+📖 **ML Specification:** [MLSpecification](documentation/MLSpecification.md)  
+
+---
+
+## **📌 Project Definition: PomoloBee – Bee Smart, Know Your Apple**  
 
 ### **🔹 Goal:**  
 Develop an **Android app** (Kotlin + Android Studio) that allows farmers to estimate **apple harvest yield** using AI-based **video or image analysis**. The system will use a **cloud-based backend (VPS)** to process data and provide accurate results.  
 
-### 🌍 Data Flow in PomoloBee
+---
+
+### 🌍 **Data Flow in PomoloBee**  
 
 The following diagram illustrates the interaction between the **PomoloBee App**, **Django Backend**, and **ML Processing Service**.
 
 ```mermaid
 graph TD
-
-  %% Define Components %%
   subgraph Android App
     MobileApp["📱 PomoloBee App"]
   end
@@ -63,7 +66,6 @@ graph TD
     FileSystem["🖼️ Image Storage"]
   end
 
-  %% Data Flow %%
   MobileApp -- "📤 Upload Image & Raw ID" --> DjangoServer
   DjangoServer -- "📂 Save Image" --> FileSystem
   DjangoServer -- "🔄 Send Image to ML" --> MLService
@@ -74,54 +76,56 @@ graph TD
   MobileApp -- "📥 Fetch Estimation Results" --> DjangoServer
   DjangoServer -- "📄 Provide Yield Data" --> MobileApp
 ```
+
 ---
 
-## **📍 Features & Functionalities**
-### **1️⃣ Mobile App (Frontend – Android)**
+## **📍 Features & Functionalities**  
+
+### **1️⃣ Mobile App (Frontend – Android)**  
 📱 **User Actions:**  
 ✅ **Record or Upload Video** – User walks through the orchard while capturing video.  
 ✅ **Take a Picture** – Alternative to video for quick analysis.  
-✅ **Mark Orchard Parameters** – Farmer defines start and end of a tree row (e.g., with red markers).  
+✅ **Mark Orchard Parameters** – Farmer defines start and end of a tree row.  
 ✅ **Enter Field Data** – Total orchard row length, tree count, sample apple size.  
 ✅ **Receive Harvest Estimate** – Displays apple count and estimated yield.  
+✅ **Local AI Estimation (NEW - Phase 2)** – Farmers can analyze images **offline** using **on-device AI**.  
+✅ **Manual Override of AI Results (NEW - Phase 2)** – Farmers can manually adjust apple count & weight.  
+✅ **Historical Tracking (NEW - Phase 3)** – Compare past yield estimations.  
 
 🔧 **Tech Stack:**  
 - **Language:** Kotlin  
 - **Networking:** Retrofit (API calls to VPS)  
-- **UI:** Jetpack Compose or XML-based UI  
+- **UI:** Jetpack Compose  
+- **Local AI Processing:** OpenCV + TensorFlow Lite (Phase 2)  
 
 ---
 
-### **2️⃣ Cloud Backend (VPS – Django or Flask API)**
+### **2️⃣ Cloud Backend (VPS – Django or Flask API)**  
 🌐 **Server Responsibilities:**  
 ✅ **Receive video/image uploads from the app**  
-✅ **Extract key frames from video** (1 per second or as needed)  
+✅ **Extract key frames from video**  
 ✅ **Apple Detection & Counting (AI Model)**  
-   - Detects apples in images  
-   - Differentiates between growth stages (small green vs. ripe apples)  
-   - Avoids duplicate counting using **Optical Flow Tracking**  
 ✅ **Calculate Total Yield Estimate**  
-   - Uses detected apples per meter to scale up yield  
 ✅ **Return Results to the App**  
-
-🔧 **Tech Stack:**  
-- **Backend Framework:** Django REST Framework or Flask  
-- **ML Processing:** OpenCV, YOLOv8, TensorFlow/PyTorch  
-- **Storage:** PostgreSQL (optional for storing farmer data)  
-- **Hosting:** VPS with GPU support (if needed for AI acceleration)  
 
 ---
 
-### **3️⃣ Machine Learning Model (AI for Apple Detection)**
-🤖 **AI Tasks:**  
-✅ **Detect Apples** – Identify apples at different growth stages (small, green, ripe).  
-✅ **Estimate Maturity** – Classify apple color & size for ripeness assessment.  
-✅ **Prevent Duplicate Counting** – Use **Optical Flow Tracking** for movement tracking.  
-✅ **Calibrate Accuracy** – Farmer can input **reference apple size** for model correction.  
+### **📅 Updated Milestones**  
 
-🔧 **Tech Stack:**  
-- **Object Detection Model:** YOLOv8 (best for real-time detection)  
-- **Color & Maturity Analysis:** HSV color filtering  
-- **Tracking & Counting:** Optical Flow (Lucas-Kanade or Farneback)  
+✅ **Phase 1 – MVP**  
+- **Offline image storage & manual upload.**  
+- **Basic apple detection model (YOLOv8).**  
+- **Simple backend API (Django + PostgreSQL).**  
 
---- 
+🚀 **Phase 2 – AI Enhancements & Manual Input**  
+- **Apple maturity classification (color-based).**  
+- **Local AI model for offline analysis (TensorFlow Lite).**  
+- **Manual override of AI results.**  
+- **Offline-only mode option in settings.**  
+
+🌍 **Phase 3 – Future Improvements**  
+- **Historical tracking & yield comparison.**  
+- **Video-based Optical Flow Tracking.**  
+- **Export yield estimations (CSV, PDF reports).**  
+
+---
