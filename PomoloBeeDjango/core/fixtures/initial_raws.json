@@ -233,7 +233,7 @@
         "model": "core.raw",
         "fields": {
             "short_name": "C1-R24",
-            "name": "Rang 25 loin maison Early Grunch 1",
+            "name": "Rang 24 loin maison Early Grunch 1",
             "nb_plant": 37,
             "field": 1,
             "fruit": 6
@@ -242,8 +242,8 @@
     {
         "model": "core.raw",
         "fields": {
-            "short_name": "C1-R26",
-            "name": "Rang 26 loin maison Early Grunch 2",
+            "short_name": "C1-R25",
+            "name": "Rang 25 loin maison Early Grunch 2",
             "nb_plant": 32,
             "field": 1,
             "fruit": 6
@@ -252,8 +252,8 @@
     {
         "model": "core.raw",
         "fields": {
-            "short_name": "C1-R27",
-            "name": "Rang 27 loin maison Early Grunch 3",
+            "short_name": "C1-R26",
+            "name": "Rang 26 loin maison Early Grunch 3",
             "nb_plant": 27,
             "field": 1,
             "fruit": 6
@@ -262,8 +262,8 @@
     {
         "model": "core.raw",
         "fields": {
-            "short_name": "C1-R28",
-            "name": "Rang 28 loin maison Early Grunch 4",
+            "short_name": "C1-R27",
+            "name": "Rang 27 loin maison Early Grunch 4",
             "nb_plant": 17,
             "field": 1,
             "fruit": 6
@@ -272,8 +272,8 @@
     {
         "model": "core.raw",
         "fields": {
-            "short_name": "C1-R29",
-            "name": "Rang 29 loin maison Early Grunch 5",
+            "short_name": "C1-R28",
+            "name": "Rang 28 loin maison Early Grunch 5",
             "nb_plant": 7,
             "field": 1,
             "fruit": 6

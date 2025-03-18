@@ -10,9 +10,8 @@ This document defines the API interface for the Pomolobee project, specifying:
 - [**📜 API Interface Definition**](#api-interface-definition)
   - [**Overview**](#overview)
   - [**📌 List of All API Endpoints** ](#list-of-all-api-endpoints)
-  - [in another phase :](#in-another-phase)
   - [**📌 API Endpoint Specifications**](#api-endpoint-specifications)
-  - [**📌 Fetching Orchard Data API Endpoints**](#fetching-orchard-data-api-endpoints)
+    - [**📌 Fetching Orchard Data API Endpoints**](#fetching-orchard-data-api-endpoints)
     - [**1️⃣ Fetch All Fields (Orchards)**](#1-fetch-all-fields-orchards)
     - [**5️⃣ Fetch All Available Fruit Types**](#5-fetch-all-available-fruit-types)
     - [**1️⃣ Fetch All Fields & Their Raw Data (Location Selection)**](#1-fetch-all-fields--their-raw-data-location-selection)
@@ -23,15 +22,19 @@ This document defines the API interface for the Pomolobee project, specifying:
     - [**6️⃣ Fetch List of Uploaded Images**](#6-fetch-list-of-uploaded-images)
     - [**7️⃣ Fetch Metadata of a Specific Uploaded Image**](#7-fetch-metadata-of-a-specific-uploaded-image)
     - [**8️⃣ Delete an Image**](#8-delete-an-image)
-  - [**2️⃣ Fetching a Single Historical Record**](#2-fetching-a-single-historical-record)
-  - [**3️⃣ Fetching Processing Errors**](#3-fetching-processing-errors)
-  - [**4️⃣ Request Retry for ML Processing**](#4-request-retry-for-ml-processing)
-  - [**5️⃣ Updating Raw Details**](#5-updating-raw-details)
-  - [**6️⃣ Updating Field Information**](#6-updating-field-information)
+    - [**2️⃣ Fetching a Single Historical Record**](#2-fetching-a-single-historical-record)
+    - [**3️⃣ Fetching Processing Errors**](#3-fetching-processing-errors)
+    - [**4️⃣ Request Retry for ML Processing**](#4-request-retry-for-ml-processing)
+    - [**5️⃣ Updating Raw Details**](#5-updating-raw-details)
+    - [**6️⃣ Updating Field Information**](#6-updating-field-information)
     - [**📌 API Specifications for Django ↔ ML Communication, Polling, and Error Handling**](#api-specifications-for-django--ml-communication-polling-and-error-handling)
-  - [**1️⃣ Django → ML: Sending Image for Processing**](#1-django--ml-sending-image-for-processing)
-  - [???????????????? **2️⃣ ML → Django: Returning Image Processing Results**](#2-ml--django-returning-image-processing-results)
-  - [**3️⃣ ML Model Debugging**](#3-ml-model-debugging)
+    - [**1️⃣ Django → ML: Sending Image for Processing**](#1-django--ml-sending-image-for-processing)
+    - [**2️⃣ ML → Django: Returning Image Processing Results**](#2-ml--django-returning-image-processing-results)
+    - [**3️⃣ ML Model Debugging**](#3-ml-model-debugging)
+  - [**4. API Design**  ](#4-api-design)
+    - [**API Call Order**  ](#api-call-order)
+    - [**Polling Strategy**  ](#polling-strategy)
+  - [**Error Handling Strategy**  ](#error-handling-strategy)
 <!-- TOC END -->
 ---
 
@@ -68,8 +71,6 @@ This document defines the API interface for the Pomolobee project, specifying:
 | **Django → ML API Calls** | `POST /ml/process-image/` | Django sends an image to the ML model for processing. | **Django → ML Model** | **Backend Processing (Automated)** |
 | | `GET /api/images/{image_id}/ml_result` | ML returns detection results to Django. | **Django → ML Model** | **Backend Processing (Automated)** |
 
-
-## in another phase :
 | **ML Model Debugging** | `GET /api/ml/version/` | Fetch the current ML model version. | **App → Django Backend** | **SettingsScreen (🐛 Debug ML Version Button)** |
 
 ---
@@ -83,7 +84,7 @@ Here is the **detailed API specification** for fetching orchard data, including 
 
 ---
 
-## **📌 Fetching Orchard Data API Endpoints**
+### **📌 Fetching Orchard Data API Endpoints**
 
 ### **1️⃣ Fetch All Fields (Orchards)**
 📌 **Purpose:** Retrieve a list of all available agricultural fields.
@@ -515,7 +516,7 @@ GET /api/history/
 
 ---
 
-## **2️⃣ Fetching a Single Historical Record**
+### **2️⃣ Fetching a Single Historical Record**
 📌 **Purpose:** Retrieve the **detailed results of a past yield estimation** for a specific record.
 
 ✅ **Endpoint:**  
@@ -555,7 +556,7 @@ GET /api/history/{history_id}/
 
 ---
 
-## **3️⃣ Fetching Processing Errors**
+### **3️⃣ Fetching Processing Errors**
 📌 **Purpose:** Retrieve **error logs** related to a specific image processing failure.
 
 ✅ **Endpoint:**  
@@ -589,7 +590,7 @@ GET /api/images/{image_id}/error_log/
 
 ---
 
-## **4️⃣ Request Retry for ML Processing**
+### **4️⃣ Request Retry for ML Processing**
 📌 **Purpose:** **Retry ML processing** if an image failed to process due to an issue.
 
 ✅ **Endpoint:**  
@@ -627,7 +628,7 @@ curl -X POST "https://server.com/api/retry_processing/" \
 
 ---
 
-## **5️⃣ Updating Raw Details**
+### **5️⃣ Updating Raw Details**
 📌 **Purpose:** Update the **number of trees** in a given raw or modify other attributes.
 
 ✅ **Endpoint:**  
@@ -667,7 +668,7 @@ PATCH /api/raws/{raw_id}/
 
 ---
 
-## **6️⃣ Updating Field Information**
+### **6️⃣ Updating Field Information**
 📌 **Purpose:** Modify the **name, orientation, or other attributes** of a specific field.
 
 ✅ **Endpoint:**  
@@ -711,7 +712,7 @@ PATCH /api/fields/{field_id}/
 
 ---
 
-## **1️⃣ Django → ML: Sending Image for Processing**
+### **1️⃣ Django → ML: Sending Image for Processing**
 📌 **Purpose:** Django sends an uploaded image to the ML model for apple detection.
 
 ✅ **Endpoint:**  
@@ -752,7 +753,7 @@ POST /process-image/
 ---
 
 
-## ???????????????? **2️⃣ ML → Django: Returning Image Processing Results**
+### **2️⃣ ML → Django: Returning Image Processing Results**
 📌 **Purpose:** The ML model returns **apple detection results** to Django.
 
 ✅ **Endpoint:**  
@@ -786,7 +787,7 @@ GET /api/images/{image_id}/ml_result
 
 ---
 
-## **3️⃣ ML Model Debugging**
+### **3️⃣ ML Model Debugging**
 📌 **Purpose:** Fetch the **current ML model version** and status.
 
 ✅ **Endpoint:**  
@@ -815,4 +816,37 @@ GET /api/ml/version/
 ---
 
    
+
+
+
+## **4. API Design**  
+
+### **API Call Order**  
+📌 `POST /api/images/` (Upload Image)  
+📌 `GET /api/images/{image_id}/status` (Check Processing Status)  
+📌 `GET /api/estimations/{image_id}` (Fetch Estimation Results)  
+
+---
+
+### **Polling Strategy**  
+📌 The app checks `GET /api/images/{image_id}/status` every **minute**.  
+📌 If `status = "done"`, the app fetches results.  
+📌 If the process takes longer than **5 retries (5 minutes)**, the app should **show a warning**.  
+📌 If ML takes longer than 5 minutes, Django should **log the delay** and optionally **send a retry request to ML**.  
+
+
+🔹 **Why?**  
+- Prevents infinite polling loops.  
+- Ensures the user is **not left waiting indefinitely**.  
+
+---
+
+## **Error Handling Strategy**  
+📌 **What if ML processing fails?**  
+- If ML **returns an error**, Django should mark `processed = false` in `ImageHistory`.  
+- The app should **stop polling after 5 attempts** and **display an error message**.
+
+📌 **What if the app sends an invalid image?**  
+- Django should return `400 Bad Request` if the image format is incorrect.  
+- The app should prompt the user to upload a valid image.
 

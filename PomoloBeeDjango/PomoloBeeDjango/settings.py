@@ -154,3 +154,5 @@ if not BYPASS_MEDIA:
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ML_API_URL = os.getenv("ML_API_URL", "http://localhost:5000/ml/")  # Default to local ML server

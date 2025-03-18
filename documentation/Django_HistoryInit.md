@@ -22,6 +22,10 @@
     - [test initialisation data in table with admin console user wuth django superuser pomobee](#test-initialisation-data-in-table-with-admin-console-user-wuth-django-superuser-pomobee)
     - [test initialisation](#test-initialisation)
   - [Init Django code ](#init-django-code)
+  - [init django test ](#init-django-test)
+    - [Workflow test](#workflow-test)
+    - [Workflow test](#workflow-test)
+    - [**run the test**](#run-the-test)
 <!-- TOC END -->
 
 ---
@@ -326,3 +330,92 @@ We create an empty shell having correct endpoint and dealing with the correct da
     - serializers.py and views.py are also initialized from the API.md document
     Feed Chatgpt **Step by step** with part of the endpoint specification API.md, to be check coherency of teh new views and serilializer.
 
+-from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+## init django test 
+
+### Workflow test
+
+Api is defined in [specification API](API.md)
+
+### Workflow test
+
+Workflow is defined in [specification Workflow](Workflow.md)
+we want to fully automate Django Workflow testing by covering:
+
+- Retrieve location data (GET /api/locations/) fields and fruit
+- Image Upload & Storage (POST /api/images/)
+- Django Sending Image to ML (POST ML_API_URL/process)
+- ML Sending Results Back (POST /api/images/{image_id}/ml_result)
+- Django Updating Database
+- Fetching Processed Data (GET /api/images/{image_id}/ml_result)
+- Fetching Estimations (GET /api/estimations/{image_id}/)
+- Fetching History (GET /api/history/)
+
+
+  ```bash
+  pip install pytest pytest-django requests pillow  
+  
+  touch core/tests.py 
+  # add the test there
+  ``` 
+  **Add permission**
+  PostgreSQL user needs  CREATE DATABASE permissions:
+  # psql -U pomolo_user -d pomolobee -h localhost -W
+  sudo -u postgres psql
+  ALTER ROLE pomolo_user CREATEDB;
+
+### **run the test**
+
+  ```bash
+  #### to run all together
+  python manage.py test core.tests
+
+  #### to run separate
+  python manage.py test core.tests.test_migration
+  python manage.py test core.tests.test_endpoint
+  python manage.py test core.tests.test_workflow
+  python manage.py test core.tests.test_ml
+
+  ```
+
+#### test covered by the core.tests.test_workflow :
+loading the fixtures from the json then make a simulation of a workflo
+prerequise:
+- json files in the /PomoloBee/PomoloBeeDjango
+      core/fixtures/
+      │── initial_fields.json
+      │── initial_fruits.json
+      │── initial_raws.json
+
+- folder and image exist : /PomoloBee/PomoloBeeDjango/media/images/orchard.jpg
+- start ML
+
+  ```bash
+  cd PomoloBeeML
+  source venv/bin/activate
+  python app.py
+            * Serving Flask app 'app' 
+            * Running on all addresses (0.0.0.0)
+            * Running on http://127.0.0.1:5000
+
+
+  ``` 
+
+
+ 
+| **Diagram Line** | **Test Implemented?** |
+|-----------------|----------------|
+| **MobileApp → DjangoServer** `"📍 Fetch Available Fields & Raws"` | ✅ `GET /api/fields/`, `GET /api/locations/` |
+| **DjangoServer → Database** `"📂 Save Image Metadata"` | ✅ Checked field, fruit, and raw data |
+| **DjangoServer → MobileApp** `"📄 Provide Field & Raw Data"` | ✅ Verified correct field and raw data |
+| **DjangoServer → MLService** `"🔄 Send Image to ML"` | ✅ `POST /process` to ML |
+| **MLService → DjangoServer** `"📊 Return Detection Results"` | ✅ `POST /ml_result` |
+| **DjangoServer → MobileApp** `"📥 Fetch Processing Status"` | ✅ `GET /ml_result` |
+| **MobileApp → DjangoServer** `"📥 Fetch Estimation Results"` | ✅ `GET /api/estimations/{image_id}/` |
+
+---

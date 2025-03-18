@@ -30,7 +30,7 @@ Since **video processing is not in scope right now**, we will focus only on **im
     - [**📌 Updated Wireframe**](#updated-wireframe)
   - [**📝 `SettingsScreen`**](#settingsscreen)
     - [**Purpose**](#purpose)
-    - [**📌 Updated Wireframe**](#updated-wireframe)
+    - [**📌 Wireframe**](#wireframe)
   - [**ℹ️ `AboutScreen`**](#aboutscreen)
     - [**Purpose**](#purpose)
     - [**📌 Updated Wireframe**](#updated-wireframe)
@@ -102,6 +102,7 @@ graph TD
 ---
 
 ## **📌 Explanation of Flow**
+once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fruits** manually.
 1️⃣ **User starts in `CameraScreen`** and **captures an image** or **selects from the gallery**.  
 2️⃣ **User must choose a field and raw** (`LocationScreen`) and return to `CameraScreen`.  
 3️⃣ **Instead of immediate upload**, the image is **saved locally** with metadata:
@@ -178,12 +179,12 @@ graph TD
 ### **Purpose**
 - Enable to select a location of the picture (raw) based on field and fruit description
 
-
+ 
 ### **Main UI Elements**
 | **Element** | **Type** | **Description** |
 |------------|---------|----------------|
-| **🌱 Field Dropdown** | `Dropdown` | Lists all fields (`GET /api/fields/`). | 
-| **🌿 Raw Dropdown** | `Dropdown` | Lists all raws within the selected field (`GET /api/fields/{field_id}/raws/`). |
+| **🌱 Field Dropdown** | `Dropdown` | Lists fields are retrieved from storage. | 
+| **🌿 Raw Dropdown** | `Dropdown` | Lists all raws within the selected field retrieved from storage . |
 | **✅ Confirm Button** | `Button` | Saves selection & navigates back to `CameraScreen`. |
 
 ### **📌 Updated Wireframe**
@@ -201,8 +202,12 @@ graph TD
  
 
 - **Triggered API Calls:**
-  - **🔄 Fetch Fields:** `GET /api/fields/` (Triggered when opening `LocationScreen`).
-  - **🌿 Fetch Raws for Selected Field:** `GET /api/fields/{field_id}/raws/` (After selecting a field).
+**none**
+
+ 
+
+
+
 ---
 
 
@@ -300,7 +305,7 @@ graph TD
 ✔  **"Pending Uploads" value is fetched from local storage (`Jetpack DataStore`).**  
 
 
-### **📌 Updated Wireframe**
+### **📌 Wireframe**
 ```
 +--------------------------------+
 |  🌱 Tree Count:  [______]      |
@@ -321,15 +326,12 @@ graph TD
   - `GET /api/locations/` (**Sync Orchard Data Now** button)
   - `GET /api/fields/` (**Sync Orchard Data Now** button)
   - `GET /api/fruits/` (**Sync Orchard Data Now** button)
-  - `PATCH /api/raws/{raw_id}/` (**Save** button)
-  - `PATCH /api/fields/{field_id}/` (**Save** button)
   - `GET /api/ml/version/` (**Debug Mode Button**)
 - **Triggered API Calls:**
   - **🔄 Sync Orchard Data Now** → Fetch all fields, raws, fruits.
   - **💾 Save** → Update field/raw details.
   - **🛠 Debug Mode** → Fetch ML model version.
   
-
 ---
 
 ## **ℹ️ `AboutScreen`**

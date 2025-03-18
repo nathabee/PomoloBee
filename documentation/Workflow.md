@@ -19,10 +19,6 @@
     - [**Django Backend Requirements**  ](#django-backend-requirements)
   - [**3. Explanation of Calculation**  ](#3-explanation-of-calculation)
     - [**📌 How Yield is Estimated**  ](#how-yield-is-estimated)
-  - [**4. API Design**  ](#4-api-design)
-    - [**API Call Order**  ](#api-call-order)
-    - [**Polling Strategy**  ](#polling-strategy)
-  - [**Error Handling Strategy**  ](#error-handling-strategy)
 <!-- TOC END -->
 
 
@@ -48,24 +44,45 @@ graph TD
     FileSystem["🖼️ Image Storage"]
   end
 
+  %% Initial Syncing of Orchard Data
   MobileApp -- "📍 Fetch Available Fields & Raws" --> DjangoServer
   DjangoServer -- "📄 Provide Field & Raw Data" --> MobileApp
+
+  %% Image Upload Process
   MobileApp -- "📤 Upload Image & Raw ID" --> DjangoServer
-  DjangoServer -- "📂 Save Image" --> FileSystem
-  DjangoServer -- "🔄 Send Image to ML" --> MLService
-  MLService -- "🔢 Detect Apples & Confidence Score" --> DjangoServer
+  DjangoServer -- "📂 Save Image Metadata" --> Database
+  DjangoServer -- "🖼️ Store Image" --> FileSystem
+
+  %% Django Sends Image for ML Processing
+  DjangoServer -- "🔄 Send Image to ML (POST /process)" --> MLService
+  MLService -- "✅ Acknowledge Processing (200 OK)" --> DjangoServer
+  MLService -- "⏳ Process Image (Detect Apples)" --> MLService
+
+  %% ML Processing & Callback to Django
+  MLService -- "📊 Return Detection Results (POST /ml_result)" --> DjangoServer
   DjangoServer -- "📄 Update Image History & Store Results" --> Database
-  MobileApp -- "📥 Fetch All Uploaded Images" --> DjangoServer
-  MobileApp -- "📥 Check Processing Status" --> DjangoServer
+
+  %% Mobile App Fetches Image Processing Status
+  MobileApp -- "📥 Check Processing Status (GET /ml_result)" --> DjangoServer
   DjangoServer -- "📄 Return Status (Done/In Progress/Failed)" --> MobileApp
+
+  %% Mobile App Fetches Yield Estimation
   MobileApp -- "📥 Fetch Estimation Results" --> DjangoServer
-  DjangoServer -- "📄 Provide Yield Data & Save to History" --> MobileApp
+  DjangoServer -- "📊 Provide Yield Data & Save to History" --> Database
   MobileApp -- "📥 Fetch Estimation History" --> DjangoServer
+
 ```
+
+
+
 
 ## **1. Workflow Summary**  
 
 ### **📌 Case: App Initializes Data**  
+
+📌 `GET /api/fields/`  
+📌 `GET /api/fruits/`  
+📌 `GET /api/locations/`  
 1. **App starts up or the user refreshes data.**  
 2. **App fetches static data** from Django:  
    - `Field`, `Raw`, `Fruit` tables.  
@@ -191,37 +208,5 @@ graph TD
    - **`raw_kg = plant_kg * raw.nb_plant`** (expected total weight for the raw).  
 
 ---
-
-## **4. API Design**  
-
-### **API Call Order**  
-📌 `POST /api/images/` (Upload Image)  
-📌 `GET /api/images/{image_id}/status` (Check Processing Status)  
-📌 `GET /api/estimations/{image_id}` (Fetch Estimation Results)  
-
----
-
-### **Polling Strategy**  
-📌 The app checks `GET /api/images/{image_id}/status` every **minute**.  
-📌 If `status = "done"`, the app fetches results.  
-📌 If the process takes longer than **5 retries (5 minutes)**, the app should **show a warning**.  
-📌 If ML takes longer than 5 minutes, Django should **log the delay** and optionally **send a retry request to ML**.  
-
-
-🔹 **Why?**  
-- Prevents infinite polling loops.  
-- Ensures the user is **not left waiting indefinitely**.  
-
----
-
-## **Error Handling Strategy**  
-📌 **What if ML processing fails?**  
-- If ML **returns an error**, Django should mark `processed = false` in `ImageHistory`.  
-- The app should **stop polling after 5 attempts** and **display an error message**.
-
-📌 **What if the app sends an invalid image?**  
-- Django should return `400 Bad Request` if the image format is incorrect.  
-- The app should prompt the user to upload a valid image.
-
-
+ 
 --- 
