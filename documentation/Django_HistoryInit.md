@@ -7,20 +7,21 @@
 - [Initialisation history ](#initialisation-history)
   - [Table of Content](#table-of-content)
   - [**Prerequise**](#prerequise)
-    - [✅ **1. Install Django**](#1-install-django)
+    - [Install Django*](#install-django)
     - [**Create Django Project**](#create-django-project)
-    - [✅ **2. Set Up a Virtual Environment (Recommended)**](#2-set-up-a-virtual-environment-recommended)
-    - [✅ **3 . add venv to .gitignore**](#3--add-venv-to-gitignore)
+    - [Set Up a Virtual Environment (Recommended)](#set-up-a-virtual-environment-recommended)
+    - [add venv to .gitignore](#add-venv-to-gitignore)
   - [Initialise Django project](#initialise-django-project)
-    - [**📌 Step 1: Create Django Project**](#step-1-create-django-project)
-    - [**📌 Step 2: Install Required Packages**](#step-2-install-required-packages)
-    - [**📌 Step 3: Configure Django Settings**](#step-3-configure-django-settings)
-    - [**📌 Step 4: Set Up Database & Migrations**](#step-4-set-up-database--migrations)
+    - [Step 1: Create Django Project](#step-1-create-django-project)
+    - [Step 2: Install Required Packages](#step-2-install-required-packages)
+    - [Step 3: Configure Django Settings](#step-3-configure-django-settings)
+    - [Set Up Database & Migrations](#set-up-database--migrations)
+    - [Why Did You Create a Superuser After Setting Up PostgreSQL?](#why-did-you-create-a-superuser-after-setting-up-postgresql)
     - [we created the equirements.txt](#we-created-the-equirementstxt)
   - [Init Data Modele](#init-data-modele)
     - [test initialisation data in table with admin console user wuth django superuser pomobee](#test-initialisation-data-in-table-with-admin-console-user-wuth-django-superuser-pomobee)
     - [test initialisation](#test-initialisation)
-    - [**Why Did You Create a Superuser After Setting Up PostgreSQL?**](#why-did-you-create-a-superuser-after-setting-up-postgresql)
+  - [Init Django code ](#init-django-code)
 <!-- TOC END -->
 
 ---
@@ -42,7 +43,7 @@ This will be your **backend API** handling:
 ## **Prerequise**
 
 
-### ✅ **1. Install Django**
+### Install Django*
 Run the following command to install Django:
 ```bash
 sudo apt install python3-django
@@ -65,7 +66,7 @@ django-admin startproject PomoloBeeDjango
 ```
 ---
 
-### ✅ **2. Set Up a Virtual Environment (Recommended)**
+### Set Up a Virtual Environment (Recommended)
 It's best to use a virtual environment to manage dependencies.
 
 1. **Navigate to your django project root**:
@@ -87,7 +88,7 @@ It's best to use a virtual environment to manage dependencies.
 
 ---
 
-### ✅ **3 . add venv to .gitignore**
+### add venv to .gitignore
 After running the command,  **inside** the `PomoloBee` directory:
 ```bash
 echo "PomoloBeeDjango/venv/" >> .gitignore
@@ -102,7 +103,7 @@ install database : see **Django PostgreSQL specification** [Django_PostgreSQL](d
 
 ## Initialise Django project
 
-### **📌 Step 1: Create Django Project**
+### Step 1: Create Django Project
 Run these commands in your terminal:
 ```sh
 # Navigate to your development folder
@@ -112,32 +113,32 @@ cd ~/PomoloBee/PomoloBeeDjango
 python manage.py startapp core
 ```
 
-📌 **Now your project structure looks like this:**
-``` 
- PomoloBeeDjango/
-│── core/ # Your main backend app
-│   ├── migrations/
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py   <--- Move your models here
-│   ├── views.py
-│   ├── urls.py
-│   ├── tests.py
-│── PomoloBeeDjango/    # Django project settings
-│   ├── __init__.py
-│   ├── settings.py  <--- Add 'core' to INSTALLED_APPS
-│   ├── urls.py
-│   ├── wsgi.py
-│── manage.py
-├── venv/               # Python env
+- Now your project structure looks like this:
+  ``` 
+  PomoloBeeDjango/
+  │── core/ # Your main backend app
+  │   ├── migrations/
+  │   ├── __init__.py
+  │   ├── admin.py
+  │   ├── apps.py
+  │   ├── models.py   <--- Move your models here
+  │   ├── views.py
+  │   ├── urls.py
+  │   ├── tests.py
+  │── PomoloBeeDjango/    # Django project settings
+  │   ├── __init__.py
+  │   ├── settings.py  <--- Add 'core' to INSTALLED_APPS
+  │   ├── urls.py
+  │   ├── wsgi.py
+  │── manage.py
+  ├── venv/               # Python env
 
 
-```
+  ```
 
 ---
 
-### **📌 Step 2: Install Required Packages**
+### Step 2: Install Required Packages
 Install necessary Python dependencies:
 ```sh
 pip install django djangorestframework pillow requests  python-dotenv psycopg2-binary numpy
@@ -152,7 +153,7 @@ pip freeze > requirements.txt
 
 ---
 
-### **📌 Step 3: Configure Django Settings**
+### Step 3: Configure Django Settings
 
 
 Modify the PomoloBeeDjango/settings.py 
@@ -216,14 +217,9 @@ mkdir media
 ```
 
 
-
-
-
-
-
 ---
 
-### **📌 Step 4: Set Up Database & Migrations**
+### Set Up Database & Migrations
 ```sh
 python manage.py migrate
 python manage.py createsuperuser
@@ -231,6 +227,16 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+
+### Why Did You Create a Superuser After Setting Up PostgreSQL?
+ 
+| **User Type**  | **Name** | **Purpose** |
+|--------------|----------|------------|
+| **PostgreSQL Database User** | `pomolo_user` | Used by Django to connect to the PostgreSQL database. |
+| **Django Superuser** | `pomobee` | Allows you to log into `http://127.0.0.1:8000/admin/` and manage data from the admin panel. |
+
+---
+  
 
 ### we created the equirements.txt
 in the PomoloBee folder :
@@ -304,13 +310,19 @@ Fruit.objects.all()
 
 
 
+## Init Django code 
 
-### **Why Did You Create a Superuser After Setting Up PostgreSQL?**
+We create an empty shell having correct endpoint and dealing with the correct data and dataformat :
+- note that the complexe behaviour like ML interaction, logic and error management will be introduce later in the code
+
+  -  installed and configured  drf-spectacular (pip install, settings.py.REST_FRAMEWORK,urls.py)
+  -  create PomoloBeeDjango/core/urls.py with all acess point mentionned in the spec  [specification API](API.md)
+  -  add a reference to it in PomoloBeeDjango/PomoloBeeDjango/urls.py path('api/', include('core.urls')), 
  
-| **User Type**  | **Name** | **Purpose** |
-|--------------|----------|------------|
-| **PostgreSQL Database User** | `pomolo_user` | Used by Django to connect to the PostgreSQL database. |
-| **Django Superuser** | `pomobee` | Allows you to log into `http://127.0.0.1:8000/admin/` and manage data from the admin panel. |
 
----
-  
+      To simplify this step, you can feed chatgpt with the API.md endpoint table
+
+
+    - serializers.py and views.py are also initialized from the API.md document
+    Feed Chatgpt **Step by step** with part of the endpoint specification API.md, to be check coherency of teh new views and serilializer.
+

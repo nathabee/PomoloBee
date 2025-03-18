@@ -1,7 +1,7 @@
 
 # Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _24 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _26 hours_ (Auto-generated)
 ---
 ## **Table of content**
 
@@ -91,9 +91,13 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 ### Mars 18, 2025
-- **Hours Worked**: 0 hours
+- **Hours Worked**: 2 hours
 - **Tasks**:
-  -  
+  -  create PomoloBeeDjango/core/urls.py with all acess point mentionned in the spec  [specification API](API.md)
+  -  add a reference to it in PomoloBeeDjango/PomoloBeeDjango/urls.py path('api/', include('core.urls')), 
+  -  installed and configured  drf-spectacular (pip install, settings.py.REST_FRAMEWORK,urls.py)
+  -  serializers.py and views.py are also initialized from the API.md document
+  -
 - **Theme**: Project Initialization 
 
  

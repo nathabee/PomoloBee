@@ -1,32 +1,6 @@
 from django.db import models
 
   
-
-# Defines a Field (Agricultural Field)
-class Field(models.Model):
-    id = models.AutoField(primary_key=True)
-    short_name = models.CharField(max_length=50, unique=True)  # Unique short identifier
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
-    orientation = models.CharField(max_length=50, blank=True, null=True)  # N, S, E, W
-
-    def __str__(self):
-        return self.name
-
-# Defines a Raw (a section in a field)
-class Raw(models.Model):
-    id = models.AutoField(primary_key=True)
-    short_name = models.CharField(max_length=50, unique=True)
-    name = models.CharField(max_length=255)
-    nb_plant = models.IntegerField()  # Number of plants in the raw
-    fruit = models.ForeignKey('Fruit', on_delete=models.CASCADE, related_name='raws')  # ✅ One raw → One fruit
-    field = models.ForeignKey('Field', on_delete=models.CASCADE, related_name='raws')  # ✅ One field → Many raws
-
-
-
-    def __str__(self):
-        return self.name
-
 # Defines a Fruit Type
 class Fruit(models.Model):
     id = models.AutoField(primary_key=True)
@@ -41,7 +15,34 @@ class Fruit(models.Model):
     def __str__(self):
         return self.name
 
+# Defines a Field (Agricultural Field)
+class Field(models.Model):
+    id = models.AutoField(primary_key=True)
+    short_name = models.CharField(max_length=50, unique=True)  # Unique short identifier
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    orientation = models.CharField(max_length=50, blank=True, null=True)  # N, S, E, W
 
+    def __str__(self):
+        return self.name
+
+
+
+
+# Defines a Raw (a section in a field)
+class Raw(models.Model):
+    id = models.AutoField(primary_key=True)
+    short_name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=255)
+    nb_plant = models.IntegerField()  # Number of plants in the raw
+    fruit = models.ForeignKey('Fruit', on_delete=models.CASCADE, related_name='raws')  # ✅ One raw → One fruit
+    field = models.ForeignKey('Field', on_delete=models.CASCADE, related_name='raws')  # ✅ One field → Many raws
+
+
+
+    def __str__(self):
+        return self.name
+    
 # Image storage for estimation analysis
 class ImageHistory(models.Model):
     id = models.AutoField(primary_key=True)

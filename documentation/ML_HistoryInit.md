@@ -14,6 +14,7 @@
   - [Table of Content](#table-of-content)
   - [**2️⃣ Initializing PomologieML (ML API with Flask/FastAPI)**](#2-initializing-pomologieml-ml-api-with-flaskfastapi)
     - [**📌 Step 1: Create PomologieML Project**](#step-1-create-pomologieml-project)
+  - [** Project Structure**](#project-structure)
     - [**📌 Step 2: Create Flask ML API**](#step-2-create-flask-ml-api)
     - [**📌 Step 3: Run the ML API**](#step-3-run-the-ml-api)
 <!-- TOC END -->
@@ -38,16 +39,34 @@ cd ~/Projects/Pomologie/
 mkdir PomologieML && cd PomologieML
 
 # Initialize a virtual environment
-python -m venv venv
-source venv/bin/activate  # Mac/Linux
-venv\Scripts\activate     # Windows
+python3 -m venv venv
+source venv/bin/activate  # Mac/Linux 
 
 # Install dependencies
-pip install flask opencv-python numpy
+pip install flask opencv-python numpy requests
+pip freeze > requirements.txt
+
 ```
 - **Flask:** Web framework for API  
 - **OpenCV & NumPy:** Image processing libraries  
 
+
+
+## ** Project Structure**
+Touch files anbd create folder, after setup, your `PomoloBeeML/` directory should look like this:
+
+```
+PomoloBeeML/
+│── venv/                  # Virtual environment
+│── app.py                 # Main Flask app
+│── requirements.txt        # List of dependencies
+│── config.py               # Configuration settings
+│── static/                 # Optional: Store static images
+│── models/                 # Optional: Store ML models
+│── uploads/                # Store uploaded images
+```
+
+--- 
 ---
 
 ### **📌 Step 2: Create Flask ML API**

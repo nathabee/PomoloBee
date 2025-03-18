@@ -5,12 +5,12 @@ This document defines the API interface for the Pomolobee project, specifying:
 - API calls and data exchanged
 - Endpoints and request/response format
 ---
-## Table of Content
+**Table of Content**
 <!-- TOC -->
 - [**📜 API Interface Definition**](#api-interface-definition)
   - [**Overview**](#overview)
-  - [Table of Content](#table-of-content)
   - [**📌 List of All API Endpoints** ](#list-of-all-api-endpoints)
+  - [in another phase :](#in-another-phase)
   - [**📌 API Endpoint Specifications**](#api-endpoint-specifications)
   - [**📌 Fetching Orchard Data API Endpoints**](#fetching-orchard-data-api-endpoints)
     - [**1️⃣ Fetch All Fields (Orchards)**](#1-fetch-all-fields-orchards)
@@ -30,11 +30,8 @@ This document defines the API interface for the Pomolobee project, specifying:
   - [**6️⃣ Updating Field Information**](#6-updating-field-information)
     - [**📌 API Specifications for Django ↔ ML Communication, Polling, and Error Handling**](#api-specifications-for-django--ml-communication-polling-and-error-handling)
   - [**1️⃣ Django → ML: Sending Image for Processing**](#1-django--ml-sending-image-for-processing)
-  - [**2️⃣ ML → Django: Returning Image Processing Results**](#2-ml--django-returning-image-processing-results)
+  - [???????????????? **2️⃣ ML → Django: Returning Image Processing Results**](#2-ml--django-returning-image-processing-results)
   - [**3️⃣ ML Model Debugging**](#3-ml-model-debugging)
-  - [**4️⃣ Polling Strategy: Checking Image Processing Status**](#4-polling-strategy-checking-image-processing-status)
-  - [**5️⃣ Fetching Processing Errors**](#5-fetching-processing-errors)
-  - [**6️⃣ Request Retry for ML Processing**](#6-request-retry-for-ml-processing)
 <!-- TOC END -->
 ---
 
@@ -45,25 +42,35 @@ This document defines the API interface for the Pomolobee project, specifying:
 | **Fetching Orchard Data** | `GET /api/fields/` | Fetch all available fields (orchards). | **App → Django Backend** | **SettingsScreen (🔄 Sync Data Button)** |
 | | `GET /api/fruits/` | Fetch all available fruit types. | **App → Django Backend** | **SettingsScreen (🔄 Sync Data Button)** |
 | **Location Selection API** | `GET /api/locations/` | Fetch orchard and field details for offline use. | **App → Django Backend** | **SettingsScreen (🔄 Sync Data Button)** |
+| **Updating Raw Details** | `PATCH /api/raws/{raw_id}/` | Modify details of a raw (e.g., tree count). | **App → Django Backend** | **SettingsScreen (✏️ Edit Raw Button & 💾 Save Button)** |
+| **Updating Field Information** | `PATCH /api/fields/{field_id}/` | Modify details of a field (e.g., name, orientation). | **App → Django Backend** | **SettingsScreen (✏️ Edit Field Button & 💾 Save Button)** |
+
+
 | **Uploading Images (On Demand)** | `POST /api/images/` | Upload an image for processing (includes `raw_id`). | **App → Django Backend** | **ProcessingScreen (📤 Analyze Button)** |
+
 | **Checking Processing Status** | `GET /api/images/{image_id}/status/` | Check if ML has processed the image. | **App → Django Backend** | **ProcessingScreen (🔄 Refresh Status Button)** |
+ 
 | **Fetching Estimation Results** | `GET /api/estimations/{image_id}/` | Fetch ML detection results (apple count, confidence, yield). | **App → Django Backend** | **ResultScreen (🔄 Load Estimation Button)** |
 | | `GET /api/latest_estimations/` | Fetch latest completed estimations. | **App → Django Backend** | **ResultScreen (🔄 Load Latest Estimations Button)** |
 | **Fetching Image List** | `GET /api/images/` | Fetch all uploaded images with their status. | **App → Django Backend** | **ProcessingScreen (🔄 Refresh Status Button)** |
 | **Fetching Image Details** | `GET /api/images/{image_id}/details/` | Retrieves metadata of a specific uploaded image. | **App → Django Backend** | **ProcessingScreen, ResultScreen (Clicking on Image Row)** |
 | **Deleting an Image** | `DELETE /api/images/{image_id}/` | Delete an uploaded image from the server. | **App → Django Backend** | **ProcessingScreen (🗑️ Delete Image Button)** |
+
+| **Fetching Processing Errors** | `GET /api/images/{image_id}/error_log` | Fetch errors related to image processing. | **App → Django Backend** | **ProcessingScreen (⚠️ View Error Log Button)** | 
+
+
 | **Fetching History of Estimations** | `GET /api/history/` | Fetch past estimation records. | **App → Django Backend** | **ResultScreen (📜 View History Button)** |
 | **Fetching Single Historical Record** | `GET /api/history/{history_id}/` | Retrieve a detailed past estimation result. | **App → Django Backend** | **ResultScreen (📜 View Detailed History Button)** |
-| **Fetching Processing Errors** | `GET /api/images/{image_id}/error_log` | Fetch errors related to image processing. | **App → Django Backend** | **ProcessingScreen (⚠️ View Error Log Button)** |
+
 | **Request Retry for ML Processing** | `POST /api/retry_processing/` | Request to retry ML processing if it failed. | **App → Django Backend** | **ProcessingScreen (🔄 Retry Processing Button)** |
-| **Updating Raw Details** | `PATCH /api/raws/{raw_id}/` | Modify details of a raw (e.g., tree count). | **App → Django Backend** | **SettingsScreen (✏️ Edit Raw Button & 💾 Save Button)** |
-| **Updating Field Information** | `PATCH /api/fields/{field_id}/` | Modify details of a field (e.g., name, orientation). | **App → Django Backend** | **SettingsScreen (✏️ Edit Field Button & 💾 Save Button)** |
-| **Django → ML API Calls** | `POST /process-image/` | Django sends an image to the ML model for processing. | **Django → ML Model** | **Backend Processing (Automated)** |
+
+
+| **Django → ML API Calls** | `POST /ml/process-image/` | Django sends an image to the ML model for processing. | **Django → ML Model** | **Backend Processing (Automated)** |
 | | `GET /api/images/{image_id}/ml_result` | ML returns detection results to Django. | **Django → ML Model** | **Backend Processing (Automated)** |
+
+
+## in another phase :
 | **ML Model Debugging** | `GET /api/ml/version/` | Fetch the current ML model version. | **App → Django Backend** | **SettingsScreen (🐛 Debug ML Version Button)** |
-| **Polling Strategy** | `GET /api/images/{image_id}/status/` | App checks processing status every minute. | **App → Django Backend** | **ProcessingScreen (⏳ Auto-Polling Every Minute)** |
-| **Error Handling** | `GET /api/images/{image_id}/error_log` | Fetch errors related to image processing. | **App → Django Backend** | **ProcessingScreen (⚠️ View Error Log Button)** |
-| | `POST /api/retry_processing/` | Request Django to retry ML processing if it failed. | **App → Django Backend** | **ProcessingScreen (🔄 Retry Processing Button)** |
 
 ---
  
@@ -149,7 +156,7 @@ GET /api/fruits/
     ]
 }
 ```
-
+ 
 ---
 
  ############################################
@@ -264,6 +271,7 @@ curl -X POST "https://server.com/api/images/" \
 
 ### **3️⃣ Check Image Processing Status**
 📌 **Purpose:** Retrieve the **status** of an uploaded image (whether processing is complete or still ongoing).
+ The **app periodically checks** if an uploaded image has been processed.
 
 ✅ **Endpoint:**  
 ```
@@ -743,7 +751,8 @@ POST /process-image/
 
 ---
 
-## **2️⃣ ML → Django: Returning Image Processing Results**
+
+## ???????????????? **2️⃣ ML → Django: Returning Image Processing Results**
 📌 **Purpose:** The ML model returns **apple detection results** to Django.
 
 ✅ **Endpoint:**  
@@ -805,114 +814,5 @@ GET /api/ml/version/
 
 ---
 
-## **4️⃣ Polling Strategy: Checking Image Processing Status**
-📌 **Purpose:** The **app periodically checks** if an uploaded image has been processed.
+   
 
-✅ **Endpoint:**  
-```
-GET /api/images/{image_id}/status/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `image_id` | `integer` | ✅ Yes | Unique ID of the uploaded image. |
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "image_id": 24,
-    "status": "processing"
-}
-```
-```json
-{
-    "image_id": 24,
-    "status": "done"
-}
-```
-
-✅ **Response (Error - 404 Not Found)**
-```json
-{
-    "error": "Image not found."
-}
-```
-
----
-
-## **5️⃣ Fetching Processing Errors**
-📌 **Purpose:** Retrieve **error logs** related to a failed image processing attempt.
-
-✅ **Endpoint:**  
-```
-GET /api/images/{image_id}/error_log/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `image_id` | `integer` | ✅ Yes | Unique ID of the uploaded image. |
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "image_id": 24,
-    "status": "failed",
-    "error_log": "ML model could not detect apples due to low resolution.",
-    "timestamp": "2024-03-14T08:45:00"
-}
-```
-
-✅ **Response (Error - 404 Not Found)**
-```json
-{
-    "error": "No error log found for this image."
-}
-```
-
----
-
-## **6️⃣ Request Retry for ML Processing**
-📌 **Purpose:** Retry processing an image **if the first attempt failed**.
-
-✅ **Endpoint:**  
-```
-POST /api/retry_processing/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Request Payload:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `image_id` | `integer` | ✅ Yes | Unique ID of the uploaded image. |
-
-✅ **Example Request:**
-```json
-{
-    "image_id": 24
-}
-```
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "message": "Image processing retry requested."
-}
-```
-
-✅ **Response (Error - 404 Not Found)**
-```json
-{
-    "error": "Image not found or already processed successfully."
-}
-```
-
----
-#############################################
----

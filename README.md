@@ -5,7 +5,7 @@
     <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/documentation/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
 </p>
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _24 hours_ (Auto-generated)  
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _26 hours_ (Auto-generated)  
 
 ---
 
@@ -158,6 +158,11 @@ git clone https://github.com/nathabee/PomoloBee.git
    ```bash
   SECRET_KEY=your-very-secret-key
   DEBUG=True
+ 
+  BYPASS_MEDIA=False
+  MEDIA_URL=https://your-cdn.com/media/
+  MEDIA_ROOT=/var/www/media/
+ 
 
   # Database Configuration
   DATABASE_NAME=pomolobee
@@ -167,4 +172,57 @@ git clone https://github.com/nathabee/PomoloBee.git
   DATABASE_PORT=5432
 
    ```
+
+-- in production Use a Web Server for Media Files (Recommended)
+If using Apache, add in the conf :
+   ```bash
+Alias /media/ /path/to/your/media/
+<Directory /path/to/your/media/>
+    Require all granted
+</Directory>
+
+   ```
+
+
+- **configure Django to be started with Unicorn and add it to the cron tab**:
+   ```bash
+   cd PomoloBeeDjango 
+   .....to be defined
+   ```
+
+
+
+- **make migration : database table, data population**:
+
+   in PomoloBeeDjango : 
+
+   ```bash
+   
+  cd  PomoloBee/PomoloBeeDjango 
+  source venv/bin/activate 
+  python manage.py makemigrations core
+  python manage.py migrate
+  python manage.py runserver
+   ```
+
+- **make migration :  data population(if needed) or populate with the admin console**:
+
+  - **Initialisation with json files**
+  adapt the json file containing fake data about fruit, field and raw to your need:
+    ```bash
+    cd PomoloBeeDjango/core/fixtures
+    edit and modify
+    ```
+    
+    ```bash
+    cd  PomoloBee/PomoloBeeDjango 
+    source venv/bin/activate     
+    python manage.py loaddata core/fixtures/initial_fields.json
+    python manage.py loaddata core/fixtures/initial_fruits.json
+    python manage.py loaddata core/fixtures/initial_raws.json
+    ```
+
+  - **Initialisation with the admin console**
+  in your webbrowser log with the superuser  pomobee to  http://127.0.0.1:8000/admin/
+  add fruits, fields and raws
 ---

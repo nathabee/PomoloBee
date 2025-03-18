@@ -47,6 +47,10 @@ INSTALLED_APPS = [
     'core',  # Your main app
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -132,9 +136,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+ 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+
+# Media Storage Configuration , Enable media serving in development
+BYPASS_MEDIA = os.getenv('BYPASS_MEDIA', 'False') == 'True'
+
+MEDIA_URL = os.getenv('MEDIA_URL', '/media/')  # Load from .env
+MEDIA_ROOT = os.getenv('MEDIA_ROOT', BASE_DIR / 'media')  # Default to 'media/' in development
+
+# In production, Django does NOT serve media files
+if not BYPASS_MEDIA:
+    DEFAULT_FILE_STORAGE = os.getenv('DEFAULT_FILE_STORAGE', 'django.core.files.storage.FileSystemStorage')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
