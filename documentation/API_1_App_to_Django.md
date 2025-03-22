@@ -12,29 +12,29 @@ This document defines the API interface for the Pomolobee project, specifying:
 <!-- TOC -->
 - [**App -> Django :  API Interface Definition**](#app--django---api-interface-definition)
   - [**Overview**](#overview)
-  - [**📌 App -> Django : API Endpoint Specifications**](#app--django--api-endpoint-specifications)
   - [🍏 Section A: Orchard & Tree Data (Fields, Fruits, Locations)](#section-a-orchard--tree-data-fields-fruits-locations)
+    - [**Fetch All Fields (Orchards)**](#fetch-all-fields-orchards)
+    - [**Fetch All Available Fruit Types**](#fetch-all-available-fruit-types)
+    - [**Fetch All Fields & Their Raw Data (Location Selection)**](#fetch-all-fields--their-raw-data-location-selection)
   - [📷 Section B: Image Upload & ML Processing](#section-b-image-upload--ml-processing)
-  - [📈 Section C: Estimations & Results](#section-c-estimations--results)
-  - [🛠️ Section D: Maintenance & Debugging](#section-d-maintenance--debugging)
-    - [**📌 Fetching Orchard Data API Endpoints**](#fetching-orchard-data-api-endpoints)
-    - [**1️⃣ Fetch All Fields (Orchards)**](#1-fetch-all-fields-orchards)
-    - [**5️⃣ Fetch All Available Fruit Types**](#5-fetch-all-available-fruit-types)
-    - [**1️⃣ Fetch All Fields & Their Raw Data (Location Selection)**](#1-fetch-all-fields--their-raw-data-location-selection)
-    - [**2️⃣ Upload an Image for Processing**](#2-upload-an-image-for-processing)
-    - [**3️⃣ Check Image Processing Status**](#3-check-image-processing-status)
-    - [**4️⃣ Fetch Apple Detection Results**](#4-fetch-apple-detection-results)
-    - [**5️⃣ Fetch Latest Completed Estimations**](#5-fetch-latest-completed-estimations)
-    - [**6️⃣ Fetch List of Uploaded Images**](#6-fetch-list-of-uploaded-images)
-    - [**7️⃣ Fetch Metadata of a Specific Uploaded Image**](#7-fetch-metadata-of-a-specific-uploaded-image)
-    - [**8️⃣ Delete an Image**](#8-delete-an-image)
-    - [**2️⃣ Fetching a Single Historical Record**](#2-fetching-a-single-historical-record)
-    - [**3️⃣ Fetching Processing Errors**](#3-fetching-processing-errors)
-    - [**4️⃣ Request Retry for ML Processing**](#4-request-retry-for-ml-processing)
-    - [**5️⃣ Updating Raw Details**](#5-updating-raw-details)
-    - [**6️⃣ Updating Field Information**](#6-updating-field-information)
-    - [**5️⃣ Fetch ML Results from Django**](#5-fetch-ml-results-from-django)
-    - [**6️⃣ Fetch the Current ML Model Version**](#6-fetch-the-current-ml-model-version)
+    - [**Upload an Image for Processing**](#upload-an-image-for-processing)
+    - [**Request Retry for ML Processing**](#request-retry-for-ml-processing)
+    - [**Fetch ML Results from Django**](#fetch-ml-results-from-django)
+    - [**Fetch the Current ML Model Version**](#fetch-the-current-ml-model-version)
+    - [**Check Image Processing Status**](#check-image-processing-status)
+  - [📈 Section C: Estimations & Yield Results](#section-c-estimations--yield-results)
+    - [**Fetch Apple Detection Results**](#fetch-apple-detection-results)
+    - [**Fetch Latest Completed Estimations**](#fetch-latest-completed-estimations)
+    - [**Fetch List of Uploaded Images**](#fetch-list-of-uploaded-images)
+    - [**Fetch Metadata of a Specific Uploaded Image**](#fetch-metadata-of-a-specific-uploaded-image)
+    - [**Delete an Image**](#delete-an-image)
+    - [**Fetching Processing Errors**](#fetching-processing-errors)
+  - [📜 Section D: History & Analytics](#section-d-history--analytics)
+    - [**Fetching all Historical Records**](#fetching-all-historical-records)
+    - [**Fetching a Single Historical Record**](#fetching-a-single-historical-record)
+  - [🛠️ Section E: Admin / Update Tree or Field Info (NOT SUPPORTED AT THE MOMENT)](#section-e-admin--update-tree-or-field-info-not-supported-at-the-moment)
+    - [**Updating Raw Details** (NOT SUPPORTED AT THE MOMENT)](#updating-raw-details-not-supported-at-the-moment)
+    - [**Updating Field Information** (NOT SUPPORTED AT THE MOMENT)](#updating-field-information-not-supported-at-the-moment)
   - [**4. API Design**  ](#4-api-design)
     - [Query Examples](#query-examples)
     - [**API Call Order**  ](#api-call-order)
@@ -45,22 +45,14 @@ This document defines the API interface for the Pomolobee project, specifying:
 </details>
 
 ---
-
-## **📌 App -> Django : API Endpoint Specifications**
-
-Here is the **detailed API specification** for fetching orchard data, including **purpose, endpoint, request parameters, and response format** based on your Django models.
+ 
 
 ## 🍏 Section A: Orchard & Tree Data (Fields, Fruits, Locations)
-## 📷 Section B: Image Upload & ML Processing
-## 📈 Section C: Estimations & Results
-## 🛠️ Section D: Maintenance & Debugging
+ 
+📌 **Purpose:** Sync orchard and tree data used for mapping & selection in the app.
+ 
 
-
----
-
-### **📌 Fetching Orchard Data API Endpoints**
-
-### **1️⃣ Fetch All Fields (Orchards)**
+### **Fetch All Fields (Orchards)**
 📌 **Purpose:** Retrieve a list of all available agricultural fields.
 
 ✅ **Endpoint:**  
@@ -94,7 +86,7 @@ GET /api/fields/
 
 ---
 
-### **5️⃣ Fetch All Available Fruit Types**
+### **Fetch All Available Fruit Types**
 📌 **Purpose:** Retrieve a list of all available fruit types.
 
 ✅ **Endpoint:**  
@@ -132,11 +124,9 @@ GET /api/fruits/
 }
 ```
  
----
+--- 
 
- ############################################
-
-### **1️⃣ Fetch All Fields & Their Raw Data (Location Selection)**
+### **Fetch All Fields & Their Raw Data (Location Selection)**
 📌 **Purpose:** Retrieve **all fields** and their respective **tree rows (Raws)** in a single request.
 
 ✅ **Endpoint:**  
@@ -201,7 +191,12 @@ GET /api/locations/
 
 ---
 
-### **2️⃣ Upload an Image for Processing**
+
+## 📷 Section B: Image Upload & ML Processing
+📌 **Purpose:** Upload image, send to ML, track progress, and fetch detection results.
+
+
+### **Upload an Image for Processing**
 📌 **Purpose:** Upload an **image** and associate it with a **specific raw (tree row)** for apple detection.
 
 ✅ **Endpoint:**  
@@ -244,7 +239,113 @@ curl -X POST "https://server.com/api/images/" \
 
 ---
 
-### **3️⃣ Check Image Processing Status**
+### **Request Retry for ML Processing**
+📌 **Purpose:** **Retry ML processing** if an image failed to process due to an issue.
+
+✅ **Endpoint:**  
+```
+POST /api/retry_processing/
+```
+✅ **Caller → Receiver:**  
+- **App → Django Backend**
+
+✅ **Request Payload:**
+| **Parameter** | **Type** | **Required?** | **Description** |
+|--------------|---------|-------------|---------------|
+| `image_id` | `integer` | ✅ Yes | Unique ID of the uploaded image. |
+
+✅ **Example Request:**
+```bash
+curl -X POST "https://server.com/api/retry_processing/" \
+-H "Content-Type: application/json" \
+-d '{"image_id": 24}'
+```
+
+✅ **Response (Success - 200 OK)**
+```json
+{
+    "message": "Image processing retry has been requested."
+}
+```
+
+✅ **Response (Error - 404 Not Found)**  
+```json
+{
+    "error": "Image not found or already processed successfully."
+}
+```
+
+---
+
+### **Fetch ML Results from Django**
+📌 **Purpose:** The App fetches apple detection results from Django after ML has returned them.
+
+
+✅ **Endpoint:**  
+```
+GET /api/images/{image_id}/ml_result
+```
+✅ **Caller → Receiver:**  
+- **Django Backend → ML Model**
+
+✅ **Path Parameters:**
+| **Parameter** | **Type** | **Required?** | **Description** |
+|--------------|---------|-------------|---------------|
+| `image_id` | `integer` | ✅ Yes | Unique ID of the image whose result is requested. |
+
+✅ **Response (Success - 200 OK)**
+```json
+{
+    "image_id": 24,
+    "nb_apples": 12,
+    "confidence_score": 0.89,
+    "processed": true
+}
+```
+
+✅ **Response (Error - 404 Not Found)**
+```json
+{
+    "error": "ML results not found for this image."
+}
+```
+
+---
+
+### **Fetch the Current ML Model Version**
+📌 **Purpose:** Django fetches the ML version from the ML server and exposes it to the app.
+
+✅ **Endpoint:**  
+```
+GET /api/ml/version/
+```
+✅ **Caller → Receiver:**  
+- **App → Django Backend**
+
+✅ **Response (Success - 200 OK)**
+```json
+{
+    "model_version": "v1.2.5",
+    "status": "active",
+    "last_updated": "2024-03-10T14:00:00"
+}
+```
+
+✅ **Response (Error - 500 Internal Server Error)**
+```json
+{
+    "error": "ML service unavailable."
+}
+```
+
+---
+
+   
+
+
+
+
+### **Check Image Processing Status**
 📌 **Purpose:** Retrieve the **status** of an uploaded image (whether processing is complete or still ongoing).
  The **app periodically checks** if an uploaded image has been processed.
 
@@ -289,7 +390,11 @@ GET /api/images/{image_id}/status/
 
 ---
 
-### **4️⃣ Fetch Apple Detection Results**
+## 📈 Section C: Estimations & Yield Results
+📌 **Purpose:** Fetch estimation/yield results computed by ML and stored in Django.
+
+
+### **Fetch Apple Detection Results**
 📌 **Purpose:** Retrieve the **apple count, confidence score, and estimated yield** for a processed image.
 
 ✅ **Endpoint:**  
@@ -325,7 +430,9 @@ GET /api/estimations/{image_id}/
 
 ---
 
-### **5️⃣ Fetch Latest Completed Estimations**
+
+
+### **Fetch Latest Completed Estimations**
 📌 **Purpose:** Retrieve the **most recent** completed estimations.
 
 ✅ **Endpoint:**  
@@ -368,9 +475,7 @@ GET /api/latest_estimations/
 }
 ```
 
----
-
-### **6️⃣ Fetch List of Uploaded Images**
+### **Fetch List of Uploaded Images**
 📌 **Purpose:** Retrieve all uploaded images and their statuses.
 
 ✅ **Endpoint:**  
@@ -392,7 +497,7 @@ GET /api/images/
 
 ---
 
-### **7️⃣ Fetch Metadata of a Specific Uploaded Image**
+### **Fetch Metadata of a Specific Uploaded Image**
 📌 **Purpose:** Retrieve **detailed metadata** of an uploaded image.
 
 ✅ **Endpoint:**  
@@ -417,7 +522,7 @@ GET /api/images/{image_id}/details/
 
 ---
 
-### **8️⃣ Delete an Image**
+### **Delete an Image**
 📌 **Purpose:** Remove an uploaded image from the server.
 
 ✅ **Endpoint:**  
@@ -440,10 +545,48 @@ DELETE /api/images/{image_id}/
     "error": "Image not found."
 }
 ```
-
 ---
-###########################################
 
+### **Fetching Processing Errors**
+📌 **Purpose:** Retrieve **error logs** related to a specific image processing failure.
+
+✅ **Endpoint:**  
+```
+GET /api/images/{image_id}/error_log/
+```
+✅ **Caller → Receiver:**  
+- **App → Django Backend**
+
+✅ **Path Parameters:**
+| **Parameter** | **Type** | **Required?** | **Description** |
+|--------------|---------|-------------|---------------|
+| `image_id` | `integer` | ✅ Yes | Unique ID of the uploaded image. |
+
+✅ **Response (Success - 200 OK)**
+```json
+{
+    "image_id": 24,
+    "status": "failed",
+    "error_log": "ML model failed to detect apples due to poor image quality.",
+    "timestamp": "2024-03-14T08:45:00"
+}
+```
+
+✅ **Response (Error - 404 Not Found)**  
+```json
+{
+    "error": "No error log found for this image."
+}
+```
+--- 
+
+
+## 📜 Section D: History & Analytics
+📌 **Purpose:**  Retrieve previously estimated yields and details.
+
+
+### **Fetching all Historical Records**
+📌 **Purpose:** Retrieve the **detailed results of all past yield estimation**  
 ✅ **Endpoint:**  
 ```
 GET /api/history/
@@ -488,9 +631,11 @@ GET /api/history/
 }
 ```
 
+
+ 
 ---
 
-### **2️⃣ Fetching a Single Historical Record**
+### **Fetching a Single Historical Record**
 📌 **Purpose:** Retrieve the **detailed results of a past yield estimation** for a specific record.
 
 ✅ **Endpoint:**  
@@ -530,79 +675,11 @@ GET /api/history/{history_id}/
 
 ---
 
-### **3️⃣ Fetching Processing Errors**
-📌 **Purpose:** Retrieve **error logs** related to a specific image processing failure.
+## 🛠️ Section E: Admin / Update Tree or Field Info (NOT SUPPORTED AT THE MOMENT)
+📌 **Purpose:**  Modify existing orchard or raw data.
 
-✅ **Endpoint:**  
-```
-GET /api/images/{image_id}/error_log/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
 
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `image_id` | `integer` | ✅ Yes | Unique ID of the uploaded image. |
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "image_id": 24,
-    "status": "failed",
-    "error_log": "ML model failed to detect apples due to poor image quality.",
-    "timestamp": "2024-03-14T08:45:00"
-}
-```
-
-✅ **Response (Error - 404 Not Found)**  
-```json
-{
-    "error": "No error log found for this image."
-}
-```
-
----
-
-### **4️⃣ Request Retry for ML Processing**
-📌 **Purpose:** **Retry ML processing** if an image failed to process due to an issue.
-
-✅ **Endpoint:**  
-```
-POST /api/retry_processing/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Request Payload:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `image_id` | `integer` | ✅ Yes | Unique ID of the uploaded image. |
-
-✅ **Example Request:**
-```bash
-curl -X POST "https://server.com/api/retry_processing/" \
--H "Content-Type: application/json" \
--d '{"image_id": 24}'
-```
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "message": "Image processing retry has been requested."
-}
-```
-
-✅ **Response (Error - 404 Not Found)**  
-```json
-{
-    "error": "Image not found or already processed successfully."
-}
-```
-
----
-
-### **5️⃣ Updating Raw Details**
+### **Updating Raw Details** (NOT SUPPORTED AT THE MOMENT)
 📌 **Purpose:** Update the **number of trees** in a given raw or modify other attributes.
 
 ✅ **Endpoint:**  
@@ -642,7 +719,7 @@ PATCH /api/raws/{raw_id}/
 
 ---
 
-### **6️⃣ Updating Field Information**
+### **Updating Field Information** (NOT SUPPORTED AT THE MOMENT)
 📌 **Purpose:** Modify the **name, orientation, or other attributes** of a specific field.
 
 ✅ **Endpoint:**  
@@ -681,72 +758,6 @@ PATCH /api/fields/{field_id}/
 ```
 
 --- 
-### **5️⃣ Fetch ML Results from Django**
-📌 **Purpose:** The App fetches apple detection results from Django after ML has returned them.
-
-
-✅ **Endpoint:**  
-```
-GET /api/images/{image_id}/ml_result
-```
-✅ **Caller → Receiver:**  
-- **Django Backend → ML Model**
-
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `image_id` | `integer` | ✅ Yes | Unique ID of the image whose result is requested. |
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "image_id": 24,
-    "nb_apples": 12,
-    "confidence_score": 0.89,
-    "processed": true
-}
-```
-
-✅ **Response (Error - 404 Not Found)**
-```json
-{
-    "error": "ML results not found for this image."
-}
-```
-
----
-
-### **6️⃣ Fetch the Current ML Model Version**
-📌 **Purpose:** Django fetches the ML version from the ML server and exposes it to the app.
-
-✅ **Endpoint:**  
-```
-GET /api/ml/version/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "model_version": "v1.2.5",
-    "status": "active",
-    "last_updated": "2024-03-10T14:00:00"
-}
-```
-
-✅ **Response (Error - 500 Internal Server Error)**
-```json
-{
-    "error": "ML service unavailable."
-}
-```
-
----
-
-   
-
-
 
 ## **4. API Design**  
 

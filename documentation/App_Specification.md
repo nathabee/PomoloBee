@@ -22,13 +22,18 @@ Since **video processing is not in scope right now**, we will focus only on **im
     - [**Main UI Elements**](#main-ui-elements)
     - [**📌 Updated Wireframe**](#updated-wireframe)
   - [**📡 `ProcessingScreen`**](#processingscreen)
-    - [**Purpose**](#purpose)
+    - [**Purpose**:](#purpose)
     - [**📌 Two-Part Display**](#twopart-display)
     - [**📌 Updated Wireframe**](#updated-wireframe)
+    - [✅ **API Calls**](#api-calls)
+    - [🔁 **Triggered API Behavior**](#triggered-api-behavior)
   - [**📊 `ResultScreen`**](#resultscreen)
     - [**Purpose**](#purpose)
     - [**📌 Updated Wireframe**](#updated-wireframe)
   - [**📝 `SettingsScreen`**](#settingsscreen)
+    - [**Purpose**](#purpose)
+    - [**📌 Wireframe**](#wireframe)
+  - [**🌳 `OrchardScreen`**](#orchardscreen)
     - [**Purpose**](#purpose)
     - [**📌 Wireframe**](#wireframe)
   - [**ℹ️ `AboutScreen`**](#aboutscreen)
@@ -57,6 +62,7 @@ Since **video processing is not in scope right now**, we will focus only on **im
 
 ## **📌 Screen Flow Diagram**
 ```mermaid
+graph TD
 graph TD
   %% Entry Point
   A[📷 CameraScreen] -->|User selects image| B[🖼️ Image Preview]
@@ -88,7 +94,10 @@ graph TD
   A --> G[ℹ️ AboutScreen]
 
   %% User Can Resynchronize Orchard Data & Settings
-  A --> H[⚙️ SettingsScreen]
+  A --> H1[⚙️ SettingsScreen]
+
+  %% User Can Visualize Orchard Data
+  A --> H2[🌳 OrchardsScreen]
 ```
 
 ---
@@ -97,6 +106,7 @@ graph TD
 - **CameraScreen** (Default)
 - **ProcessingScreen**
 - **SettingsScreen**
+- **OrchardScreen**
 - **AboutScreen**
 
 ---
@@ -126,6 +136,9 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
    - Synchronize **fields, raws, and fruits** manually.
    - Configure the **local image storage folder**.
    - View the number of **pending images** in local storage.
+9️⃣ **Users can access `OrchardScreen` anytime** to:  
+   - Visualize current orchard structure  
+   - Understand raw-to-fruit mapping*
  
 ---
 
@@ -215,7 +228,10 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 
 
 
-### **Purpose**
+### **Purpose**:
+- manage the lifecycle of captured images, from local storage to backend processing
+- display their processing status and results
+
 ### **📌 Two-Part Display**
 ✔ **(1) Local Images (Unsent):**  
 - Shows images **waiting for upload**.
@@ -241,26 +257,30 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 +--------------------------------+
 ```
 
-- ✅ **API Calls:**
-  - `POST /api/images/` (**Analyze** button → Upload to Backend)
-  - `GET /api/images/{image_id}/status` (**Automatic Status Polling:** Runs every **X** seconds after an upload).  
-  - `GET /api/images/` (**Manual Refresh Button:**Allows users to manually update the status). 
-  - `GET /api/images/{image_id}/details/` (**Click on Image**)
-  - `DELETE /api/images/{image_id}/` (**Delete Image** button)
-  - `POST /api/retry_processing/` (**Retry Processing** button)
-  - `GET /api/images/{image_id}/error_log` (**Refresh Status → Error Check**)
+---
 
-  
-
-- **Triggered API Calls:**
-  - **🔄 Refresh Status** → Fetch processing status.
-  - **📤 Analyze** → Upload image to backend.
-  - **🔍 Preview** → Runs a **local model** instead of calling an API.
-  - **🗑 Delete Image** → Deletes an uploaded image.
-  - **🔁 Retry Processing** → Requests backend to **reprocess an image**.
-
+### ✅ **API Calls**
+- `POST /api/images/` (**Analyze** button → Upload to Backend)
+- `GET /api/images/{image_id}/status/` (**Automatic Polling** after upload)
+- `GET /api/images/{image_id}/ml_result/` (**Triggered if status = "done" and results not yet loaded**)
+- `GET /api/images/` (**Manual Refresh Button**)
+- `GET /api/images/{image_id}/details/` (**Click on Image**)
+- `DELETE /api/images/{image_id}/` (**Delete Image** button)
+- `POST /api/retry_processing/` (**Retry Processing** button)
+- `GET /api/images/{image_id}/error_log/` (**Check processing errors**)
 
 ---
+
+### 🔁 **Triggered API Behavior**
+- **🔄 Refresh Status** → Calls `GET /api/images/{image_id}/status/`  
+  📌 *If* `status = "done"` **and results not yet fetched** →  
+  → **Trigger** `GET /api/images/{image_id}/ml_result/` to retrieve detection results.
+  
+- **📤 Analyze** → Uploads image to backend.
+- **🔍 Preview** → Runs a **local model**, no backend call.
+- **🗑 Delete Image** → Deletes uploaded image from backend.
+- **🔁 Retry Processing** → Requests backend to reprocess image.
+ 
 ---
 
 ## **📊 `ResultScreen`**
@@ -332,6 +352,46 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
   - **💾 Save** → Update field/raw details.
   - **🛠 Debug Mode** → Fetch ML model version.
   
+---
+
+
+## **🌳 `OrchardScreen`**
+
+### **Purpose**
+✔ Display all **fields (orchards)** and their respective **tree rows (raws)**  
+✔ Allow users to **view structure, orientation, and fruit types**  
+✔ Acts as a **read-only orchard overview**, paving the way for future field/raw editing  
+
+🔸 **Note:** Editing orchard data (fields/raws) is **not yet implemented** but planned via upcoming PATCH endpoints.
+
+---
+
+### **📌 Wireframe**
+```
++----------------------------------------+
+| 🌳 Orchard: North Orchard (N)          |
+| 📝 Description: Main apple section     |
+|----------------------------------------|
+| 🌿 Row A  • 50 trees • 🍏 Golden Apple  |
+| 🌿 Row B  • 40 trees • 🍎 Red Apple     |
+|----------------------------------------|
+| 🌳 Orchard: South Orchard (S)          |
+| 📝 Description: Mixed fruit section    |
+|----------------------------------------|
+| 🌿 Row C  • 45 trees • 🍏 Green Apple   |
++----------------------------------------+
+```
+
+---
+
+- ✅ **API Calls (Read-Only):**
+  - `GET /api/locations/` (used to fetch fields and raws in a single request)
+
+- ❌ **No Edit Capability Yet:**
+  - Future support for:
+    - `PATCH /api/fields/{field_id}/`
+    - `PATCH /api/raws/{raw_id}/`
+
 ---
 
 ## **ℹ️ `AboutScreen`**

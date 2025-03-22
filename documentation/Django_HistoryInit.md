@@ -381,7 +381,7 @@ we want to fully automate Django Workflow testing by covering:
   python manage.py test core.tests.test_workflow
   python manage.py test core.tests.test_ml
 
-  ```
+  ``` 
 
 #### test covered by the core.tests.test_workflow :
 loading the fixtures from the json then make a simulation of a workflo

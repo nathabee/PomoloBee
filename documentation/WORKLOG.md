@@ -1,7 +1,7 @@
 
 # Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _32 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _33 hours_ (Auto-generated)
 ---
 ## **Table of content**
 
@@ -112,12 +112,14 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 ### Mars 22, 2025
-- **Hours Worked**: 1 hours
+- **Hours Worked**: 2 hours
 - **Tasks**:
   -  check and correct [specification API](API.md) create separate document per interface
   -  App → Django [App → Django specification](API_1_App_to_Django.md)
   -  Django → ML  [Django → ML specification](API_2_Django_to_ML.md)
   -  ML  → Django [ML → Django specification](API_3_ML_to_Django.md)
+  -  add OrchardScreen in UI and Screen in specification  [specification App](App_Specification.md)
+  - check coherence between API App → Django specification and specification App
  
 
 - **Theme**: Project Initialization 
