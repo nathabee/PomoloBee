@@ -50,15 +50,52 @@ class ImageListView(APIView):
         serializer = ImageSerializer(images, many=True)
         return Response({"images": serializer.data}, status=status.HTTP_200_OK)
 
+
 class ImageUploadView(APIView):
     def post(self, request):
         serializer = ImageUploadSerializer(data=request.data)
         if serializer.is_valid():
             image_file = serializer.validated_data['image']
             raw_id = serializer.validated_data['raw_id']
+            date = serializer.validated_data['date']
+
+            # Save the uploaded image to disk
             file_path = default_storage.save(f'images/{image_file.name}', image_file)
-            image_history = ImageHistory.objects.create(image_path=file_path, raw_id=raw_id)
-            return Response({"image_id": image_history.id, "message": "Image uploaded successfully."}, status=status.HTTP_201_CREATED)
+
+            # Create DB entry
+            image_history = ImageHistory.objects.create(
+                image_path=file_path,
+                raw_id=raw_id,
+                date=date,
+                processed=False
+            )
+
+            # Prepare payload for ML call
+            payload = {
+                "image_url": settings.MEDIA_URL + file_path,
+                "image_id": image_history.id
+            }
+
+            try:
+                response = requests.post(f"{settings.ML_API_URL}process", json=payload)
+
+                if response.status_code == 200:
+                    return Response({
+                        "image_id": image_history.id,
+                        "message": "Image uploaded successfully and queued for processing."
+                    }, status=status.HTTP_201_CREATED)
+                else:
+                    return Response({
+                        "image_id": image_history.id,
+                        "message": "Image uploaded, but ML processing failed."
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            except requests.RequestException as e:
+                return Response({
+                    "image_id": image_history.id,
+                    "error": f"Image uploaded but ML call failed: {str(e)}"
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ImageDetailView(APIView):

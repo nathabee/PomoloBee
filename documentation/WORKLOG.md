@@ -1,7 +1,7 @@
 
 # Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _31 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _32 hours_ (Auto-generated)
 ---
 ## **Table of content**
 
@@ -16,6 +16,7 @@
   - [Week 2 (Dates: from Mars 17 to Mars 23, 2025)](#week-2-dates-from-mars-17-to-mars-23-2025)
     - [Mars 17, 2025](#mars-17-2025)
     - [Mars 18, 2025](#mars-18-2025)
+    - [Mars 22, 2025](#mars-22-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
 
@@ -107,6 +108,21 @@ This document tracks the number of hours worked each day and provides a brief de
 
 - **Theme**: Project Initialization 
 - **Progress**: Django and ML code must be checked and tested. need to test test_workflow and test_ml
+
+
+
+### Mars 22, 2025
+- **Hours Worked**: 1 hours
+- **Tasks**:
+  -  check and correct [specification API](API.md) create separate document per interface
+  -  App → Django [App → Django specification](API_1_App_to_Django.md)
+  -  Django → ML  [Django → ML specification](API_2_Django_to_ML.md)
+  -  ML  → Django [ML → Django specification](API_3_ML_to_Django.md)
+ 
+
+- **Theme**: Project Initialization 
+- **Progress**: check django is aligned with specification API_1 and API_2 spec. Check App specification aligned with API_1. check Flask implementation aligned with API_2 and API_3. Django and ML code must be tested. need to test test_workflow and test_ml. 
+
 
  
  

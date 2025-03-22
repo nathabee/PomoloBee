@@ -47,10 +47,14 @@ PomoloBeeML/.env
 .DS_Store
 Thumbs.db
 
-to_ignore
 venv/
 .env
 
-# remove wrongfull addedd: 
+# -- my specials
+to_ignore
+hooks/
+scripts/
+
+# remove wrongfully addedd: 
 # git rm -r --cached my_error_path/
  
