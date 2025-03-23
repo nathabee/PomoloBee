@@ -1,40 +1,40 @@
 
-# **App -> Django :  API Interface Definition**
+# **App -> Django   API Interface Definition**
 ## **Overview**
 This document defines the API interface for the Pomolobee project, specifying:
 - API calls and data exchanged
 - Endpoints and request/response format
 ---
-  
+   
 <details>
 <summary>Table of Content</summary>
 
 <!-- TOC -->
-- [**App -> Django :  API Interface Definition**](#app---django---api-interface-definition)
+- [**App -> Django   API Interface Definition**](#app-django-api-interface-definition)
   - [**Overview**](#overview)
-  - [Section A: Orchard & Tree Data (Fields, Fruits, Locations)](#section-a-orchard--tree-data-fields-fruits-locations)
-    - [**Fetch All Fields (Orchards)**](#fetch-all-fields-orchards)
+  - [Section A Orchard  Tree Data Fields Fruits Locations](#section-a-orchard-tree-data-fields-fruits-locations)
+    - [**Fetch All Fields Orchards**](#fetch-all-fields-orchards)
     - [**Fetch All Available Fruit Types**](#fetch-all-available-fruit-types)
-    - [**Fetch All Fields & Their Raw Data (Location Selection)**](#fetch-all-fields--their-raw-data-location-selection)
-  - [Section B: Image Upload & ML Processing](#section-b-image-upload--ml-processing)
+    - [**Fetch All Fields  Their Raw Data Location Selection**](#fetch-all-fields-their-raw-data-location-selection)
+  - [Section B Image Upload  ML Processing](#section-b-image-upload-ml-processing)
     - [**Upload an Image for Processing**](#upload-an-image-for-processing)
     - [**Request Retry for ML Processing**](#request-retry-for-ml-processing)
     - [**Fetch ML Results from Django**](#fetch-ml-results-from-django)
     - [**Fetch the Current ML Model Version**](#fetch-the-current-ml-model-version)
     - [**Check Image Processing Status**](#check-image-processing-status)
-  - [Section C: Estimations & Yield Results](#section-c-estimations--yield-results)
+  - [Section C Estimations  Yield Results](#section-c-estimations-yield-results)
     - [**Fetch Apple Detection Results**](#fetch-apple-detection-results)
     - [**Fetch Latest Completed Estimations**](#fetch-latest-completed-estimations)
     - [**Fetch List of Uploaded Images**](#fetch-list-of-uploaded-images)
     - [**Fetch Metadata of a Specific Uploaded Image**](#fetch-metadata-of-a-specific-uploaded-image)
     - [**Delete an Image**](#delete-an-image)
     - [**Fetching Processing Errors**](#fetching-processing-errors)
-  - [Section D: History & Analytics](#section-d-history--analytics)
+  - [Section D History  Analytics](#section-d-history-analytics)
     - [**Fetching all Historical Records**](#fetching-all-historical-records)
     - [**Fetching a Single Historical Record**](#fetching-a-single-historical-record)
-  - [️ Section E: Admin / Update Tree or Field Info (NOT SUPPORTED AT THE MOMENT)](#section-e-admin--update-tree-or-field-info-not-supported-at-the-moment)
-    - [**Updating Raw Details** (NOT SUPPORTED AT THE MOMENT)](#updating-raw-details-not-supported-at-the-moment)
-    - [**Updating Field Information** (NOT SUPPORTED AT THE MOMENT)](#updating-field-information-not-supported-at-the-moment)
+  - [️ Section E Admin / Update Tree or Field Info NOT SUPPORTED AT THE MOMENT](#section-e-admin-update-tree-or-field-info-not-supported-at-the-moment)
+    - [**Updating Raw Details** NOT SUPPORTED AT THE MOMENT](#updating-raw-details-not-supported-at-the-moment)
+    - [**Updating Field Information** NOT SUPPORTED AT THE MOMENT](#updating-field-information-not-supported-at-the-moment)
   - [**4. API Design**](#4-api-design)
     - [Query Examples](#query-examples)
     - [**API Call Order**](#api-call-order)
@@ -47,12 +47,12 @@ This document defines the API interface for the Pomolobee project, specifying:
 ---
  
 
-## Section A: Orchard & Tree Data (Fields, Fruits, Locations)
+## Section A Orchard  Tree Data Fields Fruits Locations
  
 📌 **Purpose:** Sync orchard and tree data used for mapping & selection in the app.
  
 
-### **Fetch All Fields (Orchards)**
+### **Fetch All Fields Orchards**
 📌 **Purpose:** Retrieve a list of all available agricultural fields.
 
 ✅ **Endpoint:**  
@@ -126,7 +126,7 @@ GET /api/fruits/
  
 --- 
 
-### **Fetch All Fields & Their Raw Data (Location Selection)**
+### **Fetch All Fields  Their Raw Data Location Selection**
 📌 **Purpose:** Retrieve **all fields** and their respective **tree rows (Raws)** in a single request.
 
 ✅ **Endpoint:**  
@@ -192,7 +192,7 @@ GET /api/locations/
 ---
 
 
-## Section B: Image Upload & ML Processing
+## Section B Image Upload  ML Processing
 📌 **Purpose:** Upload image, send to ML, track progress, and fetch detection results.
 
 
@@ -390,7 +390,7 @@ GET /api/images/{image_id}/status/
 
 ---
 
-## Section C: Estimations & Yield Results
+## Section C Estimations  Yield Results
 📌 **Purpose:** Fetch estimation/yield results computed by ML and stored in Django.
 
 
@@ -581,7 +581,7 @@ GET /api/images/{image_id}/error_log/
 --- 
 
 
-## Section D: History & Analytics
+## Section D History  Analytics
 📌 **Purpose:**  Retrieve previously estimated yields and details.
 
 
@@ -675,11 +675,11 @@ GET /api/history/{history_id}/
 
 ---
 
-## ️ Section E: Admin / Update Tree or Field Info (NOT SUPPORTED AT THE MOMENT)
+## ️ Section E Admin / Update Tree or Field Info NOT SUPPORTED AT THE MOMENT
 📌 **Purpose:**  Modify existing orchard or raw data.
 
 
-### **Updating Raw Details** (NOT SUPPORTED AT THE MOMENT)
+### **Updating Raw Details** NOT SUPPORTED AT THE MOMENT
 📌 **Purpose:** Update the **number of trees** in a given raw or modify other attributes.
 
 ✅ **Endpoint:**  
@@ -719,7 +719,7 @@ PATCH /api/raws/{raw_id}/
 
 ---
 
-### **Updating Field Information** (NOT SUPPORTED AT THE MOMENT)
+### **Updating Field Information** NOT SUPPORTED AT THE MOMENT
 📌 **Purpose:** Modify the **name, orientation, or other attributes** of a specific field.
 
 ✅ **Endpoint:**  

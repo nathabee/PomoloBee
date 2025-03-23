@@ -5,23 +5,23 @@
 
 <!-- TOC -->
 - [**Install PostgreSQL**](#install-postgresql)
-    - [1️⃣ **Ensure PostgreSQL is Installed**](#1-ensure-postgresql-is-installed)
-    - [2️⃣ **Create a Database & User for PomoloBee**](#2-create-a-database--user-for-pomolobee)
-    - [3️⃣ **Update Django `settings.py`**](#3-update-django-settingspy)
-    - [4️⃣ **Apply Migrations**](#4-apply-migrations)
-  - [**PHASE4 : Future-Proofing for Geospatial Data**](#phase4--future-proofing-for-geospatial-data)
+    - [1 **Ensure PostgreSQL is Installed**](#1-ensure-postgresql-is-installed)
+    - [2 **Create a Database  User for PomoloBee**](#2-create-a-database-user-for-pomolobee)
+    - [3 **Update Django `settings.py`**](#3-update-django-settingspy)
+    - [4 **Apply Migrations**](#4-apply-migrations)
+  - [**PHASE4  Future-Proofing for Geospatial Data**](#phase4-future-proofing-for-geospatial-data)
 <!-- TOC END -->
  
 </details>
 
-
-### 1️⃣ **Ensure PostgreSQL is Installed**
+ 
+### 1 **Ensure PostgreSQL is Installed**
 ```bash
 sudo apt update
 sudo apt install postgresql postgresql-contrib
 ```
 
-### 2️⃣ **Create a Database & User for PomoloBee**
+### 2 **Create a Database  User for PomoloBee**
 ```bash
 sudo -u postgres psql
 ```
@@ -37,7 +37,7 @@ Exit PostgreSQL:
 \q
 ```
 
-### 3️⃣ **Update Django `settings.py`**
+### 3 **Update Django `settings.py`**
 Modify your database settings:
 ```python
 DATABASES = {
@@ -51,14 +51,14 @@ DATABASES = {
     }
 }
 ```
-### 4️⃣ **Apply Migrations**
+### 4 **Apply Migrations**
 ```bash
 python manage.py migrate
 ```
 
 ---
 
-## **PHASE4 : Future-Proofing for Geospatial Data**
+## **PHASE4  Future-Proofing for Geospatial Data**
 If you decide to use **PostGIS** (for GPS tracking, orchard mapping, etc.), enable it in PostgreSQL:
 ```bash
 sudo -u postgres psql -d pomolobee -c "CREATE EXTENSION postgis;"

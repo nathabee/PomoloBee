@@ -13,19 +13,19 @@
 
 <!-- TOC -->
 - [Initialisation history](#initialisation-history)
-  - [**2️⃣ Initializing PomologieML (ML API with Flask/FastAPI)**](#2-initializing-pomologieml-ml-api-with-flaskfastapi)
-    - [**Step 1: Create PomologieML Project**](#step-1-create-pomologieml-project)
+  - [**2 Initializing PomologieML ML API with Flask/FastAPI**](#2-initializing-pomologieml-ml-api-with-flaskfastapi)
+    - [**Step 1 Create PomologieML Project**](#step-1-create-pomologieml-project)
   - [**Project Structure**](#project-structure)
-    - [**Step 2: Create Flask ML API**](#step-2-create-flask-ml-api)
-    - [**Step 3: Run the ML API**](#step-3-run-the-ml-api)
+    - [**Step 2 Create Flask ML API**](#step-2-create-flask-ml-api)
+    - [**Step 3 Run the ML API**](#step-3-run-the-ml-api)
 <!-- TOC END -->
  
 </details>
-
+ 
 ---
 
 --- 
-## **2️⃣ Initializing PomologieML (ML API with Flask/FastAPI)**
+## **2 Initializing PomologieML ML API with Flask/FastAPI**
 This will be your **machine learning API** that:  
 ✅ Receives images from Django 🖼️  
 ✅ Runs apple detection 🍏  
@@ -33,7 +33,7 @@ This will be your **machine learning API** that:
 
 ---
 
-### **Step 1: Create PomologieML Project**
+### **Step 1 Create PomologieML Project**
 ```sh
 # Navigate to your development folder
 cd ~/Projects/Pomologie/
@@ -72,7 +72,7 @@ PomoloBeeML/
 --- 
 ---
 
-### **Step 2: Create Flask ML API**
+### **Step 2 Create Flask ML API**
 Create `app.py`:
 ```python
 from flask import Flask, request, jsonify
@@ -103,7 +103,7 @@ if __name__ == '__main__':
 ```
 ---
 
-### **Step 3: Run the ML API**
+### **Step 3 Run the ML API**
 ```sh
 python app.py
 ```

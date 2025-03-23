@@ -3,21 +3,21 @@
 <summary>Table of Content</summary>
 
 <!-- TOC -->
-- [Defines a Field (Agricultural Field)](#defines-a-field-agricultural-field)
-- [Defines a Raw (a section in a field)](#defines-a-raw-a-section-in-a-field)
+- [Defines a Field Agricultural Field](#defines-a-field-agricultural-field)
+- [Defines a Raw a section in a field](#defines-a-raw-a-section-in-a-field)
 - [Defines a Fruit Type](#defines-a-fruit-type)
 - [Image storage for estimation analysis](#image-storage-for-estimation-analysis)
-- [History of Raw Analysis (Processed Data)](#history-of-raw-analysis-processed-data)
+- [History of Raw Analysis Processed Data](#history-of-raw-analysis-processed-data)
 - [History of Yield Estimations](#history-of-yield-estimations)
 - [Data example](#data-example)
 <!-- TOC END -->
  
 </details>
 ---
-
+ 
 from django.db import models
 
-# Defines a Field (Agricultural Field)
+# Defines a Field Agricultural Field
 class Field(models.Model):
     id = models.AutoField(primary_key=True)
     short_name = models.CharField(max_length=50, unique=True)  # Unique short identifier
@@ -28,7 +28,7 @@ class Field(models.Model):
     def __str__(self):
         return self.name
 
-# Defines a Raw (a section in a field)
+# Defines a Raw a section in a field
 class Raw(models.Model):
     id = models.AutoField(primary_key=True)
     short_name = models.CharField(max_length=50, unique=True)
@@ -73,7 +73,7 @@ class ImageHistory(models.Model):
 
 
 
-# History of Raw Analysis (Processed Data)
+# History of Raw Analysis Processed Data
 class HistoryRaw(models.Model):
     id = models.AutoField(primary_key=True)
     id_image = models.ForeignKey(ImageHistory, on_delete=models.SET_NULL, null=True, related_name='history') 

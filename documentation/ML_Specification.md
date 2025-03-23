@@ -9,17 +9,17 @@
 <summary>Table of Content</summary>
 
 <!-- TOC -->
-  - [**5. Django ↔ ML API Integration**](#5-django--ml-api-integration)
+  - [**5. Django ↔ ML API Integration**](#5-django-ml-api-integration)
     - [**Overview**](#overview)
-    - [**Step 1: Create ML API (Flask/FastAPI)**](#step-1-create-ml-api-flaskfastapi)
-    - [**Step 2: Django Calls ML API**](#step-2-django-calls-ml-api)
+    - [**Step 1 Create ML API Flask/FastAPI**](#step-1-create-ml-api-flaskfastapi)
+    - [**Step 2 Django Calls ML API**](#step-2-django-calls-ml-api)
 <!-- TOC END -->
  
 </details>
 
 ---
 
-
+ 
 ### **Overview**
 📌 Step 1: App uploads image, gets an `id`.  
 📌 Step 2: ML processes the image asynchronously.  
@@ -27,7 +27,7 @@
 
 ---
 
-### **Step 1: Create ML API (Flask/FastAPI)**
+### **Step 1 Create ML API Flask/FastAPI**
 ```python
 # Flask API for ML
 from flask import Flask, request, jsonify
@@ -54,9 +54,9 @@ if __name__ == '__main__':
 
 ---
 
-### **Step 2: Django Calls ML API**
+### **Step 2 Django Calls ML API**
 ```python
-# Django View: Calls External ML API
+# Django View Calls External ML API
 import requests
 from django.http import JsonResponse
 

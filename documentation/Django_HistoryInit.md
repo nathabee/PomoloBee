@@ -4,19 +4,19 @@
 ---
 <details>
 <summary>Table of Content</summary>
-
+ 
 <!-- TOC -->
 - [Initialisation history](#initialisation-history)
   - [**Prerequise**](#prerequise)
     - [Install Django*](#install-django)
     - [**Create Django Project**](#create-django-project)
-    - [Set Up a Virtual Environment (Recommended)](#set-up-a-virtual-environment-recommended)
+    - [Set Up a Virtual Environment Recommended](#set-up-a-virtual-environment-recommended)
     - [add venv to .gitignore](#add-venv-to-gitignore)
   - [Initialise Django project](#initialise-django-project)
-    - [Step 1: Create Django Project](#step-1-create-django-project)
-    - [Step 2: Install Required Packages](#step-2-install-required-packages)
-    - [Step 3: Configure Django Settings](#step-3-configure-django-settings)
-    - [Set Up Database & Migrations](#set-up-database--migrations)
+    - [Step 1 Create Django Project](#step-1-create-django-project)
+    - [Step 2 Install Required Packages](#step-2-install-required-packages)
+    - [Step 3 Configure Django Settings](#step-3-configure-django-settings)
+    - [Set Up Database  Migrations](#set-up-database-migrations)
     - [Why Did You Create a Superuser After Setting Up PostgreSQL?](#why-did-you-create-a-superuser-after-setting-up-postgresql)
     - [we created the equirements.txt](#we-created-the-equirementstxt)
   - [Init Data Modele](#init-data-modele)
@@ -73,7 +73,7 @@ django-admin startproject PomoloBeeDjango
 ```
 ---
 
-### Set Up a Virtual Environment (Recommended)
+### Set Up a Virtual Environment Recommended
 It's best to use a virtual environment to manage dependencies.
 
 1. **Navigate to your django project root**:
@@ -110,7 +110,7 @@ install database : see **Django PostgreSQL specification** [Django_PostgreSQL](d
 
 ## Initialise Django project
 
-### Step 1: Create Django Project
+### Step 1 Create Django Project
 Run these commands in your terminal:
 ```sh
 # Navigate to your development folder
@@ -145,7 +145,7 @@ python manage.py startapp core
 
 ---
 
-### Step 2: Install Required Packages
+### Step 2 Install Required Packages
 Install necessary Python dependencies:
 ```sh
 pip install django djangorestframework pillow requests  python-dotenv psycopg2-binary numpy
@@ -160,7 +160,7 @@ pip freeze > requirements.txt
 
 ---
 
-### Step 3: Configure Django Settings
+### Step 3 Configure Django Settings
 
 
 Modify the PomoloBeeDjango/settings.py 
@@ -187,10 +187,10 @@ Modify `PomoloBeeDjango/settings.py`:
 # Load environment variables from .env
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-# SECURITY WARNING: Keep the secret key used in production secret!
+# SECURITY WARNING Keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: Don't run with debug turned on in production!
+# SECURITY WARNING Don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 INSTALLED_APPS = [ 
@@ -199,7 +199,7 @@ INSTALLED_APPS = [
     'core',  # Your main app
 ]
 
-# Media files (for image storage)
+# Media files for image storage
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -226,11 +226,11 @@ mkdir media
 
 ---
 
-### Set Up Database & Migrations
+### Set Up Database  Migrations
 ```sh
 python manage.py migrate
 python manage.py createsuperuser
-# i will put pomobee, this is the superuser of django admin
+# i will put pomobee this is the superuser of django admin
 python manage.py runserver
 ```
 
@@ -276,7 +276,7 @@ Then we extract the configuration in case a new installation.
 
   ```bash
 psql -U pomolo_user -d pomolobee -h localhost -W
-# for info to list table : SELECT schemaname, tablename FROM pg_tables ;
+# for info to list table  SELECT schemaname tablename FROM pg_tables ;
 INSERT INTO core_field (short_name, name, description, orientation)
 VALUES 
     ('C1', 'Maison', 'Champ situé au bord de la maison, humide.', 'NW'),
@@ -304,7 +304,7 @@ load the data
   ```
 
   ```bash
-# check :
+# check
 python manage.py shell
 
 from core.models import Field
@@ -386,7 +386,7 @@ we want to fully automate Django Workflow testing by covering:
 
   ``` 
 
-#### test covered by the core.tests.test_workflow :
+#### test covered by the core.tests.test_workflow
 loading the fixtures from the json then make a simulation of a workflo
 prerequise:
 - json files in the /PomoloBee/PomoloBeeDjango

@@ -2,31 +2,31 @@
 ---
 <details>
 <summary>Table of Content</summary>
-
+ 
 <!-- TOC -->
 - [**️ Project Architecture**](#project-architecture)
 - [**Project Structure**](#project-structure)
   - [**Root Files**](#root-files)
-    - [**1️⃣ `MainActivity.kt`**](#1-mainactivitykt)
-  - [**Navigation (Manages Screen Routing)**](#navigation-manages-screen-routing)
-    - [**2️⃣ `navigation/NavGraph.kt`**](#2-navigationnavgraphkt)
-    - [**3️⃣ `navigation/Screen.kt`**](#3-navigationscreenkt)
-  - [**UI (Manages UI Components & Screens)**](#ui-manages-ui-components--screens)
-    - [**4️⃣ `ui/components/CameraView.kt`**](#4-uicomponentscameraviewkt)
-    - [**5️⃣ `ui/components/DrawerMenu.kt`**](#5-uicomponentsdrawermenukt)
+    - [**1 `MainActivity.kt`**](#1-mainactivitykt)
+  - [**Navigation Manages Screen Routing**](#navigation-manages-screen-routing)
+    - [**2 `navigation/NavGraph.kt`**](#2-navigationnavgraphkt)
+    - [**3 `navigation/Screen.kt`**](#3-navigationscreenkt)
+  - [**UI Manages UI Components  Screens**](#ui-manages-ui-components-screens)
+    - [**4 `ui/components/CameraView.kt`**](#4-uicomponentscameraviewkt)
+    - [**5 `ui/components/DrawerMenu.kt`**](#5-uicomponentsdrawermenukt)
   - [**UI Screens**](#ui-screens)
-    - [**6️⃣ `ui/screens/HomeScreen.kt`**](#6-uiscreenshomescreenkt)
-    - [**7️⃣ `ui/screens/CameraScreen.kt`**](#7-uiscreenscamerascreenkt)
-    - [**8️⃣ `ui/screens/SettingsScreen.kt`**](#8-uiscreenssettingsscreenkt)
-    - [**9️⃣ `ui/screens/AboutScreen.kt`**](#9-uiscreensaboutscreenkt)
-  - [**Theme (Handles UI Styling)**](#theme-handles-ui-styling)
+    - [**6 `ui/screens/HomeScreen.kt`**](#6-uiscreenshomescreenkt)
+    - [**7 `ui/screens/CameraScreen.kt`**](#7-uiscreenscamerascreenkt)
+    - [**8 `ui/screens/SettingsScreen.kt`**](#8-uiscreenssettingsscreenkt)
+    - [**9 `ui/screens/AboutScreen.kt`**](#9-uiscreensaboutscreenkt)
+  - [**Theme Handles UI Styling**](#theme-handles-ui-styling)
     - [**`ui/theme/Color.kt`**](#uithemecolorkt)
-    - [**1️⃣1️⃣ `ui/theme/Theme.kt`**](#11-uithemethemekt)
-    - [**1️⃣2️⃣ `ui/theme/Type.kt`**](#12-uithemetypekt)
-  - [**Data (Handles User Preferences)**](#data-handles-user-preferences)
-    - [**1️⃣3️⃣ `data/UserPreferences.kt`**](#13-datauserpreferenceskt)
-  - [**Utils (Handles Apple Image Processing)**](#utils-handles-apple-image-processing)
-    - [**1️⃣4️⃣ `utils/ImageProcessing.kt`**](#14-utilsimageprocessingkt)
+    - [**11 `ui/theme/Theme.kt`**](#11-uithemethemekt)
+    - [**12 `ui/theme/Type.kt`**](#12-uithemetypekt)
+  - [**Data Handles User Preferences**](#data-handles-user-preferences)
+    - [**13 `data/UserPreferences.kt`**](#13-datauserpreferenceskt)
+  - [**Utils Handles Apple Image Processing**](#utils-handles-apple-image-processing)
+    - [**14 `utils/ImageProcessing.kt`**](#14-utilsimageprocessingkt)
 - [**Summary**](#summary)
 <!-- TOC END -->
  
@@ -83,7 +83,7 @@ app/src/main/java
 ---
 
 ## **Root Files**
-### **1️⃣ `MainActivity.kt`**
+### **1 `MainActivity.kt`**
 📌 **Purpose:**  
 - The **entry point** of the app.
 - **Hosts the `PomoloBeeApp()` function**, which initializes navigation and UI.
@@ -96,8 +96,8 @@ app/src/main/java
 
 ---
 
-## **Navigation (Manages Screen Routing)**
-### **2️⃣ `navigation/NavGraph.kt`**
+## **Navigation Manages Screen Routing**
+### **2 `navigation/NavGraph.kt`**
 📌 **Purpose:**  
 - **Defines how users navigate between screens**.
 - Uses **Jetpack Compose `NavHost`**.
@@ -113,7 +113,7 @@ NavGraph(navController)
 
 ---
 
-### **3️⃣ `navigation/Screen.kt`**
+### **3 `navigation/Screen.kt`**
 📌 **Purpose:**  
 - **Defines all available screen routes** using a **sealed class**.
 
@@ -132,8 +132,8 @@ sealed class Screen(val route: String) {
 
 ---
 
-## **UI (Manages UI Components & Screens)**
-### **4️⃣ `ui/components/CameraView.kt`**
+## **UI Manages UI Components  Screens**
+### **4 `ui/components/CameraView.kt`**
 📌 **Purpose:**  
 - Displays the **camera preview using OpenCV**.
 - Processes camera frames using `detectApple()`.
@@ -149,7 +149,7 @@ CameraView(context = context, modifier = Modifier.fillMaxSize())
 
 ---
 
-### **5️⃣ `ui/components/DrawerMenu.kt`**
+### **5 `ui/components/DrawerMenu.kt`**
 📌 **Purpose:**  
 - **Creates the navigation drawer (sidebar menu)**.
 
@@ -167,7 +167,7 @@ ModalNavigationDrawer(
 ---
 
 ## **UI Screens**
-### **6️⃣ `ui/screens/HomeScreen.kt`**
+### **6 `ui/screens/HomeScreen.kt`**
 📌 **Purpose:**  
 - Displays **home screen UI**.
 
@@ -183,7 +183,7 @@ Button(onClick = { navController.navigate(Screen.Camera.route) }) {
 
 ---
 
-### **7️⃣ `ui/screens/CameraScreen.kt`**
+### **7 `ui/screens/CameraScreen.kt`**
 📌 **Purpose:**  
 - **Displays the camera interface**.
 - Calls **`CameraView.kt`** for OpenCV processing.
@@ -194,7 +194,7 @@ Button(onClick = { navController.navigate(Screen.Camera.route) }) {
 
 ---
 
-### **8️⃣ `ui/screens/SettingsScreen.kt`**
+### **8 `ui/screens/SettingsScreen.kt`**
 📌 **Purpose:**  
 - Displays settings where users can **save preferences**.
 
@@ -208,7 +208,7 @@ scope.launch { UserPreferences.savePreference(context, "apple_type", selectedApp
 
 ---
 
-### **9️⃣ `ui/screens/AboutScreen.kt`**
+### **9 `ui/screens/AboutScreen.kt`**
 📌 **Purpose:**  
 - Displays **app information**.
 
@@ -217,27 +217,27 @@ scope.launch { UserPreferences.savePreference(context, "apple_type", selectedApp
 
 ---
 
-## **Theme (Handles UI Styling)**
+## **Theme Handles UI Styling**
 ### **`ui/theme/Color.kt`**
 📌 **Purpose:**  
 - Defines **color schemes** for the app.
 
 ---
 
-### **1️⃣1️⃣ `ui/theme/Theme.kt`**
+### **11 `ui/theme/Theme.kt`**
 📌 **Purpose:**  
 - Defines **Material 3 theming** for the entire app.
 
 ---
 
-### **1️⃣2️⃣ `ui/theme/Type.kt`**
+### **12 `ui/theme/Type.kt`**
 📌 **Purpose:**  
 - Defines **custom fonts and typography**.
 
 ---
 
-## **Data (Handles User Preferences)**
-### **1️⃣3️⃣ `data/UserPreferences.kt`**
+## **Data Handles User Preferences**
+### **13 `data/UserPreferences.kt`**
 📌 **Purpose:**  
 - Uses **Jetpack DataStore** to store and retrieve user preferences.
 
@@ -252,8 +252,8 @@ UserPreferences.savePreference(context, "apple_type", selectedApple)
 
 ---
 
-## **Utils (Handles Apple Image Processing)**
-### **1️⃣4️⃣ `utils/ImageProcessing.kt`**
+## **Utils Handles Apple Image Processing**
+### **14 `utils/ImageProcessing.kt`**
 📌 **Purpose:**  
 - Processes camera frames **to detect apples**.
 

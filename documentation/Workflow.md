@@ -8,12 +8,12 @@
   - [Diagramme](#diagramme)
   - [**Data Flow**](#data-flow)
   - [**1. Workflow Summary**](#1-workflow-summary)
-    - [**Case: App Initializes Data**](#case-app-initializes-data)
-    - [**Case: App Requests Estimation Based on a Picture**](#case-app-requests-estimation-based-on-a-picture)
-    - [**Case: App Displays Data**](#case-app-displays-data)
-  - [**1️⃣ API DJANGO -> APP**](#1-api-django---app)
-  - [**2️⃣ API DJANGO <-> ML**](#2-api-django---ml)
-  - [**3️⃣ Process Image API (Django to ML)**](#3-process-image-api-django-to-ml)
+    - [**Case App Initializes Data**](#case-app-initializes-data)
+    - [**Case App Requests Estimation Based on a Picture**](#case-app-requests-estimation-based-on-a-picture)
+    - [**Case App Displays Data**](#case-app-displays-data)
+  - [**1 API DJANGO -> APP**](#1-api-django-app)
+  - [**2 API DJANGO <-> ML**](#2-api-django-ml)
+  - [**3 Process Image API Django to ML**](#3-process-image-api-django-to-ml)
   - [**2. Detailed Requirements**](#2-detailed-requirements)
     - [**App Requirements**](#app-requirements)
     - [**ML Model Requirements**](#ml-model-requirements)
@@ -24,7 +24,7 @@
  
 </details>
 
-
+ 
 ---
 ## Diagramme
 ## **Data Flow**
@@ -81,7 +81,7 @@ graph TD
 
 ## **1. Workflow Summary**
 
-### **Case: App Initializes Data**
+### **Case App Initializes Data**
 
 📌 `GET /api/fields/`  
 📌 `GET /api/fruits/`  
@@ -94,9 +94,9 @@ graph TD
 
 ---
 
-### **Case: App Requests Estimation Based on a Picture**
+### **Case App Requests Estimation Based on a Picture**
 
-#### **Step 1: App Uploads Image**
+#### **Step 1 App Uploads Image**
 📌 `POST /api/images/`  
 📩 **App sends:** `image`, `raw_id`, `date`  
 📩 **Backend returns:** `image_id`  
@@ -109,14 +109,14 @@ graph TD
 
 ---
 
-#### **Step 2: ML Processes Image (Async Job)**
+#### **Step 2 ML Processes Image Async Job**
 📌 **ML model detects `nb_apfel` and updates `ImageHistory`.**  
 📌 **ML also returns `confidence_score`.**  
 📌 **Django updates `ImageHistory` and creates `HistoryEstimation`.**  
 
 ---
 
-#### **Step 3: Retrieve Estimation**
+#### **Step 3 Retrieve Estimation**
 📌 `GET /api/estimations/{image_id}`  
 📩 **App requests:** `image_id`  
 📩 **Backend returns:**  
@@ -137,7 +137,7 @@ graph TD
 
 ---
 
-### **Case: App Displays Data**
+### **Case App Displays Data**
 1. **Displays static data (Fields, Raws, Fruits)**  
    - Retrieved from Django and stored locally.  
 
@@ -147,7 +147,7 @@ graph TD
 
 ---
 
-## **1️⃣ API DJANGO -> APP**
+## **1 API DJANGO -> APP**
 **Endpoints for communication between Django and the App:**  
 - `POST /api/images/` → Uploads an image & starts ML processing  
 - `GET /api/images/{image_id}/status` → Checks if ML has processed the image  
@@ -159,14 +159,14 @@ graph TD
 
 ---
 
-## **2️⃣ API DJANGO <-> ML**
+## **2 API DJANGO <-> ML**
 **Endpoints for communication between Django and the ML model:**  
 - `POST /process-image/` → Django sends an image to ML for processing  
 - ML returns: `nb_apfel` (number of apples detected) and `confidence_score`  
 
 ---
 
-## **3️⃣ Process Image API (Django to ML)**
+## **3 Process Image API Django to ML**
 📌 **Step 1: App uploads image** → `POST /api/images/`  
 📌 **Step 2: Django sends image to ML API** → `POST /process-image/`  
 📌 **Step 3: ML detects apples & returns results**  

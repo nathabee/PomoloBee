@@ -136,7 +136,7 @@ This document tracks the number of hours worked each day and provides a brief de
   - Reinstalled hook with ./scripts/setup-hooks.sh and added scripts/remove_emojis.py to the repo.
   - change remove_emojis.py to modifiy "keycap emojis" (1️⃣, 2️⃣,) : composed of multiple Unicode codepoints
 
- 
+  
 
 - **Theme**: Project Initialization 
 - **Progress**: see 22 Mars 
