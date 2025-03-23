@@ -1,19 +1,25 @@
 import sys
-import re
+import re 
+import unicodedata
 
 def github_anchor(title):
-    # Remove bold/italic formatting
+    # Remove Markdown formatting
     title = re.sub(r'\*\*(.*?)\*\*', r'\1', title)
     title = re.sub(r'[_`~]', '', title)
 
-    # Remove punctuation except spaces/hyphens
-    title = re.sub(r'[^\w\s-]', '', title)
+    # Normalize to NFKD (compatibility form), e.g. remove accents
+    title = unicodedata.normalize('NFKD', title)
 
-    # Convert to GitHub-style anchor
-    anchor = title.lower().strip()
-    anchor = re.sub(r'\s+', '-', anchor)      # spaces -> -
-    anchor = re.sub(r'-+', '-', anchor)       # collapse multiple dashes
-    return anchor
+    # Convert to ASCII-only (strip emojis, special dashes, etc.)
+    title = ''.join(c for c in title if not unicodedata.category(c).startswith('So'))  # Remove symbols like emojis
+    title = ''.join(c for c in title if c.isalnum() or c in [' ', '-'])
+
+    # Lowercase and convert spaces to hyphens
+    title = title.strip().lower()
+    title = re.sub(r'\s+', '-', title)
+    title = re.sub(r'-+', '-', title)
+
+    return title
 
 
 def generate_toc(filename, depth):
