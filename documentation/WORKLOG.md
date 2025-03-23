@@ -1,7 +1,7 @@
 
 # Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _33 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _34 hours_ (Auto-generated)
 ---
 ## **Table of content**
 
@@ -17,6 +17,7 @@
     - [Mars 17, 2025](#mars-17-2025)
     - [Mars 18, 2025](#mars-18-2025)
     - [Mars 22, 2025](#mars-22-2025)
+    - [Mars 23, 2025](#mars-23-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
 
@@ -124,6 +125,17 @@ This document tracks the number of hours worked each day and provides a brief de
 
 - **Theme**: Project Initialization 
 - **Progress**: check django is aligned with specification API_1 and API_2 spec. Check App specification aligned with API_1. check Flask implementation aligned with API_2 and API_3. Django and ML code must be tested. need to test test_workflow and test_ml. 
+
+
+ 
+### Mars 23, 2025
+- **Hours Worked**: 1 hours
+- **Tasks**:
+  -  change precommit github hook to remove the emoji . reason : TOC links like [📚 Documentation](#documentation) don’t work because the emoji alters the generated anchor. reinstall the hook with ./scripts/setup-hooks.sh
+
+
+- **Theme**: Project Initialization 
+- **Progress**: see 22 Mars 
 
 
  

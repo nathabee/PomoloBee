@@ -5,7 +5,7 @@
     <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/documentation/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
 </p>
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _33 hours_ (Auto-generated)  
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _34 hours_ (Auto-generated)  
 
 ---
 
@@ -25,6 +25,7 @@
   - [**Installation**  ](#installation)
     - [install PomoloBeeDjango on the VPS](#install-pomolobeedjango-on-the-vps)
 <!-- TOC END -->
+
 
 ---
 

@@ -1,35 +1,52 @@
 #!/bin/sh
 
+# Function to remove emojis from markdown headers
+remove_emojis_from_headers() {
+  local file="$1"
+  if [ -f "$file" ]; then
+    # Strip emojis from lines starting with #
+    sed -i '' -E 's/^(#{1,6}.*?) [[:space:]]*[\x{1F300}-\x{1FAD6}]+[[:space:]]*/\1 /' "$file"
+  fi
+}
+
+# Check if WORKLOG is updated
 if ! git diff --cached --name-only | grep -q 'documentation/WORKLOG.md'; then
   echo "Please update documentation/WORKLOG.md before committing."
   exit 1
 fi
 
-# Functionality to check and update Table of Contents in all Markdown files in the documentation directory
+# Loop through staged markdown files in documentation
 for file in $(git diff --cached --name-only | grep '^documentation/.*\.md$'); do
-  if grep -q '<!-- TOC -->' "$file"; then
-    echo "Updating Table of Contents for $file"
-    python3 scripts/create_tabcont.py "$file" 3
-    
-    # Ensure file is staged again after modification
+  if [ -f "$file" ]; then
+    echo "Cleaning header emojis in $file"
+    remove_emojis_from_headers "$file"
+
+    if grep -q '<!-- TOC -->' "$file"; then
+      echo "Updating Table of Contents for $file"
+      python3 scripts/create_tabcont.py "$file" 3
+    fi
+
+    # Re-stage
     git add "$file"
   fi
 done
 
-# Update README table of contents regardless of staging status
-if grep -q '<!-- TOC -->' README.md; then
-  echo "Updating Table of Contents for README.md"
-  python3 scripts/create_tabcont.py README.md 3
-  
-  # Ensure README is staged for commit
+# Handle README.md separately
+if [ -f "README.md" ]; then
+  echo "Cleaning header emojis in README.md"
+  remove_emojis_from_headers README.md
+
+  if grep -q '<!-- TOC -->' README.md; then
+    echo "Updating Table of Contents for README.md"
+    python3 scripts/create_tabcont.py README.md 3
+  fi
+
   git add README.md
 fi
 
 # Update the work log hours before committing
 ./scripts/update-hours.sh
 
-# Ensure both WORKLOG.md and README.md are staged **AFTER** modification
-if git diff --name-only | grep -q 'documentation/WORKLOG.md'; then
-  git add documentation/WORKLOG.md
-  git add README.md
-fi
+# Re-add key files after update
+git add documentation/WORKLOG.md
+git add README.md
