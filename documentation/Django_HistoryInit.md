@@ -16,7 +16,7 @@
     - [Step 1 Create Django Project](#step-1-create-django-project)
     - [Step 2 Install Required Packages](#step-2-install-required-packages)
     - [Step 3 Configure Django Settings](#step-3-configure-django-settings)
-    - [Set Up Database  Migrations](#set-up-database-migrations)
+    - [Set Up Database Migrations](#set-up-database-migrations)
     - [Why Did You Create a Superuser After Setting Up PostgreSQL?](#why-did-you-create-a-superuser-after-setting-up-postgresql)
     - [we created the equirements.txt](#we-created-the-equirementstxt)
   - [Init Data Modele](#init-data-modele)
@@ -28,7 +28,7 @@
     - [Workflow test](#workflow-test)
     - [**run the test**](#run-the-test)
 <!-- TOC END -->
- 
+
 </details>
 
 ---
@@ -226,7 +226,7 @@ mkdir media
 
 ---
 
-### Set Up Database  Migrations
+### Set Up Database Migrations
 ```sh
 python manage.py migrate
 python manage.py createsuperuser
@@ -276,7 +276,7 @@ Then we extract the configuration in case a new installation.
 
   ```bash
 psql -U pomolo_user -d pomolobee -h localhost -W
-# for info to list table  SELECT schemaname tablename FROM pg_tables ;
+# for info to list table SELECT schemaname tablename FROM pg_tables ;
 INSERT INTO core_field (short_name, name, description, orientation)
 VALUES 
     ('C1', 'Maison', 'Champ situé au bord de la maison, humide.', 'NW'),

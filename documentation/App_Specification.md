@@ -8,7 +8,7 @@ Since **video processing is not in scope right now**, we will focus only on **im
 # Table of Content
 <details>
 <summary>Table of Content</summary>
- 
+
 <!-- TOC -->
 - [Table of Content](#table-of-content)
 - [**PomoloBeeApp Workflow**](#pomolobeeapp-workflow)
@@ -42,12 +42,12 @@ Since **video processing is not in scope right now**, we will focus only on **im
   - [**ℹ️ `AboutScreen`**](#i-aboutscreen)
     - [**Purpose**](#purpose)
     - [**Updated Wireframe**](#updated-wireframe)
-- [Extra  Storage navigation error management...](#extra-storage-navigation-error-management)
+- [Extra Storage navigation error management...](#extra-storage-navigation-error-management)
   - [Architecture](#architecture)
-  - [**Offline Storage  Data Handling**](#offline-storage-data-handling)
+  - [**Offline Storage Data Handling**](#offline-storage-data-handling)
     - [**simple storage model**](#simple-storage-model)
   - [**Syncing Behavior**](#syncing-behavior)
-  - [**Navigation  Fragment Flow in Android Studio**](#navigation-fragment-flow-in-android-studio)
+  - [**Navigation Fragment Flow in Android Studio**](#navigation-fragment-flow-in-android-studio)
     - [**Navigation Diagram**](#navigation-diagram)
     - [**Expected Behavior for the Back Button**](#expected-behavior-for-the-back-button)
   - [**Expected Device Behavior**](#expected-device-behavior)
@@ -418,7 +418,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 
 ---
  
-# Extra  Storage navigation error management...
+# Extra Storage navigation error management...
  
 ## Architecture
 Android Studio
@@ -433,7 +433,7 @@ computing vision : openCV
 
 
 
-## **Offline Storage  Data Handling**
+## **Offline Storage Data Handling**
   - we use **Jetpack DataStore** for offline image storage   
   - Do not download an image in backend automatically with the backend when online. Allways wait for explicit synchronisation  
   - add a buton in the setting to prevent using backend (setting data will be imported from file, and analyse will just be local)
@@ -488,7 +488,7 @@ if the image was sent, the delete image is forcing also delete in backend
 
 ---
 
-## **Navigation  Fragment Flow in Android Studio**
+## **Navigation Fragment Flow in Android Studio**
 
 
 ### **Navigation Diagram**
@@ -542,7 +542,7 @@ graph TD
 - The app **warn the user if storage is full**
 - Error encounter are always show in pop up
  
-#### Error Logging  Recovery
+#### Error Logging Recovery
 - **All errors must be logged in `Jetpack DataStore`** under `/logs/errors.json`
 
 - **If an API call fails** (e.g., `POST /api/images/`), retry **3 times** with exponential backoff.

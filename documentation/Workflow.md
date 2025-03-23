@@ -21,7 +21,7 @@
   - [**3. Explanation of Calculation**](#3-explanation-of-calculation)
     - [**How Yield is Estimated**](#how-yield-is-estimated)
 <!-- TOC END -->
- 
+
 </details>
 
  

@@ -5,7 +5,7 @@ This document defines the API interface for the Pomolobee project, specifying:
 - API calls and data exchanged
 - Endpoints and request/response format
 --- 
-   
+  
 <details>
 <summary>Table of Content</summary>
 

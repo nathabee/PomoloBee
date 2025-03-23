@@ -39,7 +39,7 @@
 🔹 **Modify `build.gradle.kts`** to support **Jetpack Compose**  
 
 ---
- 
+
 ## **STEP 2 Screen Management and Navigation**
 ### **Project Architecture**
 Since **Jetpack Compose replaces Fragments**, the project follows a **modern Compose-based navigation structure**:

@@ -14,7 +14,7 @@
  
 </details>
 ---
- 
+
 from django.db import models
 
 # Defines a Field Agricultural Field

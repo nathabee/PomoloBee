@@ -51,6 +51,7 @@ def clean_markdown_headers(file_path):
             content = emoji_pattern.sub('', content)
             content = clean_bold_spaces(content)
             content = strip_special_chars(content)
+            content = re.sub(r'\s{2,}', ' ', content)  # Collapse multiple spaces into one
             new_lines.append(f"{hashes}{space}{content.strip()}\n")
         else:
             new_lines.append(line)

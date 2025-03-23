@@ -11,7 +11,7 @@
   - [**Navigation Manages Screen Routing**](#navigation-manages-screen-routing)
     - [**2 `navigation/NavGraph.kt`**](#2-navigationnavgraphkt)
     - [**3 `navigation/Screen.kt`**](#3-navigationscreenkt)
-  - [**UI Manages UI Components  Screens**](#ui-manages-ui-components-screens)
+  - [**UI Manages UI Components Screens**](#ui-manages-ui-components-screens)
     - [**4 `ui/components/CameraView.kt`**](#4-uicomponentscameraviewkt)
     - [**5 `ui/components/DrawerMenu.kt`**](#5-uicomponentsdrawermenukt)
   - [**UI Screens**](#ui-screens)
@@ -33,7 +33,6 @@
 </details>
 
 ---
-
 
 # **️ Project Architecture**
 Since **Jetpack Compose doesn't use Fragments**, we will replace the **"1 Activity - Multiple Fragments"** structure with:
@@ -132,7 +131,7 @@ sealed class Screen(val route: String) {
 
 ---
 
-## **UI Manages UI Components  Screens**
+## **UI Manages UI Components Screens**
 ### **4 `ui/components/CameraView.kt`**
 📌 **Purpose:**  
 - Displays the **camera preview using OpenCV**.

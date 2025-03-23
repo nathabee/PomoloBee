@@ -2,7 +2,7 @@
  
 
 
-## **Project Definition PomoloBee  Bee Smart Know Your Apple**
+## **Project Definition PomoloBee Bee Smart Know Your Apple**
 
 ### **Goal**
 Develop an **Android app** (Kotlin + Android Studio) that allows farmers to estimate **apple harvest yield** using AI-based **video or image analysis**. The system will use a **cloud-based backend (VPS)** to process data and provide accurate results.  
@@ -14,21 +14,21 @@ The **PomoloBee** app will now focus **only on image-based apple yield estimatio
 ---
 <details>
 <summary>Table of Content</summary>
- 
+
 <!-- TOC -->
 - [PomoloBee](#pomolobee)
-  - [**Project Definition PomoloBee  Bee Smart Know Your Apple**](#project-definition-pomolobee-bee-smart-know-your-apple)
+  - [**Project Definition PomoloBee Bee Smart Know Your Apple**](#project-definition-pomolobee-bee-smart-know-your-apple)
     - [**Goal**](#goal)
-  - [**Features  Functionalities**](#features-functionalities)
-    - [**1 Mobile App Frontend  Android**](#1-mobile-app-frontend-android)
+  - [**Features Functionalities**](#features-functionalities)
+    - [**1 Mobile App Frontend Android**](#1-mobile-app-frontend-android)
     - [**2 Cloud Backend Django API**](#2-cloud-backend-django-api)
     - [**3 Machine Learning Model AI for Apple Detection**](#3-machine-learning-model-ai-for-apple-detection)
-    - [**4 Offline Mode  Storage**](#4-offline-mode-storage)
+    - [**4 Offline Mode Storage**](#4-offline-mode-storage)
   - [**Updated Data Flow**](#updated-data-flow)
   - [**Updated Milestones**](#updated-milestones)
-    - [**Phase 1  MVP Current**](#phase-1-mvp-current)
-    - [**Phase 2  AI Enhancements  Manual Input**](#phase-2-ai-enhancements-manual-input)
-    - [**Phase 3  Advanced Features  Video Processing**](#phase-3-advanced-features-video-processing)
+    - [**Phase 1 MVP Current**](#phase-1-mvp-current)
+    - [**Phase 2 AI Enhancements Manual Input**](#phase-2-ai-enhancements-manual-input)
+    - [**Phase 3 Advanced Features Video Processing**](#phase-3-advanced-features-video-processing)
 <!-- TOC END -->
  
 </details>
@@ -36,8 +36,8 @@ The **PomoloBee** app will now focus **only on image-based apple yield estimatio
 
 ---
 
-## **Features  Functionalities**
-### **1 Mobile App Frontend  Android**
+## **Features Functionalities**
+### **1 Mobile App Frontend Android**
 📱 **User Actions:**  
 ✅ **Take a Picture** – User captures images of apple trees for yield estimation.  
 ✅ **Store Images Offline** – Images are **stored locally first** before uploading.  
@@ -80,7 +80,7 @@ The **PomoloBee** app will now focus **only on image-based apple yield estimatio
 
 ---
   
-### **4 Offline Mode  Storage**
+### **4 Offline Mode Storage**
 ✅ **Jetpack DataStore stores unsent images.**  
 ✅ **Manual sync instead of automatic upload.**  
 ✅ **Local AI model (optional) for offline estimation.**  
@@ -99,7 +99,7 @@ The **PomoloBee** app will now focus **only on image-based apple yield estimatio
   
 ## **Updated Milestones**
 
-### **Phase 1  MVP Current**
+### **Phase 1 MVP Current**
 - **Offline image storage & manual upload.**  
 - **Basic apple detection model (YOLOv8).**  
 - **Simple backend API (Django + PostgreSQL).**  
@@ -107,7 +107,7 @@ The **PomoloBee** app will now focus **only on image-based apple yield estimatio
 
 ---
 
-### **Phase 2  AI Enhancements  Manual Input**
+### **Phase 2 AI Enhancements Manual Input**
 🔹 **Local AI Model for Offline Estimation**  
    - Farmers can analyze images **without internet** using an **on-device AI model** (OpenCV + TensorFlow Lite).  
    - Allows instant feedback instead of waiting for backend processing.  
@@ -123,7 +123,7 @@ The **PomoloBee** app will now focus **only on image-based apple yield estimatio
 
 ---
 
-### **Phase 3  Advanced Features  Video Processing**
+### **Phase 3 Advanced Features Video Processing**
 🔹 **Historical Tracking & Yield Comparison**  
    - Farmers can **view past yield estimations** in a new **"HistoryScreen"**.  
    - Advanced comparison: **AI yield vs. manually recorded actual harvest.**  
