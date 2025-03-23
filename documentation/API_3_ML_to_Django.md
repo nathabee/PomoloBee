@@ -8,12 +8,12 @@ This document defines the API interface for the Pomolobee project, specifying:
   
 <details>
 <summary>Table of Content</summary>
-
+ 
 <!-- TOC -->
 - [**ML -> Django Interface Definition**](#ml-django-interface-definition)
   - [**Overview**](#overview)
   - [**ML to Django API Endpoint Specifications**](#ml-to-django-api-endpoint-specifications)
-    - [**ML → Django Returning Image Processing Results**](#ml-django-returning-image-processing-results)
+    - [**ML to Django Returning Image Processing Results**](#ml-to-django-returning-image-processing-results)
 <!-- TOC END -->
  
 </details>
@@ -28,7 +28,7 @@ Here is the **detailed API specification** data, including **purpose, endpoint, 
 
 
 
-### **ML → Django Returning Image Processing Results**
+### **ML to Django Returning Image Processing Results**
 
 📌 **Purpose:** The ML model returns **apple detection results** to Django once image analysis is complete.
 

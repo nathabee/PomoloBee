@@ -8,7 +8,7 @@ Since **video processing is not in scope right now**, we will focus only on **im
 # Table of Content
 <details>
 <summary>Table of Content</summary>
-
+ 
 <!-- TOC -->
 - [Table of Content](#table-of-content)
 - [**PomoloBeeApp Workflow**](#pomolobeeapp-workflow)

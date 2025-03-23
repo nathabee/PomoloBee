@@ -30,7 +30,7 @@ The **PomoloBee** app will now focus **only on image-based apple yield estimatio
     - [**Phase 2 AI Enhancements Manual Input**](#phase-2-ai-enhancements-manual-input)
     - [**Phase 3 Advanced Features Video Processing**](#phase-3-advanced-features-video-processing)
 <!-- TOC END -->
- 
+  
 </details>
  
 

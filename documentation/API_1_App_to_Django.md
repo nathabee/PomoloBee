@@ -8,7 +8,7 @@ This document defines the API interface for the Pomolobee project, specifying:
 
 <details>
 <summary>Table of Content</summary>
-
+ 
 <!-- TOC -->
 - [**App -> Django API Interface Definition**](#app-django-api-interface-definition)
   - [**Overview**](#overview)

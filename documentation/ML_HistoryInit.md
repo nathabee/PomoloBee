@@ -10,7 +10,7 @@
 ---
 <details>
 <summary>Table of Content</summary>
-
+ 
 <!-- TOC -->
 - [Initialisation history](#initialisation-history)
   - [**2 Initializing PomologieML ML API with Flask/FastAPI**](#2-initializing-pomologieml-ml-api-with-flaskfastapi)

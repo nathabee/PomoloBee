@@ -5,15 +5,15 @@ This document defines the API interface for the Pomolobee project, specifying:
 - API calls and data exchanged
 - Endpoints and request/response format
 --- 
-  
+   
 <details>
 <summary>Table of Content</summary>
 
 <!-- TOC -->
 - [**Django -> ML API Interface Definition**](#django-ml-api-interface-definition)
   - [**Overview**](#overview)
-    - [**API Specifications for Django ↔ ML Communication Polling and Error Handling**](#api-specifications-for-django-ml-communication-polling-and-error-handling)
-    - [**Django → ML Sending Image for Processing**](#django-ml-sending-image-for-processing)
+    - [**API Specifications for Django both ML Communication Polling and Error Handling**](#api-specifications-for-django-both-ml-communication-polling-and-error-handling)
+    - [**Django to ML Sending Image for Processing**](#django-to-ml-sending-image-for-processing)
     - [**ML Model Debugging**](#ml-model-debugging)
     - [️ ML Endpoint Base Path](#ml-endpoint-base-path)
     - [**Polling Strategy**](#polling-strategy)
@@ -28,11 +28,11 @@ This document defines the API interface for the Pomolobee project, specifying:
 
  
  
-### **API Specifications for Django ↔ ML Communication Polling and Error Handling**
+### **API Specifications for Django both ML Communication Polling and Error Handling**
 
 ---
 
-### **Django → ML Sending Image for Processing**
+### **Django to ML Sending Image for Processing**
 📌 **Purpose:** Django sends an uploaded image to the ML model for apple detection.
 
 ✅ **Endpoint:**  

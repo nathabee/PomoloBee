@@ -2,7 +2,7 @@
 ---
 <details>
 <summary>Table of Content</summary>
- 
+  
 <!-- TOC -->
 - [**️ Project Architecture**](#project-architecture)
 - [**Project Structure**](#project-structure)

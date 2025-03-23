@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _35 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _36 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -129,11 +129,12 @@ This document tracks the number of hours worked each day and provides a brief de
  
     
 ###  Mars 23 2025
-- **Hours Worked**: 2 hours
+- **Hours Worked**: 3 hours
 - **Tasks**:
   - Added a pre-commit hook to remove emojis from Markdown headers, fixing broken TOC anchor links caused by ChatGPT’s emoji formatting.
   - Reinstalled hook with ./scripts/setup-hooks.sh and added scripts/remove_emojis.py to the repo.
   - change remove_emojis.py to modifiy "keycap emojis" (1️⃣, 2️⃣,) : composed of multiple Unicode codepoints
+  - to avoid this mess later on the specification : i customized chatGPT :"Always avoid emojis in Markdown, especially in headers and TOC links." in "Anything else ChatGPT should know about you" trait of my setting
 
   
 

@@ -22,6 +22,14 @@ emoji_pattern = re.compile(
     "\u23E9-\u23FA"
     "]+", flags=re.UNICODE)
 
+arrow_map = {
+    '→': ' to ',
+    '←': ' from ',
+    '↔': ' both ',
+    '➔': ' to ',
+    '➡': ' to ',
+}
+
 # Characters to remove from headers
 SPECIAL_CHARS = r"[()&,:–—]"
 
@@ -49,7 +57,9 @@ def clean_markdown_headers(file_path):
             hashes, space, content = match.groups()
             content = replace_keycap_emojis(content)
             content = emoji_pattern.sub('', content)
-            content = clean_bold_spaces(content)
+            content = clean_bold_spaces(content) 
+            for arrow, word in arrow_map.items():
+                content = content.replace(arrow, word)
             content = strip_special_chars(content)
             content = re.sub(r'\s{2,}', ' ', content)  # Collapse multiple spaces into one
             new_lines.append(f"{hashes}{space}{content.strip()}\n")

@@ -1,4 +1,4 @@
-## **5. Django ↔ ML API Integration**
+## **5. Django both ML API Integration**
 
 📌 **Django sends image to a separate ML API (Flask/FastAPI, etc.)**  
 ✅ Better for scaling & performance  
@@ -9,12 +9,12 @@
 <summary>Table of Content</summary>
 
 <!-- TOC -->
-  - [**5. Django ↔ ML API Integration**](#5-django-ml-api-integration)
+  - [**5. Django both ML API Integration**](#5-django-both-ml-api-integration)
     - [**Overview**](#overview)
     - [**Step 1 Create ML API Flask/FastAPI**](#step-1-create-ml-api-flaskfastapi)
     - [**Step 2 Django Calls ML API**](#step-2-django-calls-ml-api)
 <!-- TOC END -->
- 
+  
 </details>
 ---
 

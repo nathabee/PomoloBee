@@ -5,7 +5,7 @@
     <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/documentation/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
 </p>
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _35 hours_ (Auto-generated)  
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _36 hours_ (Auto-generated)  
 
 ---
 
@@ -35,9 +35,11 @@
 
 📖 **Scope and Requirements:** [Requirements](documentation/Requirements.md)  
 📖 **API, Interface Definition:** [API](documentation/API.md)  
-📖 **Data Model:** [Data Model](documentation/DataModel.md)  
+📖 **Data Model:** [Data Model](documentation/Django_DataModel.md)  
 📖 **Workflow:** [Workflow](documentation/Workflow.md)  
-📖 **ML Specification:** [MLSpecification](documentation/MLSpecification.md)  
+📖 **ML Specification:** [ML Specification](documentation/ML_Specification.md)  
+📖 **App Specification:** [App Specification](documentation/App_Specification.md)  [App Structure](documentation/App_Structure.md)  
+📖 **Database Specification:** [PostgresSQL Specification](documentation/Django_PostgresSQL.md)   
 
 ---
 
