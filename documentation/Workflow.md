@@ -26,10 +26,13 @@
   
 --- 
 ## **Data Flow**
+
+The following diagram illustrates the interaction between the **PomoloBee App**, **Django Backend**, and **ML Processing Service**.
+
 ```mermaid
-graph TD
+graph TD 
   subgraph App
-    MobileApp["📱 Pomolobee App"]
+    MobileApp["📱 PomoloBee App"]
   end
 
   subgraph Backend
@@ -44,30 +47,24 @@ graph TD
   subgraph Storage
     FileSystem["🖼️ Image Storage"]
   end
-
-  %% Initial Syncing of Orchard Data
+ 
   MobileApp -- "📍 Fetch Available Fields & Raws" --> DjangoServer
   DjangoServer -- "📄 Provide Field & Raw Data" --> MobileApp
-
-  %% Image Upload Process
+ 
   MobileApp -- "📤 Upload Image & Raw ID" --> DjangoServer
   DjangoServer -- "📂 Save Image Metadata" --> Database
   DjangoServer -- "🖼️ Store Image" --> FileSystem
-
-  %% Django Sends Image for ML Processing
+ 
   DjangoServer -- "🔄 Send Image to ML (POST /process)" --> MLService
   MLService -- "✅ Acknowledge Processing (200 OK)" --> DjangoServer
   MLService -- "⏳ Process Image (Detect Apples)" --> MLService
-
-  %% ML Processing & Callback to Django
+ 
   MLService -- "📊 Return Detection Results (POST /ml_result)" --> DjangoServer
   DjangoServer -- "📄 Update Image History & Store Results" --> Database
-
-  %% Mobile App Fetches Image Processing Status
+ 
   MobileApp -- "📥 Check Processing Status (GET /ml_result)" --> DjangoServer
   DjangoServer -- "📄 Return Status (Done/In Progress/Failed)" --> MobileApp
-
-  %% Mobile App Fetches Yield Estimation
+ 
   MobileApp -- "📥 Fetch Estimation Results" --> DjangoServer
   DjangoServer -- "📊 Provide Yield Data & Save to History" --> Database
   MobileApp -- "📥 Fetch Estimation History" --> DjangoServer
