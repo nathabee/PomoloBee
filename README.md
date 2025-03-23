@@ -192,7 +192,7 @@ Alias /media/ /path/to/your/media/
    .....to be defined
    ```
 
-
+ 
 
 - **make migration : database table, data population**:
 

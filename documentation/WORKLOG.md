@@ -131,8 +131,9 @@ This document tracks the number of hours worked each day and provides a brief de
 ###  Mars 23, 2025
 - **Hours Worked**: 1 hours
 - **Tasks**:
-  -  change precommit github hook to remove the emoji . reason : TOC links like [📚 Documentation](#documentation) don’t work because the emoji alters the generated anchor. reinstall the hook with ./scripts/setup-hooks.sh
-  - test precommit, add in github scripts and hooks
+  - Added a pre-commit hook to remove emojis from Markdown headers, fixing broken TOC anchor links caused by ChatGPT’s emoji formatting.
+  - Reinstalled hook with ./scripts/setup-hooks.sh and added scripts/remove_emojis.py to the repo.
+
 
 
 - **Theme**: Project Initialization 
