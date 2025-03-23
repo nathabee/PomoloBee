@@ -136,10 +136,29 @@ This document tracks the number of hours worked each day and provides a brief de
   - change remove_emojis.py to modifiy "keycap emojis" (1️⃣, 2️⃣,) : composed of multiple Unicode codepoints
   - to avoid this mess later on the specification : i customized chatGPT :"Always avoid emojis in Markdown, especially in headers and TOC links." in "Anything else ChatGPT should know about you" trait of my setting
   - check coherence between App specification  [specification App](App_Specification.md) and update app structure doc [App Structure](App_Structure.md) 
-   
+  - Create missing component files  ui/components/ImageCard.kt , FolderPicker.kt,  PermissionManager.kt
+  - Create missing screen files ui/screens/ProcessingScreen.kt ResultScreen.kt OrchardScreen.kt LocationScreen.kt ErrorLogScreen.kt ImageHistoryScreen.kt LocalResultScreen.kt PreviewScreen.kt SettingsRepository.kt
 
 - **Theme**: Project Initialization 
-- **Progress**: see 22 Mars 
+- **Progress**: Specification cehcked, time to code API for Django and ML to offer a service endpoint
+
+
+- **PENDING**
+  - **APP**
+  - at this point App is just specified but not implented in code. just empty nutshell
+  - Check App specification aligned with API_1. 
+  - write code for files  ui/components/ImageCard.kt , FolderPicker.kt,  PermissionManager.kt
+  - write code for files  ui/screens/ProcessingScreen.kt ResultScreen.kt OrchardScreen.kt LocationScreen.kt ErrorLogScreen.kt ImageHistoryScreen.kt LocalResultScreen.kt PreviewScreen.kt SettingsRepository.kt
+  - **DJANGO**
+  - at this point DjangoApp is just specified , shortly implented in code but not tested 
+  - check django is aligned with specification API_1 and API_2 spec. 
+  - Django code must be tested. 
+  - need to test test_workflow and test_ml.  
+  - **ML**
+  - at this point ML is not specified (except API) and not implented in code. just empty nutshell to have a endpoint to test app and django
+  - make Flask implementation aligned with API_2 and API_3. 
+  - ML code empty shell must be tested. 
+ 
 
   
  
