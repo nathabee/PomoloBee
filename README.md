@@ -80,6 +80,7 @@ graph TD
   DjangoServer -- "📄 Provide Yield Data" --> MobileApp
 ```
 
+
 ---
 
 ## **📍 Features & Functionalities**  

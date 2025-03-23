@@ -52,8 +52,6 @@ venv/
 
 # -- my specials
 to_ignore
-hooks/
-scripts/
 
 # remove wrongfully addedd: 
 # git rm -r --cached my_error_path/

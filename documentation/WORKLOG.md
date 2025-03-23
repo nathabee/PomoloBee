@@ -132,6 +132,7 @@ This document tracks the number of hours worked each day and provides a brief de
 - **Hours Worked**: 1 hours
 - **Tasks**:
   -  change precommit github hook to remove the emoji . reason : TOC links like [📚 Documentation](#documentation) don’t work because the emoji alters the generated anchor. reinstall the hook with ./scripts/setup-hooks.sh
+  - test precommit, add in github scripts and hooks
 
 
 - **Theme**: Project Initialization 

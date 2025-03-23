@@ -3,10 +3,7 @@
 # Function to remove emojis from markdown headers
 remove_emojis_from_headers() {
   local file="$1"
-  if [ -f "$file" ]; then
-    # Strip emojis from lines starting with #
-    sed -i '' -E 's/^(#{1,6}.*?) [[:space:]]*[\x{1F300}-\x{1FAD6}]+[[:space:]]*/\1 /' "$file"
-  fi
+  python3 scripts/remove_emojis.py "$file"
 }
 
 # Check if WORKLOG is updated
