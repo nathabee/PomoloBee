@@ -15,12 +15,12 @@
 <!-- TOC -->
 - [PomoloBee](#pomolobee)
   - [**Documentation**](#documentation)
-  - [**Project Definition: PomoloBee – Bee Smart, Know Your Apple**](#project-definition-pomolobee-bee-smart-know-your-apple)
-    - [**Goal:**](#goal)
+  - [**Project Definition PomoloBee  Bee Smart Know Your Apple**](#project-definition-pomolobee-bee-smart-know-your-apple)
+    - [**Goal**](#goal)
     - [**Data Flow in PomoloBee**](#data-flow-in-pomolobee)
-  - [**Features & Functionalities**](#features-functionalities)
-    - [**1 Mobile App (Frontend – Android)**](#1-mobile-app-frontend-android)
-    - [**2 Cloud Backend (VPS – Django or Flask API)**](#2-cloud-backend-vps-django-or-flask-api)
+  - [**Features  Functionalities**](#features-functionalities)
+    - [**1 Mobile App Frontend Android**](#1-mobile-app-frontend-android)
+    - [**2 Cloud Backend VPS  Django or Flask API**](#2-cloud-backend-vps-django-or-flask-api)
     - [**Updated Milestones**](#updated-milestones)
   - [**Installation**](#installation)
     - [install PomoloBeeDjango on the VPS](#install-pomolobeedjango-on-the-vps)
@@ -41,9 +41,9 @@
 
 ---
 
-## **Project Definition: PomoloBee – Bee Smart, Know Your Apple**
+## **Project Definition PomoloBee  Bee Smart Know Your Apple**
 
-### **Goal:**
+### **Goal**
 Develop an **Android app** (Kotlin + Android Studio) that allows farmers to estimate **apple harvest yield** using AI-based **video or image analysis**. The system will use a **cloud-based backend (VPS)** to process data and provide accurate results.  
 
 ---
@@ -82,12 +82,12 @@ graph TD
   DjangoServer -- "📄 Provide Yield Data" --> MobileApp
 ```
 
-  
+   
 ---
 
-## **Features & Functionalities**
+## **Features  Functionalities**
 
-### **1 Mobile App (Frontend – Android)**
+### **1 Mobile App Frontend Android**
 📱 **User Actions:**  
 ✅ **Record or Upload Video** – User walks through the orchard while capturing video.  
 ✅ **Take a Picture** – Alternative to video for quick analysis.  
@@ -106,7 +106,7 @@ graph TD
  
 ---
 
-### **2 Cloud Backend (VPS – Django or Flask API)**
+### **2 Cloud Backend VPS  Django or Flask API**
 🌐 **Server Responsibilities:**  
 ✅ **Receive video/image uploads from the app**  
 ✅ **Extract key frames from video**  

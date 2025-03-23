@@ -1,23 +1,12 @@
 import sys
 import re
 
-# Map keycap emojis to digits
 keycap_map = {
-    '0️⃣': '0',
-    '1️⃣': '1',
-    '2️⃣': '2',
-    '3️⃣': '3',
-    '4️⃣': '4',
-    '5️⃣': '5',
-    '6️⃣': '6',
-    '7️⃣': '7',
-    '8️⃣': '8',
-    '9️⃣': '9',
-    '#️⃣': '#',
-    '*️⃣': '*',
+    '0️⃣': '0', '1️⃣': '1', '2️⃣': '2', '3️⃣': '3', '4️⃣': '4',
+    '5️⃣': '5', '6️⃣': '6', '7️⃣': '7', '8️⃣': '8', '9️⃣': '9',
+    '#️⃣': '#', '*️⃣': '*',
 }
 
-# Emoji regex for non-keycap emoji removal
 emoji_pattern = re.compile(
     "[" 
     "\U0001F600-\U0001F64F"
@@ -33,13 +22,19 @@ emoji_pattern = re.compile(
     "\u23E9-\u23FA"
     "]+", flags=re.UNICODE)
 
-def clean_bold_spaces(text):
-    return re.sub(r'\*\*\s*(.*?)\s*\*\*', r'**\1**', text)
+# Characters to remove from headers
+SPECIAL_CHARS = r"[()&,:–—]"
 
 def replace_keycap_emojis(text):
     for emoji, digit in keycap_map.items():
         text = text.replace(emoji, digit)
     return text
+
+def clean_bold_spaces(text):
+    return re.sub(r'\*\*\s*(.*?)\s*\*\*', r'**\1**', text)
+
+def strip_special_chars(text):
+    return re.sub(SPECIAL_CHARS, '', text)
 
 def clean_markdown_headers(file_path):
     header_regex = re.compile(r'^(#{1,6})(\s+)(.*)')
@@ -55,6 +50,7 @@ def clean_markdown_headers(file_path):
             content = replace_keycap_emojis(content)
             content = emoji_pattern.sub('', content)
             content = clean_bold_spaces(content)
+            content = strip_special_chars(content)
             new_lines.append(f"{hashes}{space}{content.strip()}\n")
         else:
             new_lines.append(line)

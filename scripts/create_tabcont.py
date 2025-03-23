@@ -1,26 +1,25 @@
 import sys
-import re 
+import re
 import unicodedata
 
 def github_anchor(title):
-    # Remove Markdown formatting
+    # Remove bold/italic/code formatting
     title = re.sub(r'\*\*(.*?)\*\*', r'\1', title)
-    title = re.sub(r'[_`~]', '', title)
+    title = re.sub(r'\*(.*?)\*', r'\1', title)
+    title = re.sub(r'`(.*?)`', r'\1', title)
+    title = re.sub(r'[_~]', '', title)
 
-    # Normalize to NFKD (compatibility form), e.g. remove accents
+    # Normalize unicode
     title = unicodedata.normalize('NFKD', title)
 
-    # Convert to ASCII-only (strip emojis, special dashes, etc.)
-    title = ''.join(c for c in title if not unicodedata.category(c).startswith('So'))  # Remove symbols like emojis
+    # Remove unwanted characters but keep alphanum, space, hyphen
     title = ''.join(c for c in title if c.isalnum() or c in [' ', '-'])
 
     # Lowercase and convert spaces to hyphens
-    title = title.strip().lower()
-    title = re.sub(r'\s+', '-', title)
-    title = re.sub(r'-+', '-', title)
-
+    title = title.lower().strip()
+    title = re.sub(r'\s+', '-', title)      # spaces to hyphens
+    title = re.sub(r'-+', '-', title)       # collapse multiple hyphens
     return title
-
 
 def generate_toc(filename, depth):
     toc_lines = []
@@ -29,7 +28,6 @@ def generate_toc(filename, depth):
         in_code_block = False
 
         for line in lines:
-            # Ignore code blocks
             if line.strip().startswith("```"):
                 in_code_block = not in_code_block
                 continue
@@ -38,7 +36,7 @@ def generate_toc(filename, depth):
                 match = re.match(r'^(#{1,' + str(depth) + r'})\s+(.*)', line)
                 if match:
                     level = len(match.group(1))
-                    title = match.group(2)
+                    title = match.group(2).strip()
                     link = github_anchor(title)
                     toc_lines.append(f"{'  ' * (level - 1)}- [{title}](#{link})")
 

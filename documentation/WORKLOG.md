@@ -9,15 +9,15 @@
 <!-- TOC -->
 - [Project Work Log](#project-work-log)
   - [Detailed Work Log](#detailed-work-log)
-  - [Week 1 (Dates: from Mars 14 to Mars 16, 2025)](#week-1-dates-from-mars-14-to-mars-16-2025)
-    - [Mars 14, 2025](#mars-14-2025)
-    - [Mars 15, 2025](#mars-15-2025)
-    - [Mars 16, 2025](#mars-16-2025)
-  - [Week 2 (Dates: from Mars 17 to Mars 23, 2025)](#week-2-dates-from-mars-17-to-mars-23-2025)
-    - [Mars 17, 2025](#mars-17-2025)
-    - [Mars 18, 2025](#mars-18-2025)
-    - [Mars 22, 2025](#mars-22-2025)
-    - [Mars 23, 2025](#mars-23-2025)
+  - [Week 1 Dates from Mars 14 to Mars 16 2025](#week-1-dates-from-mars-14-to-mars-16-2025)
+    - [Mars 14 2025](#mars-14-2025)
+    - [Mars 15 2025](#mars-15-2025)
+    - [Mars 16 2025](#mars-16-2025)
+  - [Week 2 Dates from Mars 17 to Mars 23 2025](#week-2-dates-from-mars-17-to-mars-23-2025)
+    - [Mars 17 2025](#mars-17-2025)
+    - [Mars 18 2025](#mars-18-2025)
+    - [Mars 22 2025](#mars-22-2025)
+    - [Mars 23 2025](#mars-23-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -32,9 +32,9 @@ This document tracks the number of hours worked each day and provides a brief de
  
 ---
 
-##  Week 1 (Dates: from Mars 14 to Mars 16, 2025)
+##  Week 1 Dates from Mars 14 to Mars 16 2025
 
-###  Mars 14, 2025
+###  Mars 14 2025
 - **Hours Worked**: 2 hours
 - **Tasks**:
   - Created initial github , Requirements , README, tradename, slogan and Logo
@@ -42,7 +42,7 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 
-###  Mars 15, 2025
+###  Mars 15 2025
 - **Hours Worked**: 5 hours
 - **Tasks**:
   - Create Documentation : DataModel, MLSpecification, API, Workflow 
@@ -52,7 +52,7 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 
-###  Mars 16, 2025
+###  Mars 16 2025
 - **Hours Worked**: 10 hours
 - **Tasks**:
   - Create Documentation : WORKLOG
@@ -77,9 +77,9 @@ This document tracks the number of hours worked each day and provides a brief de
  
 ---
 
-##  Week 2 (Dates: from Mars 17 to Mars 23, 2025)
+##  Week 2 Dates from Mars 17 to Mars 23 2025
 
-###  Mars 17, 2025
+###  Mars 17 2025
 - **Hours Worked**: 7 hours
 - **Tasks**:
   - Refined App Documentation :   [specification App](App_Specification.md) and  [specification API](API.md)
@@ -93,7 +93,7 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 
-###  Mars 18, 2025
+###  Mars 18 2025
 - **Hours Worked**: 7 hours
 - **Tasks**:
   -  create PomoloBeeDjango/core/urls.py with all acess point mentionned in the spec  [specification API](API.md)
@@ -112,8 +112,8 @@ This document tracks the number of hours worked each day and provides a brief de
 - **Progress**: Django and ML code must be checked and tested. need to test test_workflow and test_ml
 
 
-
-###  Mars 22, 2025
+ 
+###  Mars 22 2025
 - **Hours Worked**: 2 hours
 - **Tasks**:
   -  check and correct [specification API](API.md) create separate document per interface
@@ -129,7 +129,7 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
     
-###  Mars 23, 2025
+###  Mars 23 2025
 - **Hours Worked**: 2 hours
 - **Tasks**:
   - Added a pre-commit hook to remove emojis from Markdown headers, fixing broken TOC anchor links caused by ChatGPT’s emoji formatting.
