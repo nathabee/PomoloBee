@@ -15,12 +15,12 @@
 <!-- TOC -->
 - [PomoloBee](#pomolobee)
   - [**Documentation**](#documentation)
-  - [**Project Definition: PomoloBee – Bee Smart, Know Your Apple**](#project-definition-pomolobee--bee-smart-know-your-apple)
+  - [**Project Definition: PomoloBee – Bee Smart, Know Your Apple**](#project-definition-pomolobee-bee-smart-know-your-apple)
     - [**Goal:**](#goal)
     - [**Data Flow in PomoloBee**](#data-flow-in-pomolobee)
-  - [**Features & Functionalities**](#features--functionalities)
-    - [**1 Mobile App (Frontend – Android)**](#1-mobile-app-frontend--android)
-    - [**2 Cloud Backend (VPS – Django or Flask API)**](#2-cloud-backend-vps--django-or-flask-api)
+  - [**Features & Functionalities**](#features-functionalities)
+    - [**1 Mobile App (Frontend – Android)**](#1-mobile-app-frontend-android)
+    - [**2 Cloud Backend (VPS – Django or Flask API)**](#2-cloud-backend-vps-django-or-flask-api)
     - [**Updated Milestones**](#updated-milestones)
   - [**Installation**](#installation)
     - [install PomoloBeeDjango on the VPS](#install-pomolobeedjango-on-the-vps)
@@ -103,7 +103,7 @@ graph TD
 - **Networking:** Retrofit (API calls to VPS)  
 - **UI:** Jetpack Compose  
 - **Local AI Processing:** OpenCV + TensorFlow Lite (Phase 2)  
-
+ 
 ---
 
 ### **2 Cloud Backend (VPS – Django or Flask API)**

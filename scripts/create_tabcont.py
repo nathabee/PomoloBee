@@ -2,11 +2,18 @@ import sys
 import re
 
 def github_anchor(title):
-    # Remove formatting and emoji leftovers
+    # Remove bold/italic formatting
     title = re.sub(r'\*\*(.*?)\*\*', r'\1', title)
-    title = re.sub(r'[^\w\s-]', '', title)  # remove punctuation
-    title = title.lower().strip().replace(' ', '-')
-    return title
+    title = re.sub(r'[_`~]', '', title)
+
+    # Remove punctuation except spaces/hyphens
+    title = re.sub(r'[^\w\s-]', '', title)
+
+    # Convert to GitHub-style anchor
+    anchor = title.lower().strip()
+    anchor = re.sub(r'\s+', '-', anchor)      # spaces -> -
+    anchor = re.sub(r'-+', '-', anchor)       # collapse multiple dashes
+    return anchor
 
 
 def generate_toc(filename, depth):
