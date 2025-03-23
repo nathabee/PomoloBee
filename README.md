@@ -5,7 +5,7 @@
     <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/documentation/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
 </p>
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _34 hours_ (Auto-generated)  
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _35 hours_ (Auto-generated)  
 
 ---
 
@@ -19,8 +19,8 @@
     - [**Goal:**](#goal)
     - [**Data Flow in PomoloBee**](#data-flow-in-pomolobee)
   - [**Features & Functionalities**](#features--functionalities)
-    - [**1️⃣ Mobile App (Frontend – Android)**](#1-mobile-app-frontend--android)
-    - [**2️⃣ Cloud Backend (VPS – Django or Flask API)**](#2-cloud-backend-vps--django-or-flask-api)
+    - [**1 Mobile App (Frontend – Android)**](#1-mobile-app-frontend--android)
+    - [**2 Cloud Backend (VPS – Django or Flask API)**](#2-cloud-backend-vps--django-or-flask-api)
     - [**Updated Milestones**](#updated-milestones)
   - [**Installation**](#installation)
     - [install PomoloBeeDjango on the VPS](#install-pomolobeedjango-on-the-vps)
@@ -82,12 +82,12 @@ graph TD
   DjangoServer -- "📄 Provide Yield Data" --> MobileApp
 ```
 
- 
+  
 ---
 
 ## **Features & Functionalities**
 
-### **1️⃣ Mobile App (Frontend – Android)**
+### **1 Mobile App (Frontend – Android)**
 📱 **User Actions:**  
 ✅ **Record or Upload Video** – User walks through the orchard while capturing video.  
 ✅ **Take a Picture** – Alternative to video for quick analysis.  
@@ -106,7 +106,7 @@ graph TD
 
 ---
 
-### **2️⃣ Cloud Backend (VPS – Django or Flask API)**
+### **2 Cloud Backend (VPS – Django or Flask API)**
 🌐 **Server Responsibilities:**  
 ✅ **Receive video/image uploads from the app**  
 ✅ **Extract key frames from video**  

@@ -1,26 +1,45 @@
 import sys
 import re
 
-# --- Regex to match emojis, including 1️⃣-style keycaps ---
+# Map keycap emojis to digits
+keycap_map = {
+    '0️⃣': '0',
+    '1️⃣': '1',
+    '2️⃣': '2',
+    '3️⃣': '3',
+    '4️⃣': '4',
+    '5️⃣': '5',
+    '6️⃣': '6',
+    '7️⃣': '7',
+    '8️⃣': '8',
+    '9️⃣': '9',
+    '#️⃣': '#',
+    '*️⃣': '*',
+}
+
+# Emoji regex for non-keycap emoji removal
 emoji_pattern = re.compile(
     "[" 
-    "\U0001F600-\U0001F64F"  # emoticons
-    "\U0001F300-\U0001F5FF"  # symbols & pictographs
-    "\U0001F680-\U0001F6FF"  # transport
-    "\U0001F1E0-\U0001F1FF"  # flags
-    "\U00002500-\U00002BEF"  # Chinese/Japanese
-    "\U00002700-\U000027BF"  # Dingbats
-    "\U0001F900-\U0001F9FF"  # supplemental symbols
-    "\U0001FA70-\U0001FAFF"  # extended pictographs
-    "\u200d"                 # Zero Width Joiner
+    "\U0001F600-\U0001F64F"
+    "\U0001F300-\U0001F5FF"
+    "\U0001F680-\U0001F6FF"
+    "\U0001F1E0-\U0001F1FF"
+    "\U00002700-\U000027BF"
+    "\U0001F900-\U0001F9FF"
+    "\U0001FA70-\U0001FAFF"
+    "\u200d"
     "\u2640-\u2642"
     "\u2600-\u26FF"
     "\u23E9-\u23FA"
     "]+", flags=re.UNICODE)
 
-# --- Clean bold formatting ---
 def clean_bold_spaces(text):
     return re.sub(r'\*\*\s*(.*?)\s*\*\*', r'**\1**', text)
+
+def replace_keycap_emojis(text):
+    for emoji, digit in keycap_map.items():
+        text = text.replace(emoji, digit)
+    return text
 
 def clean_markdown_headers(file_path):
     header_regex = re.compile(r'^(#{1,6})(\s+)(.*)')
@@ -33,6 +52,7 @@ def clean_markdown_headers(file_path):
         match = header_regex.match(line)
         if match:
             hashes, space, content = match.groups()
+            content = replace_keycap_emojis(content)
             content = emoji_pattern.sub('', content)
             content = clean_bold_spaces(content)
             new_lines.append(f"{hashes}{space}{content.strip()}\n")
