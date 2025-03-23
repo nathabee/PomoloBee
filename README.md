@@ -9,27 +9,27 @@
 
 ---
 
-## ** Table of Content**
+## **Table of Content**
 
 <!-- TOC -->
 - [PomoloBee](#pomolobee)
-  - [** Table of Content**](#table-of-content)
-  - [** Documentation**](#documentation)
-  - [** Project Definition: PomoloBee – Bee Smart, Know Your Apple**](#project-definition-pomolobee--bee-smart-know-your-apple)
-    - [** Goal:**](#goal)
-    - [** Data Flow in PomoloBee**](#data-flow-in-pomolobee)
-  - [** Features & Functionalities**](#features--functionalities)
+  - [**Table of Content**](#table-of-content)
+  - [**Documentation**](#documentation)
+  - [**Project Definition: PomoloBee – Bee Smart, Know Your Apple**](#project-definition-pomolobee--bee-smart-know-your-apple)
+    - [**Goal:**](#goal)
+    - [**Data Flow in PomoloBee**](#data-flow-in-pomolobee)
+  - [**Features & Functionalities**](#features--functionalities)
     - [**1️⃣ Mobile App (Frontend – Android)**](#1-mobile-app-frontend--android)
     - [**2️⃣ Cloud Backend (VPS – Django or Flask API)**](#2-cloud-backend-vps--django-or-flask-api)
-    - [** Updated Milestones**](#updated-milestones)
-  - [** Installation**](#installation)
+    - [**Updated Milestones**](#updated-milestones)
+  - [**Installation**](#installation)
     - [install PomoloBeeDjango on the VPS](#install-pomolobeedjango-on-the-vps)
 <!-- TOC END -->
 
 
 ---
 
-## ** Documentation**
+## **Documentation**
 
 📖 **Scope and Requirements:** [Requirements](documentation/Requirements.md)  
 📖 **API, Interface Definition:** [API](documentation/API.md)  
@@ -39,14 +39,14 @@
 
 ---
 
-## ** Project Definition: PomoloBee – Bee Smart, Know Your Apple**
+## **Project Definition: PomoloBee – Bee Smart, Know Your Apple**
 
-### ** Goal:**
+### **Goal:**
 Develop an **Android app** (Kotlin + Android Studio) that allows farmers to estimate **apple harvest yield** using AI-based **video or image analysis**. The system will use a **cloud-based backend (VPS)** to process data and provide accurate results.  
 
 ---
 
-### ** Data Flow in PomoloBee**
+### **Data Flow in PomoloBee**
 
 The following diagram illustrates the interaction between the **PomoloBee App**, **Django Backend**, and **ML Processing Service**.
 
@@ -83,7 +83,7 @@ graph TD
  
 ---
 
-## ** Features & Functionalities**
+## **Features & Functionalities**
 
 ### **1️⃣ Mobile App (Frontend – Android)**
 📱 **User Actions:**  
@@ -111,10 +111,10 @@ graph TD
 ✅ **Apple Detection & Counting (AI Model)**  
 ✅ **Calculate Total Yield Estimate**  
 ✅ **Return Results to the App**  
-
+ 
 ---
 
-### ** Updated Milestones**
+### **Updated Milestones**
 
 ✅ **Phase 1 – MVP**  
 - **Offline image storage & manual upload.**  
@@ -135,7 +135,7 @@ graph TD
 
 ---
 
-## ** Installation**
+## **Installation**
 
 clone github :
 git clone https://github.com/nathabee/PomoloBee.git

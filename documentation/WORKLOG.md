@@ -3,11 +3,11 @@
 
 ![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _34 hours_ (Auto-generated)
 ---
-## ** Table of content**
+## **Table of content**
 
 <!-- TOC -->
 - [Project Work Log](#project-work-log)
-  - [** Table of content**](#table-of-content)
+  - [**Table of content**](#table-of-content)
   - [Detailed Work Log](#detailed-work-log)
   - [Week 1 (Dates: from Mars 14 to Mars 16, 2025)](#week-1-dates-from-mars-14-to-mars-16-2025)
     - [Mars 14, 2025](#mars-14-2025)
@@ -127,7 +127,7 @@ This document tracks the number of hours worked each day and provides a brief de
 - **Progress**: check django is aligned with specification API_1 and API_2 spec. Check App specification aligned with API_1. check Flask implementation aligned with API_2 and API_3. Django and ML code must be tested. need to test test_workflow and test_ml. 
 
 
-  
+   
 ###  Mars 23, 2025
 - **Hours Worked**: 1 hours
 - **Tasks**:
