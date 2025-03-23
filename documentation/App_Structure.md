@@ -19,6 +19,15 @@
     - [**7 `ui/screens/CameraScreen.kt`**](#7-uiscreenscamerascreenkt)
     - [**8 `ui/screens/SettingsScreen.kt`**](#8-uiscreenssettingsscreenkt)
     - [**9 `ui/screens/AboutScreen.kt`**](#9-uiscreensaboutscreenkt)
+    - [**10 `ui/screens/PreviewScreen.kt`**](#10-uiscreenspreviewscreenkt)
+    - [**11 `ui/screens/LocalResultScreen.kt`**](#11-uiscreenslocalresultscreenkt)
+    - [**12 `ui/screens/ErrorLogScreen.kt`**](#12-uiscreenserrorlogscreenkt)
+    - [**13 `ui/screens/SplashScreen.kt`**](#13-uiscreenssplashscreenkt)
+    - [**14 `ui/screens/ImageHistoryScreen.kt`**](#14-uiscreensimagehistoryscreenkt)
+    - [**15 `ui/components/FolderPicker.kt`**](#15-uicomponentsfolderpickerkt)
+    - [**16 `ui/components/PermissionManager.kt`**](#16-uicomponentspermissionmanagerkt)
+    - [**17 `viewmodel/SharedViewModel.kt`**](#17-viewmodelsharedviewmodelkt)
+    - [**18 `viewmodel/ImageListViewModel.kt`**](#18-viewmodelimagelistviewmodelkt)
   - [**Theme Handles UI Styling**](#theme-handles-ui-styling)
     - [**`ui/theme/Color.kt`**](#uithemecolorkt)
     - [**11 `ui/theme/Theme.kt`**](#11-uithemethemekt)
@@ -27,6 +36,12 @@
     - [**13 `data/UserPreferences.kt`**](#13-datauserpreferenceskt)
   - [**Utils Handles Apple Image Processing**](#utils-handles-apple-image-processing)
     - [**14 `utils/ImageProcessing.kt`**](#14-utilsimageprocessingkt)
+  - [**Model Classes Shared between UI/Repo/API**](#model-classes-shared-between-uirepoapi)
+  - [**ViewModels**](#viewmodels)
+  - [**Repository**](#repository)
+    - [**ImageRepository.kt**](#imagerepositorykt)
+    - [**OrchardRepository.kt**](#orchardrepositorykt)
+    - [**SettingsRepository.kt** *optional but recommended*](#settingsrepositorykt-optional-but-recommended)
 - [**Summary**](#summary)
 <!-- TOC END -->
  
@@ -63,18 +78,49 @@ app/src/main/java
             ├── ui
             │   ├── components
             │   │   ├── CameraView.kt
-            │   │   └── DrawerMenu.kt
+            │   │   ├── DrawerMenu.kt 
+            │   │   ├── ImageCard.kt               // reuse for preview + metadata
+            │   │   ├── FolderPicker.kt            // used in SettingsScreen to change image path
+            │   │   └── PermissionManager.kt
             │   ├── screens
+            │   │   ├── ProcessingScreen.kt        // for viewing & uploading images
+            │   │   ├── ResultScreen.kt            // shows detection/yield after processing
+            │   │   ├── OrchardScreen.kt           // read-only orchard visualisation
+            │   │   ├── LocationScreen.kt          // raw + field selection before save
             │   │   ├── AboutScreen.kt
             │   │   ├── CameraScreen.kt
+            │   │   ├── ErrorLogScreen.kt
             │   │   ├── HomeScreen.kt
-            │   │   └── SettingsScreen.kt
+            │   │   ├── ImageHistoryScreen.kt
+            │   │   ├── LocalResultScreen.kt
+            │   │   ├── PreviewScreen.kt
+            │   │   ├── SettingsScreen.kt
+            │   │   └── SplashScreen.kt
             │   └── theme
             │       ├── Color.kt
             │       ├── Theme.kt
             │       └── Type.kt
-            └── utils
-                └── ImageProcessing.kt
+            ├── utils
+            │   └── ImageProcessing.kt
+            ├── network
+            │   ├── ApiClient.kt             // Retrofit builder
+            │   ├── ImageApiService.kt       // For image-related endpoints
+            │   ├── OrchardApiService.kt     // For orchards, raws, fruits
+            │   └── ModelApiService.kt       // For ML model metadata: versioning, local/remote info
+            ├── repository
+            │   ├── ImageRepository.kt       // Handles all image-related data operations
+            │   ├── OrchardRepository.kt     // For fields, raws, fruits
+            │   ├── SettingsRepository.kt    // Optional, for DataStore abstraction
+            └── model/
+                ├── PendingImage.kt
+                ├── OrchardData.kt
+            └── viewmodel
+                ├── ImageListViewModel.kt
+                ├── ImageViewModel.kt          // Manages local + uploaded images
+                ├── SettingsViewModel.kt       // Manages preferences (path, syncing, etc.)
+                └── SharedViewModel.kt
+
+
 
 
 ```
@@ -126,7 +172,13 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Camera : Screen("camera")
     object Settings : Screen("settings")
+    object Processing : Screen("processing")
+    object Result : Screen("result")
+    object Location : Screen("location")
+    object Orchard : Screen("orchard")
+    object About : Screen("about")
 }
+
 ```
 
 ---
@@ -215,6 +267,102 @@ scope.launch { UserPreferences.savePreference(context, "apple_type", selectedApp
 - Provides details about PomoloBee and **its purpose**.
 
 ---
+### **10 `ui/screens/PreviewScreen.kt`**
+📌 **Purpose:**  
+- Provides a UI for the user to preview the selected image **before saving** or **uploading**.
+- Allows re-selection or field/raw assignment before confirming.
+
+📌 **Key Responsibilities:**
+- Display full-screen preview of image.
+- Enable selection or change of field/raw if not yet set.
+- Buttons to "Save Locally" or "Discard Image".
+
+---
+
+### **11 `ui/screens/LocalResultScreen.kt`**
+📌 **Purpose:**  
+- Displays **results generated from local AI model** before uploading to backend.
+
+📌 **Key Responsibilities:**
+- Show image, apple count, yield, and confidence from local detection.
+- Optionally compare against last known backend result.
+
+---
+
+### **12 `ui/screens/ErrorLogScreen.kt`**
+📌 **Purpose:**  
+- View application-level errors, especially around storage, API, or local model.
+
+📌 **Key Responsibilities:**
+- Fetch errors from `/logs/errors.json` stored in Jetpack DataStore.
+- Group logs by date or component.
+- Add a drawer entry if `DebugMode` is enabled.
+
+---
+
+### **13 `ui/screens/SplashScreen.kt`**
+📌 **Purpose:**  
+- Shown on app launch to manage first-run setup and permission checks.
+
+📌 **Key Responsibilities:**
+- Ask for permissions (camera, storage).
+- Check Jetpack DataStore for first-run flags.
+- Redirect to `CameraScreen` once ready.
+
+---
+
+### **14 `ui/screens/ImageHistoryScreen.kt`**
+📌 **Purpose:**  
+- Browse and filter all uploaded and processed images.
+
+📌 **Key Responsibilities:**
+- Pull data from `GET /api/history/`.
+- Allow filtering by date, orchard, or status.
+- Tap to open `ResultScreen` or `LocalResultScreen`.
+
+---
+
+### **15 `ui/components/FolderPicker.kt`**
+📌 **Purpose:**
+- Allow users to select a storage folder using Android's Storage Access Framework (SAF).
+
+📌 **Key Responsibilities:**
+- Trigger SAF intent to open directory picker.
+- Store the chosen URI/path to DataStore.
+
+---
+
+### **16 `ui/components/PermissionManager.kt`**
+📌 **Purpose:**
+- Centralizes permission request & handling logic (camera, gallery, file storage).
+
+📌 **Key Responsibilities:**
+- Displays rationale dialog when needed.
+- Fallback handling for permanent denials ("go to settings").
+- Uses Compose + Accompanist APIs.
+
+---
+
+### **17 `viewmodel/SharedViewModel.kt`**
+📌 **Purpose:**
+- Share image, field/raw selection, and temporary state across screens.
+
+📌 **Key Responsibilities:**
+- Store selected image URI and metadata before saving.
+- Provide consistent access to draft image state.
+
+---
+
+### **18 `viewmodel/ImageListViewModel.kt`**
+📌 **Purpose:**
+- Central ViewModel to manage unsent, processing, and processed image lists.
+
+📌 **Key Responsibilities:**
+- Pull data from Jetpack DataStore and API.
+- Handle list updates, retries, deletions.
+- Used by `ProcessingScreen` and `HistoryScreen`.
+
+---
 
 ## **Theme Handles UI Styling**
 ### **`ui/theme/Color.kt`**
@@ -264,6 +412,59 @@ UserPreferences.savePreference(context, "apple_type", selectedApple)
 ```kotlin
 val processedFrame = detectApple(inputFrame.rgba())
 ```
+---
+## **Model Classes Shared between UI/Repo/API**
+The models like ( PendingImage.kt or Orchard.kt) match the JSON models:
+
+```kotlin
+data class PendingImage(
+    val id: Int,
+    val imagePath: String,
+    val rawId: Int,
+    val date: String
+)
+
+```
+---
+## **ViewModels**
+ ViewModel logic internally to:
+Not call APIs or DataStore directly (no call imageApiService). Instead, call functions from the appropriate repository  :
+
+```kotlin
+val response = imageRepository.uploadImage(imageData)
+
+```
+---
+## **Repository**
+
+### **ImageRepository.kt**
+Handles:
+- `uploadImage(imageData)`
+- `getImageStatus(id)`
+- `getResults(id)`
+- `deleteImage(id)`
+- `retryProcessing(id)`
+
+Uses: `ImageApiService.kt` (Retrofit)
+
+---
+
+### **OrchardRepository.kt**
+Handles:
+- `getFields()`
+- `getRaws()`
+- `getFruits()`
+
+Uses: `OrchardApiService.kt`
+
+---
+
+### **SettingsRepository.kt** *optional but recommended*
+Wraps:
+- DataStore read/write
+- Folder path preference
+- "Backend disabled" toggle
+- Error logs (writes to `/logs/errors.json`)
 
 ---
 
@@ -277,5 +478,9 @@ val processedFrame = detectApple(inputFrame.rgba())
 | `ui/theme/` | **Defines UI styling (colors, typography, themes)** |
 | `data/` | **Stores user preferences (Jetpack DataStore)** |
 | `utils/` | **Handles image processing with OpenCV** |
+| `model/` | **Data classes like PendingImage, OrchardData** |
+| `viewmodel/` | **ViewModels delegating to repositories (Image, Settings, Shared)** |
+| `repository/` | **Business logic for images, settings, orchards** |
+| `network/` | **Retrofit interfaces and API config** |
 
 --- 

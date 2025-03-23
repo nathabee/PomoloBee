@@ -135,7 +135,7 @@ This document tracks the number of hours worked each day and provides a brief de
   - Reinstalled hook with ./scripts/setup-hooks.sh and added scripts/remove_emojis.py to the repo.
   - change remove_emojis.py to modifiy "keycap emojis" (1️⃣, 2️⃣,) : composed of multiple Unicode codepoints
   - to avoid this mess later on the specification : i customized chatGPT :"Always avoid emojis in Markdown, especially in headers and TOC links." in "Anything else ChatGPT should know about you" trait of my setting
-
+  - check coherence between App specification  [specification App](App_Specification.md) and update app structure doc [App Structure](App_Structure.md) 
    
 
 - **Theme**: Project Initialization 
