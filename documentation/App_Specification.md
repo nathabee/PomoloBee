@@ -67,41 +67,30 @@ Since **video processing is not in scope right now**, we will focus only on **im
 
 ## **Screen Flow Diagram**
 ```mermaid
-graph TD
-graph TD
-  %% Entry Point
+graph TD  
   A[📷 CameraScreen] -->|User selects image| B[🖼️ Image Preview]
-
-  %% Selecting Field & Raw Before Storing Locally
+ 
   B -->|Select Field & Raw| L[📍 LocationScreen]
   L -->|User selects Field & Raw| B1[✅ Field & Raw Selected]
   B1 -->|Back to CameraScreen| A
-
-  %% Offline Storage Instead of Immediate Upload
+ 
   A -->|Save Image Locally| S[💾 Local Storage]
-
-  %% Processing Screen: Two Sections
+ 
   S -->|Go to Processing Screen| D[📡 ProcessingScreen]
-  
-  %% Unsent Images (Stored Locally)
+   
   D -->|Pending Local Images| U[🖼️ Unsent Images List]
   U -->|User clicks Analyze| X[📤 Upload to Backend]
   U -->|User clicks Preview| Y[🖥️ Local AI Model]
-
-  %% Sent & Processed Images
+ 
   D -->|Uploaded Images| E[📊 Processed Results]
   E -->|User views detection results| F[✅ Done]
-
-  %% Results Screen for More Details
+ 
   E -->|Open Result| R[📊 ResultScreen]
-
-  %% User Can Access About Screen Anytime
+ 
   A --> G[ℹ️ AboutScreen]
-
-  %% User Can Resynchronize Orchard Data & Settings
+ 
   A --> H1[⚙️ SettingsScreen]
-
-  %% User Can Visualize Orchard Data
+ 
   A --> H2[🌳 OrchardsScreen]
 ```
 

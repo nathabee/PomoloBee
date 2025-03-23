@@ -142,7 +142,7 @@ This document tracks the number of hours worked each day and provides a brief de
 - **Theme**: Project Initialization 
 - **Progress**: Specification cehcked, time to code API for Django and ML to offer a service endpoint
 
-
+ 
 - **PENDING**
   - **APP**
   - at this point App is just specified but not implented in code. just empty nutshell
