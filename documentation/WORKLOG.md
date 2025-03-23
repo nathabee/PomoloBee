@@ -136,12 +136,12 @@ This document tracks the number of hours worked each day and provides a brief de
   - change remove_emojis.py to modifiy "keycap emojis" (1️⃣, 2️⃣,) : composed of multiple Unicode codepoints
   - to avoid this mess later on the specification : i customized chatGPT :"Always avoid emojis in Markdown, especially in headers and TOC links." in "Anything else ChatGPT should know about you" trait of my setting
 
-  
+   
 
 - **Theme**: Project Initialization 
 - **Progress**: see 22 Mars 
 
-
+ 
  
  
 ---

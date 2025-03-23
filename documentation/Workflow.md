@@ -5,7 +5,6 @@
 
 <!-- TOC -->
 - [**Pomolobee Workflow Document**](#pomolobee-workflow-document)
-  - [Diagramme](#diagramme)
   - [**Data Flow**](#data-flow)
   - [**1. Workflow Summary**](#1-workflow-summary)
     - [**Case App Initializes Data**](#case-app-initializes-data)
@@ -25,8 +24,7 @@
 </details>
 
   
----
-## Diagramme
+--- 
 ## **Data Flow**
 ```mermaid
 graph TD

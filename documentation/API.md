@@ -18,9 +18,6 @@ This document defines the API interface for the Pomolobee project, specifying:
     - [2 Django to ML](#2-django-to-ml)
     - [3 ML to Django](#3-ml-to-django)
   - [Document reference](#document-reference)
-    - [1 App to Django [App to Django specification]API_1_App_to_Django.md](#1-app-to-django-app-to-django-specificationapi1apptodjangomd)
-    - [2 Django to ML [Django to ML specification]API_2_Django_to_ML.md](#2-django-to-ml-django-to-ml-specificationapi2djangotomlmd)
-    - [3 ML to Django [ML to Django specification]API_3_ML_to_Django.md](#3-ml-to-django-ml-to-django-specificationapi3mltodjangomd)
 <!-- TOC END -->
  
 </details>
@@ -78,7 +75,8 @@ This document defines the API interface for the Pomolobee project, specifying:
 ## Document reference
 
 
-### 1 App to Django [App to Django specification]API_1_App_to_Django.md
-### 2 Django to ML [Django to ML specification]API_2_Django_to_ML.md
-### 3 ML to Django [ML to Django specification]API_3_ML_to_Django.md
+-  📖 1 **App to Django** [App to Django specification](API_1_App_to_Django.md)
+-  📖 2 **Django to ML** [Django to ML specification](API_2_Django_to_ML.md)
+-  📖 3 **ML to Django** [ML to Django specification](API_3_ML_to_Django.md)
+ 
  
