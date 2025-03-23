@@ -1,4 +1,4 @@
-# PomoloBee  
+#  PomoloBee
 "PomoloBee - Bee Smart Know Your Apple" allows farmers to estimate apple harvest yield.
 
 <p align="center">
@@ -9,27 +9,27 @@
 
 ---
 
-## **Table of Content**  
+## ** Table of Content**
 
 <!-- TOC -->
-- [PomoloBee  ](#pomolobee)
-  - [**Table of Content**  ](#table-of-content)
-  - [**📚 Documentation**  ](#documentation)
-  - [**📌 Project Definition: PomoloBee – Bee Smart, Know Your Apple**  ](#project-definition-pomolobee--bee-smart-know-your-apple)
-    - [**🔹 Goal:**  ](#goal)
-    - [🌍 **Data Flow in PomoloBee**  ](#data-flow-in-pomolobee)
-  - [**📍 Features & Functionalities**  ](#features--functionalities)
-    - [**1️⃣ Mobile App (Frontend – Android)**  ](#1-mobile-app-frontend--android)
-    - [**2️⃣ Cloud Backend (VPS – Django or Flask API)**  ](#2-cloud-backend-vps--django-or-flask-api)
-    - [**📅 Updated Milestones**  ](#updated-milestones)
-  - [**Installation**  ](#installation)
+- [PomoloBee](#pomolobee)
+  - [** Table of Content**](#table-of-content)
+  - [** Documentation**](#documentation)
+  - [** Project Definition: PomoloBee – Bee Smart, Know Your Apple**](#project-definition-pomolobee--bee-smart-know-your-apple)
+    - [** Goal:**](#goal)
+    - [** Data Flow in PomoloBee**](#data-flow-in-pomolobee)
+  - [** Features & Functionalities**](#features--functionalities)
+    - [**1️⃣ Mobile App (Frontend – Android)**](#1-mobile-app-frontend--android)
+    - [**2️⃣ Cloud Backend (VPS – Django or Flask API)**](#2-cloud-backend-vps--django-or-flask-api)
+    - [** Updated Milestones**](#updated-milestones)
+  - [** Installation**](#installation)
     - [install PomoloBeeDjango on the VPS](#install-pomolobeedjango-on-the-vps)
 <!-- TOC END -->
 
 
 ---
 
-## **📚 Documentation**  
+## ** Documentation**
 
 📖 **Scope and Requirements:** [Requirements](documentation/Requirements.md)  
 📖 **API, Interface Definition:** [API](documentation/API.md)  
@@ -39,14 +39,14 @@
 
 ---
 
-## **📌 Project Definition: PomoloBee – Bee Smart, Know Your Apple**  
+## ** Project Definition: PomoloBee – Bee Smart, Know Your Apple**
 
-### **🔹 Goal:**  
+### ** Goal:**
 Develop an **Android app** (Kotlin + Android Studio) that allows farmers to estimate **apple harvest yield** using AI-based **video or image analysis**. The system will use a **cloud-based backend (VPS)** to process data and provide accurate results.  
 
 ---
 
-### 🌍 **Data Flow in PomoloBee**  
+### ** Data Flow in PomoloBee**
 
 The following diagram illustrates the interaction between the **PomoloBee App**, **Django Backend**, and **ML Processing Service**.
 
@@ -80,12 +80,12 @@ graph TD
   DjangoServer -- "📄 Provide Yield Data" --> MobileApp
 ```
 
-
+ 
 ---
 
-## **📍 Features & Functionalities**  
+## ** Features & Functionalities**
 
-### **1️⃣ Mobile App (Frontend – Android)**  
+### **1️⃣ Mobile App (Frontend – Android)**
 📱 **User Actions:**  
 ✅ **Record or Upload Video** – User walks through the orchard while capturing video.  
 ✅ **Take a Picture** – Alternative to video for quick analysis.  
@@ -104,7 +104,7 @@ graph TD
 
 ---
 
-### **2️⃣ Cloud Backend (VPS – Django or Flask API)**  
+### **2️⃣ Cloud Backend (VPS – Django or Flask API)**
 🌐 **Server Responsibilities:**  
 ✅ **Receive video/image uploads from the app**  
 ✅ **Extract key frames from video**  
@@ -114,7 +114,7 @@ graph TD
 
 ---
 
-### **📅 Updated Milestones**  
+### ** Updated Milestones**
 
 ✅ **Phase 1 – MVP**  
 - **Offline image storage & manual upload.**  
@@ -135,7 +135,7 @@ graph TD
 
 ---
 
-## **Installation**  
+## ** Installation**
 
 clone github :
 git clone https://github.com/nathabee/PomoloBee.git
@@ -144,7 +144,7 @@ git clone https://github.com/nathabee/PomoloBee.git
 - PomoloBeeML
 
 
-### install PomoloBeeDjango on the VPS
+###  install PomoloBeeDjango on the VPS
 - copy the PomoloBeeDjango folder in you seveur
 - install database : see **Django PostgreSQL specification** [Django_PostgreSQL](documentation/Django_PostgreSQL.md)  
 

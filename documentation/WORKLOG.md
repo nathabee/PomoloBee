@@ -1,13 +1,13 @@
 
-# Project Work Log
+#  Project Work Log
 
 ![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _34 hours_ (Auto-generated)
 ---
-## **Table of content**
+## ** Table of content**
 
 <!-- TOC -->
 - [Project Work Log](#project-work-log)
-  - [**Table of content**](#table-of-content)
+  - [** Table of content**](#table-of-content)
   - [Detailed Work Log](#detailed-work-log)
   - [Week 1 (Dates: from Mars 14 to Mars 16, 2025)](#week-1-dates-from-mars-14-to-mars-16-2025)
     - [Mars 14, 2025](#mars-14-2025)
@@ -26,14 +26,14 @@
 This document tracks the number of hours worked each day and provides a brief description of what was accomplished. It is useful to analyze the distribution of time across various activities in the project.
 
 ---
-## Detailed Work Log
+##  Detailed Work Log
 
  
 ---
 
-## Week 1 (Dates: from Mars 14 to Mars 16, 2025)
+##  Week 1 (Dates: from Mars 14 to Mars 16, 2025)
 
-### Mars 14, 2025
+###  Mars 14, 2025
 - **Hours Worked**: 2 hours
 - **Tasks**:
   - Created initial github , Requirements , README, tradename, slogan and Logo
@@ -41,7 +41,7 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 
-### Mars 15, 2025
+###  Mars 15, 2025
 - **Hours Worked**: 5 hours
 - **Tasks**:
   - Create Documentation : DataModel, MLSpecification, API, Workflow 
@@ -51,7 +51,7 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 
-### Mars 16, 2025
+###  Mars 16, 2025
 - **Hours Worked**: 10 hours
 - **Tasks**:
   - Create Documentation : WORKLOG
@@ -76,9 +76,9 @@ This document tracks the number of hours worked each day and provides a brief de
  
 ---
 
-## Week 2 (Dates: from Mars 17 to Mars 23, 2025)
+##  Week 2 (Dates: from Mars 17 to Mars 23, 2025)
 
-### Mars 17, 2025
+###  Mars 17, 2025
 - **Hours Worked**: 7 hours
 - **Tasks**:
   - Refined App Documentation :   [specification App](App_Specification.md) and  [specification API](API.md)
@@ -92,7 +92,7 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 
-### Mars 18, 2025
+###  Mars 18, 2025
 - **Hours Worked**: 7 hours
 - **Tasks**:
   -  create PomoloBeeDjango/core/urls.py with all acess point mentionned in the spec  [specification API](API.md)
@@ -112,7 +112,7 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 
-### Mars 22, 2025
+###  Mars 22, 2025
 - **Hours Worked**: 2 hours
 - **Tasks**:
   -  check and correct [specification API](API.md) create separate document per interface
@@ -127,8 +127,8 @@ This document tracks the number of hours worked each day and provides a brief de
 - **Progress**: check django is aligned with specification API_1 and API_2 spec. Check App specification aligned with API_1. check Flask implementation aligned with API_2 and API_3. Django and ML code must be tested. need to test test_workflow and test_ml. 
 
 
- 
-### Mars 23, 2025
+  
+###  Mars 23, 2025
 - **Hours Worked**: 1 hours
 - **Tasks**:
   -  change precommit github hook to remove the emoji . reason : TOC links like [📚 Documentation](#documentation) don’t work because the emoji alters the generated anchor. reinstall the hook with ./scripts/setup-hooks.sh
@@ -143,7 +143,7 @@ This document tracks the number of hours worked each day and provides a brief de
  
 ---
 
-## Tips for Using This Log
+##  Tips for Using This Log
 1. **Add a Section for Each Week**: It's helpful to group logs into weeks to make it easy to find particular days and also get an overview of progress week by week.
 2. **Use Consistent Themes**: Try to use consistent labels for themes (e.g., "Frontend Setup", "API Integration", "Styling") to make it easier to analyze how much time was spent in different project areas.
 3. **Summarize Weekly Progress**: At the end of each week, consider adding a summary that helps understand how productive the week was, what blockers were encountered, and what’s planned next.
