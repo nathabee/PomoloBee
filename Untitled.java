@@ -12,12 +12,7 @@ def clean_header_emojis_and_spaces(filepath):
         "\U00002700-\U000027BF"
         "\U0001F900-\U0001F9FF"
         "\U0001FA70-\U0001FAFF"
-        "\u200d"             # Zero Width Joiner
-        "\u2640-\u2642"      # Gender symbols
-        "\u2600-\u26FF"      # Misc symbols
-        "\u23E9-\u23FA"      # Misc icons
         "]+", flags=re.UNICODE)
-
 
     def clean_bold_spaces(text):
         return re.sub(r'\*\*\s*(.*?)\s*\*\*', r'**\1**', text)

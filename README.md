@@ -26,7 +26,7 @@
     - [install PomoloBeeDjango on the VPS](#install-pomolobeedjango-on-the-vps)
 <!-- TOC END -->
 
-
+ 
 ---
 
 ## **Documentation**

@@ -1,6 +1,13 @@
 import sys
 import re
 
+def github_anchor(text):
+    text = text.strip().lower()
+    text = re.sub(r'[^\w\s-]', '', text)  # Remove punctuation except dash
+    text = text.replace(' ', '-')
+    return text
+
+
 def generate_toc(filename, depth):
     toc_lines = []
     with open(filename, 'r') as file:
@@ -18,7 +25,7 @@ def generate_toc(filename, depth):
                 if match:
                     level = len(match.group(1))
                     title = match.group(2)
-                    link = re.sub(r'[^a-zA-Z0-9 ]', '', title).strip().replace(' ', '-').lower()
+                    link = github_anchor(title)
                     toc_lines.append(f"{'  ' * (level - 1)}- [{title}](#{link})")
 
     return '\n'.join(toc_lines)
