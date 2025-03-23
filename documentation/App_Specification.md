@@ -6,61 +6,66 @@ Since **video processing is not in scope right now**, we will focus only on **im
 
 ---
 # Table of Content
+<details>
+<summary>Table of Content</summary>
+
 <!-- TOC -->
 - [Table of Content](#table-of-content)
 - [**PomoloBeeApp Workflow**](#pomolobeeapp-workflow)
-  - [**📌 Screen Flow Diagram**](#screen-flow-diagram)
-  - [**📌 Menu**](#menu)
-  - [**📌 Explanation of Flow**](#explanation-of-flow)
+  - [**Screen Flow Diagram**](#screen-flow-diagram)
+  - [**Menu**](#menu)
+  - [**Explanation of Flow**](#explanation-of-flow)
 - [UI Frame](#ui-frame)
-  - [**📷 `CameraScreen` **](#camerascreen)
-    - [**Purpose**](#purpose)
-    - [**📌 Main UI Elements**](#main-ui-elements)
-    - [**📌 Wireframe**](#wireframe)
-  - [**📍 `LocationScreen`**](#locationscreen)
+  - [**`CameraScreen`**](#camerascreen)
     - [**Purpose**](#purpose)
     - [**Main UI Elements**](#main-ui-elements)
-    - [**📌 Updated Wireframe**](#updated-wireframe)
-  - [**📡 `ProcessingScreen`**](#processingscreen)
+    - [**Wireframe**](#wireframe)
+  - [**`LocationScreen`**](#locationscreen)
+    - [**Purpose**](#purpose)
+    - [**Main UI Elements**](#main-ui-elements)
+    - [**Updated Wireframe**](#updated-wireframe)
+  - [**`ProcessingScreen`**](#processingscreen)
     - [**Purpose**:](#purpose)
-    - [**📌 Two-Part Display**](#twopart-display)
-    - [**📌 Updated Wireframe**](#updated-wireframe)
-    - [✅ **API Calls**](#api-calls)
-    - [🔁 **Triggered API Behavior**](#triggered-api-behavior)
-  - [**📊 `ResultScreen`**](#resultscreen)
+    - [**Two-Part Display**](#two-part-display)
+    - [**Updated Wireframe**](#updated-wireframe)
+    - [**API Calls**](#api-calls)
+    - [**Triggered API Behavior**](#triggered-api-behavior)
+  - [**`ResultScreen`**](#resultscreen)
     - [**Purpose**](#purpose)
-    - [**📌 Updated Wireframe**](#updated-wireframe)
-  - [**📝 `SettingsScreen`**](#settingsscreen)
+    - [**Updated Wireframe**](#updated-wireframe)
+  - [**`SettingsScreen`**](#settingsscreen)
     - [**Purpose**](#purpose)
-    - [**📌 Wireframe**](#wireframe)
-  - [**🌳 `OrchardScreen`**](#orchardscreen)
+    - [**Wireframe**](#wireframe)
+  - [**`OrchardScreen`**](#orchardscreen)
     - [**Purpose**](#purpose)
-    - [**📌 Wireframe**](#wireframe)
-  - [**ℹ️ `AboutScreen`**](#aboutscreen)
+    - [**Wireframe**](#wireframe)
+  - [**ℹ️ `AboutScreen`**](#ℹ-aboutscreen)
     - [**Purpose**](#purpose)
-    - [**📌 Updated Wireframe**](#updated-wireframe)
+    - [**Updated Wireframe**](#updated-wireframe)
 - [Extra : Storage, navigation, error management,...](#extra--storage-navigation-error-management)
   - [Architecture](#architecture)
-  - [**Offline Storage & Data Handling** ](#offline-storage--data-handling)
-    - [**simple storage model:**  ](#simple-storage-model)
-  - [**Syncing Behavior:**  ](#syncing-behavior)
-  - [**Navigation & Fragment Flow in Android Studio** ](#navigation--fragment-flow-in-android-studio)
-    - [**Navigation Diagram:** ](#navigation-diagram)
-    - [**Expected Behavior for the Back Button:**  ](#expected-behavior-for-the-back-button)
+  - [**Offline Storage & Data Handling**](#offline-storage--data-handling)
+    - [**simple storage model:**](#simple-storage-model)
+  - [**Syncing Behavior:**](#syncing-behavior)
+  - [**Navigation & Fragment Flow in Android Studio**](#navigation--fragment-flow-in-android-studio)
+    - [**Navigation Diagram:**](#navigation-diagram)
+    - [**Expected Behavior for the Back Button:**](#expected-behavior-for-the-back-button)
   - [**Expected Device Behavior**](#expected-device-behavior)
-    - [**large images strategie**  ](#large-images-strategie)
+    - [**large images strategie**](#large-images-strategie)
     - [**permissions** needed for camera, gallery, and storage :](#permissions-needed-for-camera-gallery-and-storage)
     - [Error management](#error-management)
-  - [🛠 Debug Mode Features](#debug-mode-features)
-  - [📡 API Response Handling](#api-response-handling)
-  - [🛑 What If...?](#what-if)
+  - [Debug Mode Features](#debug-mode-features)
+  - [API Response Handling](#api-response-handling)
+  - [What If...?](#what-if)
 <!-- TOC END -->
+ 
+</details>
 
 ---
 
 # **PomoloBeeApp Workflow**
 
-## **📌 Screen Flow Diagram**
+## **Screen Flow Diagram**
 ```mermaid
 graph TD
 graph TD
@@ -102,7 +107,7 @@ graph TD
 
 ---
 
-## **📌 Menu**
+## **Menu**
 - **CameraScreen** (Default)
 - **ProcessingScreen**
 - **SettingsScreen**
@@ -111,7 +116,7 @@ graph TD
 
 ---
 
-## **📌 Explanation of Flow**
+## **Explanation of Flow**
 once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fruits** manually.
 1️⃣ **User starts in `CameraScreen`** and **captures an image** or **selects from the gallery**.  
 2️⃣ **User must choose a field and raw** (`LocationScreen`) and return to `CameraScreen`.  
@@ -145,7 +150,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 # UI Frame
 
 
-## **📷 `CameraScreen` **
+## **`CameraScreen`**
 
 
 ### **Purpose**
@@ -153,7 +158,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 - **Save the image information in the DataStorage**  **Stores last results for offline mode (`Jetpack DataStore`)**
 - **Stores the image locally first, then allows users to manually upload it later in `ProcessingScreen`.**
 
-### **📌 Main UI Elements**
+### **Main UI Elements**
 | **Element** | **Type** | **Description** |
 |------------|---------|----------------|
 | **📸 Take Picture Button** | `Button` | Opens camera to take a new picture. |
@@ -165,7 +170,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 | **📂 Storage Path Display** | `Text` | Shows where images are saved. (Configurable in Settings) |
 | **➡ Navigate to ProcessingScreen** | `Navigation` | Moves to `ProcessingScreen` to manage uploads. |
 
-### **📌 Wireframe**
+### **Wireframe**
 ```
 +--------------------------------+
 |  [📸 Take Picture]  [🖼️ Upload from Gallery] |
@@ -186,7 +191,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 
 ---
 
-## **📍 `LocationScreen`**
+## **`LocationScreen`**
 
 
 ### **Purpose**
@@ -200,7 +205,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 | **🌿 Raw Dropdown** | `Dropdown` | Lists all raws within the selected field retrieved from storage . |
 | **✅ Confirm Button** | `Button` | Saves selection & navigates back to `CameraScreen`. |
 
-### **📌 Updated Wireframe**
+### **Updated Wireframe**
 ```
 +--------------------------------+
 |  🌱 Select Field: [Dropdown ▼] |
@@ -224,7 +229,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 ---
 
 
-## **📡 `ProcessingScreen`**
+## **`ProcessingScreen`**
 
 
 
@@ -232,7 +237,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 - manage the lifecycle of captured images, from local storage to backend processing
 - display their processing status and results
 
-### **📌 Two-Part Display**
+### **Two-Part Display**
 ✔ **(1) Local Images (Unsent):**  
 - Shows images **waiting for upload**.
 - Includes **Analyze Button** (Send to Backend) & **Preview Button** (Run Local Model).
@@ -241,7 +246,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 - Displays **previously uploaded images & results**.
 - Works like the old ProcessingScreen.
 
-### **📌 Updated Wireframe**
+### **Updated Wireframe**
 ```
 +--------------------------------+
 |  🔄 [Refresh Status]          |
@@ -259,7 +264,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 
 ---
 
-### ✅ **API Calls**
+### **API Calls**
 - `POST /api/images/` (**Analyze** button → Upload to Backend)
 - `GET /api/images/{image_id}/status/` (**Automatic Polling** after upload)
 - `GET /api/images/{image_id}/ml_result/` (**Triggered if status = "done" and results not yet loaded**)
@@ -271,7 +276,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 
 ---
 
-### 🔁 **Triggered API Behavior**
+### **Triggered API Behavior**
 - **🔄 Refresh Status** → Calls `GET /api/images/{image_id}/status/`  
   📌 *If* `status = "done"` **and results not yet fetched** →  
   → **Trigger** `GET /api/images/{image_id}/ml_result/` to retrieve detection results.
@@ -283,7 +288,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
  
 ---
 
-## **📊 `ResultScreen`**
+## **`ResultScreen`**
 
 
 ### **Purpose**
@@ -291,7 +296,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 ✔ Shows **apple count, estimated yield, and confidence score**.  
 ✔ Allows **reprocessing or sharing results**.  
 
-### **📌 Updated Wireframe**
+### **Updated Wireframe**
 ```
 +--------------------------------+
 |  🖼️ [Processed Image]         |
@@ -314,7 +319,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
   - **📜 View History** → Fetch previous estimations.
 ---
 
-## **📝 `SettingsScreen`**
+## **`SettingsScreen`**
 
 
 
@@ -325,7 +330,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 ✔  **"Pending Uploads" value is fetched from local storage (`Jetpack DataStore`).**  
 
 
-### **📌 Wireframe**
+### **Wireframe**
 ```
 +--------------------------------+
 |  🌱 Tree Count:  [______]      |
@@ -355,7 +360,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 ---
 
 
-## **🌳 `OrchardScreen`**
+## **`OrchardScreen`**
 
 ### **Purpose**
 ✔ Display all **fields (orchards)** and their respective **tree rows (raws)**  
@@ -366,7 +371,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 
 ---
 
-### **📌 Wireframe**
+### **Wireframe**
 ```
 +----------------------------------------+
 | 🌳 Orchard: North Orchard (N)          |
@@ -400,7 +405,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 ### **Purpose**
 ✔ Displays **app version, usage guide, developer info, and licenses**.  
 
-### **📌 Updated Wireframe**
+### **Updated Wireframe**
 ```
 +--------------------------------+
 |  ℹ️ How to use the app         |
@@ -428,14 +433,14 @@ computing vision : openCV
 
 
 
-## **Offline Storage & Data Handling** 
+## **Offline Storage & Data Handling**
   - we use **Jetpack DataStore** for offline image storage   
   - Do not download an image in backend automatically with the backend when online. Allways wait for explicit synchronisation  
   - add a buton in the setting to prevent using backend (setting data will be imported from file, and analyse will just be local)
 
 ---
 
-### **simple storage model:**  
+### **simple storage model:**
 ```json
 {
     "pending_images": [
@@ -469,7 +474,7 @@ val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, v
 
    
   
-## **Syncing Behavior:**  
+## **Syncing Behavior:**
 - the app attempt to sync unsent images Manually only  
 
 - If a user deletes an image :
@@ -483,10 +488,10 @@ if the image was sent, the delete image is forcing also delete in backend
 
 ---
 
-## **Navigation & Fragment Flow in Android Studio** 
+## **Navigation & Fragment Flow in Android Studio**
 
 
-### **Navigation Diagram:** 
+### **Navigation Diagram:**
 
 ```mermaid 
 graph TD
@@ -505,7 +510,7 @@ graph TD
 
 ```
 
-### **Expected Behavior for the Back Button:**  
+### **Expected Behavior for the Back Button:**
 - If the user **hasn’t saved an image yet**, :  the back button is not cancelling the selection  
 - If the user **has pending unsent images**, there should be a **warning message** in the topbar
 - If the user **started but didn’t finish location selection**, pressing **Back** should:  
@@ -518,7 +523,7 @@ graph TD
 ## **Expected Device Behavior**
 - (Performance, Storage, Permissions, Error management)
 
-### **large images strategie**  
+### **large images strategie**
 - Limit image resolution to **1080p** before saving.  
 - Define **image compression format (JPEG, PNG, etc.)**.
  
@@ -537,7 +542,7 @@ graph TD
 - The app **warn the user if storage is full**
 - Error encounter are always show in pop up
  
-#### 📜 Error Logging & Recovery
+#### Error Logging & Recovery
 - **All errors must be logged in `Jetpack DataStore`** under `/logs/errors.json`
 
 - **If an API call fails** (e.g., `POST /api/images/`), retry **3 times** with exponential backoff.
@@ -558,14 +563,14 @@ if (bytesAvailable < 50 * 1024 * 1024) { // Less than 50MB left
 
 
 ---
-## 🛠 Debug Mode Features
+## Debug Mode Features
 - ✅ **Enable/Disable Backend Calls** → Prevents all API calls.
 - ✅ **Use Local AI Model** → Bypasses backend ML model.
 - ✅ **Manually Enter Results** → User can input fake ML detection results for testing.
 - ✅ **Log API Responses** → Displays the last 10 API responses in a debug console.
 
 
-## 📡 API Response Handling
+## API Response Handling
 | **API Call**                 | **Success**  | **Error**  | **UI Behavior** |
 |------------------------------|-------------|------------|-----------------|
 | `GET /api/images/{id}/status` | `"done"` → Show results | `"processing"` → Show loading icon | ✅ Display status |
@@ -574,7 +579,7 @@ if (bytesAvailable < 50 * 1024 * 1024) { // Less than 50MB left
 
 ---
 
-## 🛑 What If...?
+## What If...?
 - **What if the user selects a location but never saves the image?**  
   → The image remains in **temporary memory** but will not be added to the unsent list.  
 

@@ -9,11 +9,11 @@
 
 ---
 
-## **Table of Content**
+<details>
+<summary>Table of Content</summary>
 
 <!-- TOC -->
 - [PomoloBee](#pomolobee)
-  - [**Table of Content**](#table-of-content)
   - [**Documentation**](#documentation)
   - [**Project Definition: PomoloBee – Bee Smart, Know Your Apple**](#project-definition-pomolobee--bee-smart-know-your-apple)
     - [**Goal:**](#goal)
@@ -25,6 +25,8 @@
   - [**Installation**](#installation)
     - [install PomoloBeeDjango on the VPS](#install-pomolobeedjango-on-the-vps)
 <!-- TOC END -->
+ 
+</details>
 
  
 ---

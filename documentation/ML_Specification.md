@@ -1,30 +1,33 @@
-## **5. Django ↔ ML API Integration**  
+## **5. Django ↔ ML API Integration**
 
 📌 **Django sends image to a separate ML API (Flask/FastAPI, etc.)**  
 ✅ Better for scaling & performance  
 
 
 ---
-## Table of Content
+<details>
+<summary>Table of Content</summary>
+
 <!-- TOC -->
-  - [**5. Django ↔ ML API Integration**  ](#5-django--ml-api-integration)
-  - [Table of Content](#table-of-content)
-    - [**Overview**  ](#overview)
-    - [**📌 Step 1: Create ML API (Flask/FastAPI)**  ](#step-1-create-ml-api-flaskfastapi)
-    - [**📌 Step 2: Django Calls ML API**  ](#step-2-django-calls-ml-api)
+  - [**5. Django ↔ ML API Integration**](#5-django--ml-api-integration)
+    - [**Overview**](#overview)
+    - [**Step 1: Create ML API (Flask/FastAPI)**](#step-1-create-ml-api-flaskfastapi)
+    - [**Step 2: Django Calls ML API**](#step-2-django-calls-ml-api)
 <!-- TOC END -->
+ 
+</details>
 
 ---
 
 
-### **Overview**  
+### **Overview**
 📌 Step 1: App uploads image, gets an `id`.  
 📌 Step 2: ML processes the image asynchronously.  
 📌 Step 3: App requests estimation later.  
 
 ---
 
-### **📌 Step 1: Create ML API (Flask/FastAPI)**  
+### **Step 1: Create ML API (Flask/FastAPI)**
 ```python
 # Flask API for ML
 from flask import Flask, request, jsonify
@@ -51,7 +54,7 @@ if __name__ == '__main__':
 
 ---
 
-### **📌 Step 2: Django Calls ML API**  
+### **Step 2: Django Calls ML API**
 ```python
 # Django View: Calls External ML API
 import requests

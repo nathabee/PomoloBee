@@ -1,47 +1,50 @@
 import sys
 import re
 
-def clean_header_emojis_and_spaces(filepath):
+# --- Regex to match emojis, including 1️⃣-style keycaps ---
+emoji_pattern = re.compile(
+    "[" 
+    "\U0001F600-\U0001F64F"  # emoticons
+    "\U0001F300-\U0001F5FF"  # symbols & pictographs
+    "\U0001F680-\U0001F6FF"  # transport
+    "\U0001F1E0-\U0001F1FF"  # flags
+    "\U00002500-\U00002BEF"  # Chinese/Japanese
+    "\U00002700-\U000027BF"  # Dingbats
+    "\U0001F900-\U0001F9FF"  # supplemental symbols
+    "\U0001FA70-\U0001FAFF"  # extended pictographs
+    "\u200d"                 # Zero Width Joiner
+    "\u2640-\u2642"
+    "\u2600-\u26FF"
+    "\u23E9-\u23FA"
+    "]+", flags=re.UNICODE)
+
+# --- Clean bold formatting ---
+def clean_bold_spaces(text):
+    return re.sub(r'\*\*\s*(.*?)\s*\*\*', r'**\1**', text)
+
+def clean_markdown_headers(file_path):
     header_regex = re.compile(r'^(#{1,6})(\s+)(.*)')
-    emoji_pattern = re.compile(
-        "[" 
-        "\U0001F600-\U0001F64F"
-        "\U0001F300-\U0001F5FF"
-        "\U0001F680-\U0001F6FF"
-        "\U0001F1E0-\U0001F1FF"
-        "\U00002700-\U000027BF"
-        "\U0001F900-\U0001F9FF"
-        "\U0001FA70-\U0001FAFF"
-        "\u200d"             # Zero Width Joiner
-        "\u2640-\u2642"      # Gender symbols
-        "\u2600-\u26FF"      # Misc symbols
-        "\u23E9-\u23FA"      # Misc icons
-        "]+", flags=re.UNICODE)
 
-
-    def clean_bold_spaces(text):
-        return re.sub(r'\*\*\s*(.*?)\s*\*\*', r'**\1**', text)
-
-    with open(filepath, 'r', encoding='utf-8') as file:
-        lines = file.readlines()
+    with open(file_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
 
     new_lines = []
     for line in lines:
         match = header_regex.match(line)
         if match:
-            hashes, space, header_text = match.groups()
-            no_emoji = emoji_pattern.sub('', header_text)
-            clean_text = clean_bold_spaces(no_emoji.strip())
-            new_lines.append(f"{hashes}{space}{clean_text}\n")
+            hashes, space, content = match.groups()
+            content = emoji_pattern.sub('', content)
+            content = clean_bold_spaces(content)
+            new_lines.append(f"{hashes}{space}{content.strip()}\n")
         else:
             new_lines.append(line)
 
-    with open(filepath, 'w', encoding='utf-8') as file:
-        file.writelines(new_lines)
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.writelines(new_lines)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python remove_emojis.py <markdown_file>")
         sys.exit(1)
 
-    clean_header_emojis_and_spaces(sys.argv[1])
+    clean_markdown_headers(sys.argv[1])

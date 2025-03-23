@@ -1,11 +1,12 @@
 import sys
 import re
 
-def github_anchor(text):
-    text = text.strip().lower()
-    text = re.sub(r'[^\w\s-]', '', text)  # Remove punctuation except dash
-    text = text.replace(' ', '-')
-    return text
+def github_anchor(title):
+    # Remove formatting and emoji leftovers
+    title = re.sub(r'\*\*(.*?)\*\*', r'\1', title)
+    title = re.sub(r'[^\w\s-]', '', title)  # remove punctuation
+    title = title.lower().strip().replace(' ', '-')
+    return title
 
 
 def generate_toc(filename, depth):

@@ -5,12 +5,12 @@ This document defines the API interface for the Pomolobee project, specifying:
 - API calls and data exchanged
 - Endpoints and request/response format
 --- 
-
+  
 <details>
 <summary>Table of Content</summary>
 
 <!-- TOC -->
-- [**ML -> Django Interface Definition**](#ml--django-interface-definition)
+- [**ML -> Django Interface Definition**](#ml---django-interface-definition)
   - [**Overview**](#overview)
   - [**ML to Django API Endpoint Specifications**](#ml-to-django-api-endpoint-specifications)
     - [**ML → Django: Returning Image Processing Results**](#ml--django-returning-image-processing-results)

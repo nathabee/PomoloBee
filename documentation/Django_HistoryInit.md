@@ -1,11 +1,12 @@
-# Initialisation history 
+# Initialisation history
 - This document is used for me to trace how i created this repository initialisation when all project was empty, for the next time i make a project. It serves only information purposes.
 
 ---
-## Table of Content
+<details>
+<summary>Table of Content</summary>
+
 <!-- TOC -->
-- [Initialisation history ](#initialisation-history)
-  - [Table of Content](#table-of-content)
+- [Initialisation history](#initialisation-history)
   - [**Prerequise**](#prerequise)
     - [Install Django*](#install-django)
     - [**Create Django Project**](#create-django-project)
@@ -21,12 +22,14 @@
   - [Init Data Modele](#init-data-modele)
     - [test initialisation data in table with admin console user wuth django superuser pomobee](#test-initialisation-data-in-table-with-admin-console-user-wuth-django-superuser-pomobee)
     - [test initialisation](#test-initialisation)
-  - [Init Django code ](#init-django-code)
-  - [init django test ](#init-django-test)
+  - [Init Django code](#init-django-code)
+  - [init django test](#init-django-test)
     - [Workflow test](#workflow-test)
     - [Workflow test](#workflow-test)
     - [**run the test**](#run-the-test)
 <!-- TOC END -->
+ 
+</details>
 
 ---
 
@@ -181,7 +184,7 @@ create a .venv with settings replace with value
 Modify `PomoloBeeDjango/settings.py`:
 ```python
 
-# Load environment variables from .env 
+# Load environment variables from .env
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: Keep the secret key used in production secret!
@@ -314,7 +317,7 @@ Fruit.objects.all()
 
 
 
-## Init Django code 
+## Init Django code
 
 We create an empty shell having correct endpoint and dealing with the correct data and dataformat :
 - note that the complexe behaviour like ML interaction, logic and error management will be introduce later in the code
@@ -336,7 +339,7 @@ from django.conf.urls.static import static
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
-## init django test 
+## init django test
 
 ### Workflow test
 

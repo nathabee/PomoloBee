@@ -1,16 +1,18 @@
 ---
-## Table of Content
+<details>
+<summary>Table of Content</summary>
+
 <!-- TOC -->
-  - [Table of Content](#table-of-content)
 - [Defines a Field (Agricultural Field)](#defines-a-field-agricultural-field)
 - [Defines a Raw (a section in a field)](#defines-a-raw-a-section-in-a-field)
 - [Defines a Fruit Type](#defines-a-fruit-type)
 - [Image storage for estimation analysis](#image-storage-for-estimation-analysis)
 - [History of Raw Analysis (Processed Data)](#history-of-raw-analysis-processed-data)
 - [History of Yield Estimations](#history-of-yield-estimations)
-- [Data example ](#data-example)
+- [Data example](#data-example)
 <!-- TOC END -->
-
+ 
+</details>
 ---
 
 from django.db import models
@@ -115,7 +117,7 @@ class HistoryEstimation(models.Model):
         return f"Estimation {self.id} - {self.raw.name}"
 
 
-# Data example 
+# Data example
 Fruit :
 
 | Description                      | Yield Start Date | Yield End Date | Yield Avg (kg/tree) | Fruit Avg (kg/fruit) |

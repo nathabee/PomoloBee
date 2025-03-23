@@ -1,26 +1,26 @@
 
-# **📜 API Interface Definition**
+# **API Interface Definition**
 ## **Overview**
 This document defines the API interface for the Pomolobee project, specifying:
 - API calls and data exchanged
 - Endpoints and request/response format
 ---
  
-
+ 
 <details>
 <summary>Table of Content</summary>
 
 <!-- TOC -->
-- [**📜 API Interface Definition**](#api-interface-definition)
+- [**API Interface Definition**](#api-interface-definition)
   - [**Overview**](#overview)
-  - [📌 Global API Endpoint Overview](#global-api-endpoint-overview)
-    - [1 :   🔁 App → Django ](#1-----app--django)
-    - [2 :   🔁 Django → ML ](#2-----django--ml)
-    - [3 : 🔁  ML  →  Django ](#3----ml----django)
+  - [Global API Endpoint Overview](#global-api-endpoint-overview)
+    - [1 :    App → Django](#1-----app--django)
+    - [2 :    Django → ML](#2-----django--ml)
+    - [3 :   ML  →  Django](#3----ml----django)
   - [Document reference](#document-reference)
-    - [1 : 🔁 App → Django [App → Django specification](API_1_App_to_Django.md)](#1---app--django-app--django-specificationapi1apptodjangomd)
-    - [2 : 🔁 Django → ML  [Django → ML specification](API_2_Django_to_ML.md)](#2---django--ml--django--ml-specificationapi2djangotomlmd)
-    - [3 : 🔁 ML  → Django [ML → Django specification](API_3_ML_to_Django.md)](#3---ml---django-ml--django-specificationapi3mltodjangomd)
+    - [1 :  App → Django [App → Django specification](API_1_App_to_Django.md)](#1---app--django-app--django-specificationapi_1_app_to_djangomd)
+    - [2 :  Django → ML  [Django → ML specification](API_2_Django_to_ML.md)](#2---django--ml--django--ml-specificationapi_2_django_to_mlmd)
+    - [3 :  ML  → Django [ML → Django specification](API_3_ML_to_Django.md)](#3---ml---django-ml--django-specificationapi_3_ml_to_djangomd)
 <!-- TOC END -->
  
 </details>
@@ -28,11 +28,11 @@ This document defines the API interface for the Pomolobee project, specifying:
 ---
 
 
-## 📌 Global API Endpoint Overview
+## Global API Endpoint Overview
 
 
 
-### 1 :   🔁 App → Django 
+### 1 :    App → Django
 
 | **Category** | **Endpoints** | **Purpose** | **Caller → Receiver** | **Screen Used In** (**Button Triggering API Call**) |
 |-------------|--------------|-------------|----------------------|----------------------------------------|
@@ -56,7 +56,7 @@ This document defines the API interface for the Pomolobee project, specifying:
 | **App fetches ML version** | `GET /api/ml/version/` | Fetch the current ML model version. | **App → Django Backend** | **SettingsScreen  Django fetches the ML version from the ML server and exposes it to the app** |
 
 
-### 2 :   🔁 Django → ML 
+### 2 :    Django → ML
 
 | **Category** | **Endpoints** | **Purpose** | **Caller → Receiver** | **Screen Used In** (**Button Triggering API Call**) |
 |-------------|--------------|-------------|----------------------|
@@ -64,7 +64,7 @@ This document defines the API interface for the Pomolobee project, specifying:
 | **ML Model Debugging** | `GET /ml/version/` | Fetch the current ML model version. | **Django Backend → ML Model** | **triggered by App GET /api/ml/version/* |
 
 
-### 3 : 🔁  ML  →  Django 
+### 3 :   ML  →  Django
 
 
 | **Category** | **Endpoints** | **Purpose** | **Caller → Receiver** | **Screen Used In** (**Button Triggering API Call**) |
@@ -78,7 +78,7 @@ This document defines the API interface for the Pomolobee project, specifying:
 ## Document reference
 
 
-### 1 : 🔁 App → Django [App → Django specification](API_1_App_to_Django.md)
-### 2 : 🔁 Django → ML  [Django → ML specification](API_2_Django_to_ML.md)
-### 3 : 🔁 ML  → Django [ML → Django specification](API_3_ML_to_Django.md)
+### 1 :  App → Django [App → Django specification](API_1_App_to_Django.md)
+### 2 :  Django → ML  [Django → ML specification](API_2_Django_to_ML.md)
+### 3 :  ML  → Django [ML → Django specification](API_3_ML_to_Django.md)
  

@@ -3,11 +3,11 @@
 
 ![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _34 hours_ (Auto-generated)
 ---
-## **Table of content**
+<details>
+<summary>Table of Content</summary>
 
 <!-- TOC -->
 - [Project Work Log](#project-work-log)
-  - [**Table of content**](#table-of-content)
   - [Detailed Work Log](#detailed-work-log)
   - [Week 1 (Dates: from Mars 14 to Mars 16, 2025)](#week-1-dates-from-mars-14-to-mars-16-2025)
     - [Mars 14, 2025](#mars-14-2025)
@@ -20,7 +20,8 @@
     - [Mars 23, 2025](#mars-23-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
-
+ 
+</details>
 ---
 
 This document tracks the number of hours worked each day and provides a brief description of what was accomplished. It is useful to analyze the distribution of time across various activities in the project.

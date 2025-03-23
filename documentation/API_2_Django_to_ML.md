@@ -5,21 +5,21 @@ This document defines the API interface for the Pomolobee project, specifying:
 - API calls and data exchanged
 - Endpoints and request/response format
 --- 
-
+  
 <details>
 <summary>Table of Content</summary>
 
 <!-- TOC -->
-- [**Django -> ML API Interface Definition**](#django--ml-api-interface-definition)
+- [**Django -> ML API Interface Definition**](#django---ml-api-interface-definition)
   - [**Overview**](#overview)
-    - [**📌 API Specifications for Django ↔ ML Communication, Polling, and Error Handling**](#api-specifications-for-django--ml-communication-polling-and-error-handling)
+    - [**API Specifications for Django ↔ ML Communication, Polling, and Error Handling**](#api-specifications-for-django--ml-communication-polling-and-error-handling)
     - [**Django → ML: Sending Image for Processing**](#django--ml-sending-image-for-processing)
     - [**ML Model Debugging**](#ml-model-debugging)
-    - [🗂️ ML Endpoint Base Path](#ml-endpoint-base-path)
-    - [**Polling Strategy**  ](#polling-strategy)
-  - [**Error Handling Strategy**  ](#error-handling-strategy)
+    - [️ ML Endpoint Base Path](#ml-endpoint-base-path)
+    - [**Polling Strategy**](#polling-strategy)
+  - [**Error Handling Strategy**](#error-handling-strategy)
     - [Basic Contract Tests](#basic-contract-tests)
-    - [🧪 Recommended Test](#recommended-test)
+    - [Recommended Test](#recommended-test)
 <!-- TOC END -->
  
 </details>
@@ -28,7 +28,7 @@ This document defines the API interface for the Pomolobee project, specifying:
 
  
  
-### **📌 API Specifications for Django ↔ ML Communication, Polling, and Error Handling**
+### **API Specifications for Django ↔ ML Communication, Polling, and Error Handling**
 
 ---
 
@@ -101,7 +101,7 @@ GET /version/
 
 ---
 
-### 🗂️ ML Endpoint Base Path
+### ️ ML Endpoint Base Path
 
 - All ML endpoints are prefixed with `/ml/` (as defined in `.env`: `ML_API_URL=http://localhost:5000/ml/`)
 - Example full URL Django will call:
@@ -109,7 +109,7 @@ GET /version/
 http://localhost:5000/ml/process-image/
 ```
 
-### **Polling Strategy**  
+### **Polling Strategy**
    
 📌 If ML takes longer than 5 minutes, Django should **log the delay** and optionally **send a retry request to ML**.  
 
@@ -119,7 +119,7 @@ http://localhost:5000/ml/process-image/
 
 ---
 
-## **Error Handling Strategy**  
+## **Error Handling Strategy**
 📌 **What if ML processing fails?**  
 - If ML **returns an error**, Django should mark `processed = false` in `ImageHistory`.  
  
@@ -135,6 +135,6 @@ http://localhost:5000/ml/process-image/
 - Responds within 3–5 seconds to acknowledge receipt
 - ML service must be reachable at `${ML_API_URL}` (from .env)
 
-### 🧪 Recommended Test
+### Recommended Test
 - Try curl POST to `/ml/process-image/` with a dummy payload
 - Verify that Django handles both 200 and 400 responses correctly

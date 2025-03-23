@@ -1,38 +1,41 @@
 **PomoloBeeApp detailled specification**
 ---
-## Table of Content
+<details>
+<summary>Table of Content</summary>
+
 <!-- TOC -->
-  - [Table of Content](#table-of-content)
-- [**🏗️ Project Architecture**](#project-architecture)
-- [**📌 Project Structure**](#project-structure)
-  - [**📂 Root Files**](#root-files)
+- [**️ Project Architecture**](#project-architecture)
+- [**Project Structure**](#project-structure)
+  - [**Root Files**](#root-files)
     - [**1️⃣ `MainActivity.kt`**](#1-mainactivitykt)
-  - [**📂 Navigation (Manages Screen Routing)**](#navigation-manages-screen-routing)
+  - [**Navigation (Manages Screen Routing)**](#navigation-manages-screen-routing)
     - [**2️⃣ `navigation/NavGraph.kt`**](#2-navigationnavgraphkt)
     - [**3️⃣ `navigation/Screen.kt`**](#3-navigationscreenkt)
-  - [**📂 UI (Manages UI Components & Screens)**](#ui-manages-ui-components--screens)
+  - [**UI (Manages UI Components & Screens)**](#ui-manages-ui-components--screens)
     - [**4️⃣ `ui/components/CameraView.kt`**](#4-uicomponentscameraviewkt)
     - [**5️⃣ `ui/components/DrawerMenu.kt`**](#5-uicomponentsdrawermenukt)
-  - [**📂 UI Screens**](#ui-screens)
+  - [**UI Screens**](#ui-screens)
     - [**6️⃣ `ui/screens/HomeScreen.kt`**](#6-uiscreenshomescreenkt)
     - [**7️⃣ `ui/screens/CameraScreen.kt`**](#7-uiscreenscamerascreenkt)
     - [**8️⃣ `ui/screens/SettingsScreen.kt`**](#8-uiscreenssettingsscreenkt)
     - [**9️⃣ `ui/screens/AboutScreen.kt`**](#9-uiscreensaboutscreenkt)
-  - [**📂 Theme (Handles UI Styling)**](#theme-handles-ui-styling)
-    - [**🔟 `ui/theme/Color.kt`**](#uithemecolorkt)
+  - [**Theme (Handles UI Styling)**](#theme-handles-ui-styling)
+    - [**`ui/theme/Color.kt`**](#uithemecolorkt)
     - [**1️⃣1️⃣ `ui/theme/Theme.kt`**](#11-uithemethemekt)
     - [**1️⃣2️⃣ `ui/theme/Type.kt`**](#12-uithemetypekt)
-  - [**📂 Data (Handles User Preferences)**](#data-handles-user-preferences)
+  - [**Data (Handles User Preferences)**](#data-handles-user-preferences)
     - [**1️⃣3️⃣ `data/UserPreferences.kt`**](#13-datauserpreferenceskt)
-  - [**📂 Utils (Handles Apple Image Processing)**](#utils-handles-apple-image-processing)
+  - [**Utils (Handles Apple Image Processing)**](#utils-handles-apple-image-processing)
     - [**1️⃣4️⃣ `utils/ImageProcessing.kt`**](#14-utilsimageprocessingkt)
-- [**🚀 Summary**](#summary)
+- [**Summary**](#summary)
 <!-- TOC END -->
+ 
+</details>
 
 ---
 
 
-# **🏗️ Project Architecture**
+# **️ Project Architecture**
 Since **Jetpack Compose doesn't use Fragments**, we will replace the **"1 Activity - Multiple Fragments"** structure with:
 
 - **1 Main Activity**
@@ -45,7 +48,7 @@ Since **Jetpack Compose doesn't use Fragments**, we will replace the **"1 Activi
 
 ---
 
-# **📌 Project Structure**
+# **Project Structure**
 ```plaintext
  tree app/src/main/java
 app/src/main/java
@@ -79,7 +82,7 @@ app/src/main/java
 
 ---
 
-## **📂 Root Files**
+## **Root Files**
 ### **1️⃣ `MainActivity.kt`**
 📌 **Purpose:**  
 - The **entry point** of the app.
@@ -93,7 +96,7 @@ app/src/main/java
 
 ---
 
-## **📂 Navigation (Manages Screen Routing)**
+## **Navigation (Manages Screen Routing)**
 ### **2️⃣ `navigation/NavGraph.kt`**
 📌 **Purpose:**  
 - **Defines how users navigate between screens**.
@@ -129,7 +132,7 @@ sealed class Screen(val route: String) {
 
 ---
 
-## **📂 UI (Manages UI Components & Screens)**
+## **UI (Manages UI Components & Screens)**
 ### **4️⃣ `ui/components/CameraView.kt`**
 📌 **Purpose:**  
 - Displays the **camera preview using OpenCV**.
@@ -163,7 +166,7 @@ ModalNavigationDrawer(
 
 ---
 
-## **📂 UI Screens**
+## **UI Screens**
 ### **6️⃣ `ui/screens/HomeScreen.kt`**
 📌 **Purpose:**  
 - Displays **home screen UI**.
@@ -214,8 +217,8 @@ scope.launch { UserPreferences.savePreference(context, "apple_type", selectedApp
 
 ---
 
-## **📂 Theme (Handles UI Styling)**
-### **🔟 `ui/theme/Color.kt`**
+## **Theme (Handles UI Styling)**
+### **`ui/theme/Color.kt`**
 📌 **Purpose:**  
 - Defines **color schemes** for the app.
 
@@ -233,7 +236,7 @@ scope.launch { UserPreferences.savePreference(context, "apple_type", selectedApp
 
 ---
 
-## **📂 Data (Handles User Preferences)**
+## **Data (Handles User Preferences)**
 ### **1️⃣3️⃣ `data/UserPreferences.kt`**
 📌 **Purpose:**  
 - Uses **Jetpack DataStore** to store and retrieve user preferences.
@@ -249,7 +252,7 @@ UserPreferences.savePreference(context, "apple_type", selectedApple)
 
 ---
 
-## **📂 Utils (Handles Apple Image Processing)**
+## **Utils (Handles Apple Image Processing)**
 ### **1️⃣4️⃣ `utils/ImageProcessing.kt`**
 📌 **Purpose:**  
 - Processes camera frames **to detect apples**.
@@ -265,7 +268,7 @@ val processedFrame = detectApple(inputFrame.rgba())
 
 ---
 
-# **🚀 Summary**
+# **Summary**
 | **📂 Folder** | **Purpose** |
 |--------------|------------|
 | `MainActivity.kt` | **Entry point** of the app, initializes UI & navigation |

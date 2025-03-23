@@ -6,13 +6,14 @@
 📌 **Detailed code and specifications are available in GitHub**. 
 
 ---
-## Table of Content
+<details>
+<summary>Table of Content</summary>
+
 <!-- TOC -->
-  - [Table of Content](#table-of-content)
-- [**📌 STEP BY STEP DEVELOPMENT AND TEST**](#step-by-step-development-and-test)
+- [**STEP BY STEP DEVELOPMENT AND TEST**](#step-by-step-development-and-test)
   - [**STEP 1: Project Initialization**](#step-1-project-initialization)
   - [**STEP 2: Screen Management and Navigation**](#step-2-screen-management-and-navigation)
-    - [**🔹 Project Architecture**](#project-architecture)
+    - [**Project Architecture**](#project-architecture)
   - [**STEP 3: Apple Detection Overview**](#step-3-apple-detection-overview)
   - [**STEP 4: User Preferences (Jetpack DataStore)**](#step-4-user-preferences-jetpack-datastore)
   - [**STEP 5: UI/UX Improvements**](#step-5-uiux-improvements)
@@ -20,10 +21,12 @@
   - [**STEP 7: define specification](#step-7-define-specification)
   - [Testing and Deployment**](#testing-and-deployment)
 <!-- TOC END -->
+ 
+</details>
 
 ---
 
-# **📌 STEP BY STEP DEVELOPMENT AND TEST**
+# **STEP BY STEP DEVELOPMENT AND TEST**
 
 ## **STEP 1: Project Initialization**
 🔹 **Create Empty Activity Project** in **Android Studio**  
@@ -38,7 +41,7 @@
 ---
 
 ## **STEP 2: Screen Management and Navigation**
-### **🔹 Project Architecture**
+### **Project Architecture**
 Since **Jetpack Compose replaces Fragments**, the project follows a **modern Compose-based navigation structure**:
 - **1 Main Activity (`MainActivity.kt`)**
 - **1 Navigation Host (`NavGraph.kt`)**
