@@ -122,7 +122,7 @@ This document tracks the number of hours worked each day and provides a brief de
   -  add OrchardScreen in UI and Screen in specification  [specification App](App_Specification.md)
   - check coherence between API App → Django specification and specification App
  
-
+ 
 - **Theme**: Project Initialization 
 - **Progress**: check django is aligned with specification API_1 and API_2 spec. Check App specification aligned with API_1. check Flask implementation aligned with API_2 and API_3. Django and ML code must be tested. need to test test_workflow and test_ml. 
 
