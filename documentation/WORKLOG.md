@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _36 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _44 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -18,6 +18,8 @@
     - [Mars 18 2025](#mars-18-2025)
     - [Mars 22 2025](#mars-22-2025)
     - [Mars 23 2025](#mars-23-2025)
+  - [Week 3 Dates from Mars 24 to Mars 30 2025](#week-3-dates-from-mars-24-to-mars-30-2025)
+    - [Mars 24 2025](#mars-24-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -140,9 +142,33 @@ This document tracks the number of hours worked each day and provides a brief de
   - Create missing screen files ui/screens/ProcessingScreen.kt ResultScreen.kt OrchardScreen.kt LocationScreen.kt ErrorLogScreen.kt ImageHistoryScreen.kt LocalResultScreen.kt PreviewScreen.kt SettingsRepository.kt
 
 - **Theme**: Project Initialization 
-- **Progress**: Specification cehcked, time to code API for Django and ML to offer a service endpoint
+- **Progress**: API Specification seems coherent, it is time to code API for Django and ML to offer a service endpoint
+
+
 
  
+---
+
+##  Week 3 Dates from Mars 24 to Mars 30 2025
+
+###  Mars 24 2025
+- **Hours Worked**: 8 hours
+- **Tasks**:
+  - added JSON format specification [specification API](API.md)
+  - error and response wrapping in API documentation and in Django and Flask Code
+  - check Django code with all 4 API docs
+  - check flask code with API, API_2 and API_3 docs
+  - create ML specification :   [specification ML](ML_Specification.md)  
+  - modify README.md to explain ML install and start ML and Django
+  - create note book to explain how to train the modele
+  - create empty tree folder for PomoloBeeML sub-project
+  - create Django/Core/fixtures/initial_farms.json and add id_farm in field
+  - modify README.md, Django_HistoryInit.md to specifiy creation with fixture - - script pomoloBeeDjango/scripts/reset_db.sh to reset or install  database
+  
+- **Theme**: Project Initialization 
+
+
+
 - **PENDING**
   - **APP**
   - at this point App is just specified but not implented in code. just empty nutshell

@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+
 
   
 # Defines a Fruit Type
@@ -15,13 +17,27 @@ class Fruit(models.Model):
     def __str__(self):
         return self.name
 
+# define a farm
+class Farm(models.Model):
+    name = models.CharField(max_length=100)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='farms')
+
+    def __str__(self):
+        return f"Farm: {self.name}"
+    
 # Defines a Field (Agricultural Field)
 class Field(models.Model):
     id = models.AutoField(primary_key=True)
-    short_name = models.CharField(max_length=50, unique=True)  # Unique short identifier
+    id_farm = models.ForeignKey(
+        Farm,
+        on_delete=models.CASCADE,
+        related_name='fields',
+        default=1  
+    )
+    short_name = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    orientation = models.CharField(max_length=50, blank=True, null=True)  # N, S, E, W
+    orientation = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -101,5 +117,4 @@ class HistoryEstimation(models.Model):
 
     def __str__(self):
         return f"Estimation {self.id} - {self.raw.name}"
-
-
+ 

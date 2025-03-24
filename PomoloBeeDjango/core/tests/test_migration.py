@@ -8,7 +8,7 @@ from core.models import Field, Fruit, Raw
 class LoadFixtureDataTest(TestCase):
     """Test if initial fixture data is correctly loaded in the test database."""
 
-    fixtures = ["initial_fields.json", "initial_fruits.json", "initial_raws.json"]
+    fixtures = ["initial_farms.json","initial_fields.json", "initial_fruits.json", "initial_raws.json"]
 
     def test_field_count(self):
         """Check if 6 fields are correctly loaded."""

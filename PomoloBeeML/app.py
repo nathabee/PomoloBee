@@ -21,6 +21,22 @@ LAST_UPDATED = "2024-03-10T14:00:00"
 # Dummy Storage for Processed Results
 processing_queue = {}
 
+
+def api_error(code, message, status_code=400):
+    return jsonify({
+        "error": {
+            "code": code,
+            "message": message
+        }
+    }), status_code
+
+def api_success(data, status_code=200):
+    return jsonify({
+        "status": "success",
+        "data": data
+    }), status_code
+
+
 def detect_apples(image_path):
     """Simulated Apple Detection (Replace with real ML model later)."""
     img = cv2.imread(image_path)
@@ -33,7 +49,7 @@ def detect_apples(image_path):
     return nb_apples, confidence_score
 
 
-@app.route('/process', methods=['POST'])
+@app.route('/ml/process-image', methods=['POST'])
 def process_image():
     """Receives an image for processing, returns 200 OK immediately, then processes asynchronously."""
     data = request.json
@@ -41,7 +57,24 @@ def process_image():
     image_url = data.get("image_url")
 
     if not image_id or not image_url:
-        return jsonify({"error": "Invalid image URL or image ID."}), 400
+        #return jsonify({"error": "Invalid image URL or image ID."}), 400
+        return api_error("INVALID_INPUT", "Invalid image URL or image ID.", 400)
+
+    # safety check before retrying a completed image to block unneeded retry calls
+    if image_id in processing_queue and processing_queue[image_id]["status"] == "completed":
+        return api_error("ALREADY_PROCESSED", f"Image {image_id} was already processed.", 409)
+
+    # requeue if pürocess failed
+    if image_id in processing_queue and processing_queue[image_id]["status"] == "failed":
+        print(f"Retrying failed image {image_id}...")
+        processing_queue[image_id]["status"] = "processing"
+
+    # If already queued and still processing, accept silently (idempotent)
+    elif image_id in processing_queue and processing_queue[image_id]["status"] != "completed":
+        return api_success({
+            "message": f"Image {image_id} is already queued for processing."
+        })
+
 
     image_path = os.path.join(UPLOAD_FOLDER, f"image_{image_id}.jpg")
 
@@ -53,9 +86,12 @@ def process_image():
                 for chunk in response.iter_content(1024):
                     f.write(chunk)
         else:
-            return jsonify({"error": "Failed to download image."}), 400
+            return api_error("ML_PROCESSING_FAILED", "Failed to download image.", 502)
+
+
     except requests.RequestException as e:
-        return jsonify({"error": str(e)}), 500
+        # return jsonify({"error": str(e)}), 500
+        return api_error("500_INTERNAL_ERROR", str(e), 500)
 
     # Add to processing queue
     processing_queue[image_id] = {
@@ -67,7 +103,11 @@ def process_image():
     response_message = {
         "message": f"Image {image_id} received, processing started."
     }
-    return jsonify(response_message), 200
+    #return jsonify(response_message), 200
+    return api_success({
+        "message": f"Image {image_id} received, processing started."
+    })
+
 
 
 def background_process_images():
@@ -111,14 +151,15 @@ def background_process_images():
                     print(f"❌ Failed to send ML results to Django: {str(e)}")
 
 
-@app.route('/version', methods=['GET'])
+@app.route('/ml/version', methods=['GET'])
 def get_version():
-    """Returns the current ML model version and status."""
-    return jsonify({
+    """Returns the current ML model version and status (wrapped)."""
+    
+    return api_success({
         "model_version": ML_MODEL_VERSION,
         "status": "active",
         "last_updated": LAST_UPDATED
-    }), 200
+    })
 
 
 if __name__ == '__main__':

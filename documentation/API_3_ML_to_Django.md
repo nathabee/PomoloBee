@@ -66,20 +66,29 @@ POST /api/images/{image_id}/ml_result
 ✅ **Response (Success - 200 OK)**
 ```json
 {
-  "message": "ML result successfully received."
+  "status": "success",
+  "data": {
+    "message": "ML result successfully received."
+  }
 }
+
 
 ```
 
 ✅ **Response (Error - 404 Not Found)**
 ```json
 {
-  "error": "Image not found."
+  "error": {
+    "code": "404_NOT_FOUND",
+    "message": "Image not found."
+  }
 }
 
 ```
 
  
-   
+## **JSON Format Conventions**
 
- 
+📌 **IMPORTANT : see documentation  API** [API specification](API.md) defining :
+- list of existing error code
+- format and naming convention 

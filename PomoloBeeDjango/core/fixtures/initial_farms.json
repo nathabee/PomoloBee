@@ -1,0 +1,10 @@
+[
+  {
+    "model": "core.farm",
+    "pk": 1,
+    "fields": {
+      "name": "Abraracoutix Farm",
+      "owner": 1
+    }
+  }
+]

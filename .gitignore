@@ -32,7 +32,16 @@ PomoloBeeML/venv/
 PomoloBeeML/.vscode/
 PomoloBeeML/models/
 PomoloBeeML/logs/
+PomoloBeeML/upload/
 PomoloBeeML/.env
+# ---- IGNORE ML DATA ----
+PomoloBeeML/data/images/
+PomoloBeeML/data/labels/
+PomoloBeeML/data/*.yaml
+# YOLO training runs
+PomoloBeeML/runs/       
+# Final trained model (manually added later if needed)           
+PomoloBeeML/model/best.pt         
 
 # ---- GLOBAL IGNORE (For All Subprojects) ----
 *.log

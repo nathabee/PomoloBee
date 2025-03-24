@@ -3,8 +3,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     FieldViewSet, FruitViewSet, LocationListView, ImageUploadView, ImageStatusView,
     EstimationView, LatestEstimationView, ImageListView, ImageDetailView, ImageDeleteView,
-    HistoryView, HistoryDetailView, ErrorLogView, RetryProcessingView, RawUpdateView,
-    FieldUpdateView,  MLResultView, MLVersionView,ProcessImageView
+    HistoryView, HistoryDetailView, ErrorLogView, RetryProcessingView, 
+      MLResultView, MLVersionView,ProcessImageView
 )
  
 router = DefaultRouter()
@@ -24,9 +24,8 @@ urlpatterns = [
     path('latest_estimations/', LatestEstimationView.as_view(), name='latest-estimations'),
     path('history/', HistoryView.as_view(), name='history-list'),
     path('history/<int:history_id>/', HistoryDetailView.as_view(), name='history-detail'),
-    path('raws/<int:raw_id>/', RawUpdateView.as_view(), name='update-raw'),
-    path('fields/<int:field_id>/', FieldUpdateView.as_view(), name='update-field'),
-
+#    path('raws/<int:raw_id>/', RawUpdateView.as_view(), name='update-raw'),
+#    path('fields/<int:field_id>/', FieldUpdateView.as_view(), name='update-field'),
     path('images/<int:image_id>/ml_result/', MLResultView.as_view(), name='ml-result'),  #get from app-- post from ML
 
     path('process-image/', ProcessImageView.as_view(), name='process-image'),  #post from app

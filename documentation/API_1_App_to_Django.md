@@ -32,14 +32,12 @@ This document defines the API interface for the Pomolobee project, specifying:
   - [Section D History Analytics](#section-d-history-analytics)
     - [**Fetching all Historical Records**](#fetching-all-historical-records)
     - [**Fetching a Single Historical Record**](#fetching-a-single-historical-record)
-  - [️ Section E Admin / Update Tree or Field Info NOT SUPPORTED AT THE MOMENT](#section-e-admin-update-tree-or-field-info-not-supported-at-the-moment)
-    - [**Updating Raw Details** NOT SUPPORTED AT THE MOMENT](#updating-raw-details-not-supported-at-the-moment)
-    - [**Updating Field Information** NOT SUPPORTED AT THE MOMENT](#updating-field-information-not-supported-at-the-moment)
   - [**4. API Design**](#4-api-design)
     - [Query Examples](#query-examples)
     - [**API Call Order**](#api-call-order)
     - [**Polling Strategy**](#polling-strategy)
   - [**Error Handling Strategy in DJANGO**](#error-handling-strategy-in-django)
+  - [**JSON Format Conventions**](#json-format-conventions)
 <!-- TOC END -->
  
 </details>
@@ -65,22 +63,26 @@ GET /api/fields/
 ✅ **Response (Success - 200 OK)**
 ```json
 {
+  "status": "success",
+  "data": {
+
     "fields": [
         {
-            "id": 1,
+            "field_id": 1,
             "short_name": "North_Field",
             "name": "North Orchard",
             "description": "Main orchard section for apples.",
             "orientation": "N"
         },
         {
-            "id": 2,
+            "field_id": 2,
             "short_name": "South_Field",
             "name": "South Orchard",
             "description": "Smaller orchard with mixed fruit trees.",
             "orientation": "S"
         }
-    ]
+     ]
+    }
 }
 ```
 
@@ -99,9 +101,12 @@ GET /api/fruits/
 ✅ **Response (Success - 200 OK)**
 ```json
 {
+
+  "status": "success",
+  "data": {
     "fruits": [
         {
-            "id": 5,
+            "fruit_id": 5,
             "short_name": "Golden_Apple",
             "name": "Golden Apple",
             "description": "Sweet yellow apples, ripe in autumn.",
@@ -111,7 +116,7 @@ GET /api/fruits/
             "fruit_avg_kg": 0.3
         },
         {
-            "id": 6,
+            "fruit_id": 6,
             "short_name": "Red_Apple",
             "name": "Red Apple",
             "description": "Crunchy red apples, available in late summer.",
@@ -121,6 +126,7 @@ GET /api/fruits/
             "fruit_avg_kg": 0.35
         }
     ]
+}
 }
 ```
  
@@ -139,6 +145,9 @@ GET /api/locations/
 ✅ **Response (Success - 200 OK)**
 ```json
 {
+
+  "status": "success",
+  "data": {
     "locations": [
         {
             "field_id": 1,
@@ -179,13 +188,17 @@ GET /api/locations/
             ]
         }
     ]
+  }
 }
 ```
 
 ✅ **Response (Error - 404 Not Found)**
 ```json
-{
-    "error": "No field and raw data available."
+ {
+  "error": {
+    "code": "404_NOT_FOUND",
+    "message": "No field and raw data available."
+  }
 }
 ```
 
@@ -225,15 +238,22 @@ curl -X POST "https://server.com/api/images/" \
 ✅ **Response (Success - 201 Created)**
 ```json
 {
+
+  "status": "success",
+  "data": {
     "image_id": 24,
     "message": "Image uploaded successfully and queued for processing."
+}
 }
 ```
 
 ✅ **Response (Error - Missing Parameters)**
 ```json
 {
-    "error": "Image and raw_id are required."
+  "error": {
+    "code": "MISSING_PARAMETER",
+    "message": "Image and raw_id are required."
+  }
 }
 ```
 
@@ -264,15 +284,30 @@ curl -X POST "https://server.com/api/retry_processing/" \
 ✅ **Response (Success - 200 OK)**
 ```json
 {
+
+  "status": "success",
+  "data": {
     "message": "Image processing retry has been requested."
+}
 }
 ```
 
 ✅ **Response (Error - 404 Not Found)**  
 ```json
 {
-    "error": "Image not found or already processed successfully."
+  "error": {
+    "code": "404_NOT_FOUND",
+    "message": "Image not found."
+  }
 }
+or 
+{
+  "error": {
+    "code": "ALREADY_PROCESSED",
+    "message": "This image has already been processed and cannot be retried."
+  }
+}
+
 ```
 
 ---
@@ -296,17 +331,24 @@ GET /api/images/{image_id}/ml_result
 ✅ **Response (Success - 200 OK)**
 ```json
 {
+
+  "status": "success",
+  "data": {
     "image_id": 24,
     "nb_apples": 12,
     "confidence_score": 0.89,
     "processed": true
+}
 }
 ```
 
 ✅ **Response (Error - 404 Not Found)**
 ```json
 {
-    "error": "ML results not found for this image."
+  "error": {
+    "code": "404_NOT_FOUND",
+    "message": "ML results not found for this image."
+  }
 }
 ```
 
@@ -325,16 +367,23 @@ GET /api/ml/version/
 ✅ **Response (Success - 200 OK)**
 ```json
 {
-    "model_version": "v1.2.5",
-    "status": "active",
-    "last_updated": "2024-03-10T14:00:00"
-}
+  "status": "success",
+  "data": 
+        {
+            "model_version": "v1.2.5",
+            "status": "active",
+            "last_updated": "2024-03-10T14:00:00"
+        }
+  }
 ```
 
 ✅ **Response (Error - 500 Internal Server Error)**
 ```json
 {
-    "error": "ML service unavailable."
+  "error": {
+    "code": "ML_UNAVAILABLE",
+    "message": "ML service unavailable"
+  }
 }
 ```
 
@@ -364,27 +413,38 @@ GET /api/images/{image_id}/status/
 ✅ **Response (Success - 200 OK)**
 ```json
 {
+
+  "status": "success",
+  "data": {
     "image_id": 24,
     "status": "done",
     "processed": true,
     "nb_apfel": 15,
     "confidence_score": 0.87
 }
+}
 ```
 
 ✅ **Response (Still Processing - 200 OK)**
 ```json
 {
+
+  "status": "success",
+  "data": {
     "image_id": 24,
     "status": "processing",
     "processed": false
+}
 }
 ```
 
 ✅ **Response (Error - 404 Not Found)**
 ```json
 {
-    "error": "Image not found."
+  "error": {
+    "code": "404_NOT_FOUND",
+    "message": "Image not found."
+  }
 }
 ```
 
@@ -412,6 +472,9 @@ GET /api/estimations/{image_id}/
 ✅ **Response (Success - 200 OK)**
 ```json
 {
+
+  "status": "success",
+  "data": {
     "image_id": 24,
     "plant_apfel": 12,
     "plant_kg": 2.4,
@@ -419,12 +482,16 @@ GET /api/estimations/{image_id}/
     "confidence_score": 0.85,
     "status": "done"
 }
+}
 ```
 
 ✅ **Response (Error - 404 Not Found)**
 ```json
 {
-    "error": "Estimation not found."
+  "error": {
+    "code": "404_NOT_FOUND",
+    "message": "Estimation not found."
+  }
 }
 ```
 
@@ -445,33 +512,40 @@ GET /api/latest_estimations/
 ✅ **Response (Success - 200 OK)**
 ```json
 {
-    "latest_estimations": [
-        {
-            "image_id": 24,
-            "raw_id": 3,
-            "plant_apfel": 12,
-            "plant_kg": 2.4,
-            "raw_kg": 48.0,
-            "confidence_score": 0.85,
-            "date": "2024-03-14"
-        },
-        {
-            "image_id": 25,
-            "raw_id": 4,
-            "plant_apfel": 10,
-            "plant_kg": 2.0,
-            "raw_kg": 40.0,
-            "confidence_score": 0.83,
-            "date": "2024-03-13"
-        }
-    ]
+
+  "status": "success",
+    "data": {
+        "latest_estimations": [
+            {
+                "image_id": 24,
+                "raw_id": 3,
+                "plant_apfel": 12,
+                "plant_kg": 2.4,
+                "raw_kg": 48.0,
+                "confidence_score": 0.85,
+                "date": "2024-03-14"
+            },
+            {
+                "image_id": 25,
+                "raw_id": 4,
+                "plant_apfel": 10,
+                "plant_kg": 2.0,
+                "raw_kg": 40.0,
+                "confidence_score": 0.83,
+                "date": "2024-03-13"
+            }
+        ]
+    }
 }
 ```
 
 ✅ **Response (Error - 404 Not Found)**
 ```json
 {
-    "error": "No recent estimations found."
+  "error": {
+    "code": "404_NOT_FOUND",
+    "message": "No recent estimation found."
+  }
 }
 ```
 
@@ -488,10 +562,14 @@ GET /api/images/
 ✅ **Response (Success - 200 OK)**
 ```json
 {
-    "images": [
-        { "image_id": 24, "raw_id": 3, "status": "done", "upload_date": "2024-03-10" },
-        { "image_id": 25, "raw_id": 5, "status": "processing", "upload_date": "2024-03-12" }
-    ]
+  "status": "success",
+    "data": 
+    {
+        "images": [
+            { "image_id": 24, "raw_id": 3, "status": "done", "upload_date": "2024-03-10" },
+            { "image_id": 25, "raw_id": 5, "status": "processing", "upload_date": "2024-03-12" }
+        ]
+    }
 }
 ```
 
@@ -510,13 +588,17 @@ GET /api/images/{image_id}/details/
 ✅ **Response (Success - 200 OK)**
 ```json
 {
-    "image_id": 24,
-    "raw_id": 3,
-    "field_id": 1,
-    "fruit_type": "Golden Apple",
-    "status": "done",
-    "upload_date": "2024-03-10",
-    "image_url": "https://server.com/images/24.jpg"
+
+  "status": "success",
+    "data": {
+        "image_id": 24,
+        "raw_id": 3,
+        "field_id": 1,
+        "fruit_type": "Golden Apple",
+        "status": "done",
+        "upload_date": "2024-03-10",
+        "image_url": "https://server.com/images/24.jpg"
+    }
 }
 ```
 
@@ -535,14 +617,21 @@ DELETE /api/images/{image_id}/
 ✅ **Response (Success - 200 OK)**
 ```json
 {
-    "message": "Image deleted successfully."
+
+  "status": "success",
+    "data": {
+        "message": "Image deleted successfully."
+    }
 }
 ```
 
 ✅ **Response (Error - 404 Not Found)**
 ```json
 {
-    "error": "Image not found."
+  "error": {
+    "code": "404_NOT_FOUND",
+    "message": "Image not found."
+  }
 }
 ```
 ---
@@ -565,17 +654,23 @@ GET /api/images/{image_id}/error_log/
 ✅ **Response (Success - 200 OK)**
 ```json
 {
-    "image_id": 24,
-    "status": "failed",
-    "error_log": "ML model failed to detect apples due to poor image quality.",
-    "timestamp": "2024-03-14T08:45:00"
+  "status": "success",
+  "data": {
+        "image_id": 24,
+        "status": "failed",
+        "error_log": "ML model failed to detect apples due to poor image quality.",
+        "timestamp": "2024-03-14T08:45:00"
+        }
 }
 ```
 
 ✅ **Response (Error - 404 Not Found)**  
 ```json
 {
-    "error": "No error log found for this image."
+  "error": {
+    "code": "404_NOT_FOUND",
+    "message": "No error log found for this image."
+  }
 }
 ```
 --- 
@@ -597,6 +692,8 @@ GET /api/history/
 ✅ **Response (Success - 200 OK)**  
 ```json
 {
+  "status": "success",
+  "data": {
     "history": [
         {
             "history_id": 12,
@@ -621,13 +718,17 @@ GET /api/history/
             "date": "2024-03-08"
         }
     ]
+  }
 }
 ```
 
 ✅ **Response (Error - 404 Not Found)**  
 ```json
-{
-    "error": "No history records found."
+ {
+  "error": {
+    "code": "404_NOT_FOUND",
+    "message": "No history records found."
+  }
 }
 ```
 
@@ -652,113 +753,38 @@ GET /api/history/{history_id}/
 
 ✅ **Response (Success - 200 OK)**
 ```json
+
 {
-    "history_id": 12,
-    "raw_id": 3,
-    "raw_name": "Row A",
-    "field_id": 1,
-    "field_name": "North Orchard",
-    "fruit_type": "Golden Apple",
-    "estimated_yield_kg": 50.0,
-    "confidence_score": 0.88,
-    "image_url": "https://server.com/images/processed_12.jpg",
-    "timestamp": "2024-03-05T12:00:00"
+  "status": "success",
+  "data": {
+        "history_id": 12,
+        "raw_id": 3,
+        "raw_name": "Row A",
+        "field_id": 1,
+        "field_name": "North Orchard",
+        "fruit_type": "Golden Apple",
+        "estimated_yield_kg": 50.0,
+        "confidence_score": 0.88,
+        "image_url": "https://server.com/images/processed_12.jpg",
+        "timestamp": "2024-03-05T12:00:00"
+    }
 }
 ```
 
 ✅ **Response (Error - 404 Not Found)**  
 ```json
-{
-    "error": "Estimation history not found."
+
+ {
+  "error": {
+    "code": "404_NOT_FOUND",
+    "message": "Estimation history not found."
+  }
 }
 ```
 
 ---
 
-## ️ Section E Admin / Update Tree or Field Info NOT SUPPORTED AT THE MOMENT
-📌 **Purpose:**  Modify existing orchard or raw data.
-
-
-### **Updating Raw Details** NOT SUPPORTED AT THE MOMENT
-📌 **Purpose:** Update the **number of trees** in a given raw or modify other attributes.
-
-✅ **Endpoint:**  
-```
-PATCH /api/raws/{raw_id}/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `raw_id` | `integer` | ✅ Yes | Unique ID of the raw (tree row) to be updated. |
-
-✅ **Request Payload (Optional Fields):**
-```json
-{
-    "name": "Updated Row A",
-    "nb_plant": 55
-}
-```
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "raw_id": 3,
-    "message": "Raw details updated successfully."
-}
-```
-
-✅ **Response (Error - 404 Not Found)**  
-```json
-{
-    "error": "Raw not found."
-}
-```
-
----
-
-### **Updating Field Information** NOT SUPPORTED AT THE MOMENT
-📌 **Purpose:** Modify the **name, orientation, or other attributes** of a specific field.
-
-✅ **Endpoint:**  
-```
-PATCH /api/fields/{field_id}/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `field_id` | `integer` | ✅ Yes | Unique ID of the field to be updated. |
-
-✅ **Request Payload (Optional Fields):**
-```json
-{
-    "name": "Updated North Orchard",
-    "orientation": "NE"
-}
-```
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-    "field_id": 1,
-    "message": "Field details updated successfully."
-}
-```
-
-✅ **Response (Error - 404 Not Found)**  
-```json
-{
-    "error": "Field not found."
-}
-```
-
---- 
-
+ 
 ## **4. API Design**
 
 
@@ -804,3 +830,9 @@ curl -X POST "https://server.com/api/images/" \
 - Django should return `400 Bad Request` if the image format is incorrect.  
 - The app should prompt the user to upload a valid image.
 
+
+## **JSON Format Conventions**
+
+📌 **IMPORTANT : see documentation  API** [API specification](API.md) defining :
+- list of existing error code
+- format and naming convention 

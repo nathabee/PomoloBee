@@ -10,7 +10,7 @@ from core.models import ImageHistory, Field, Fruit, Raw
 class DjangoWorkflowTest(TestCase):
     """Test full Django workflow including database initialization, API calls, and ML processing."""
 
-    fixtures = ["initial_fields.json", "initial_fruits.json", "initial_raws.json"]
+    fixtures = ["initial_farms.json","initial_fields.json", "initial_fruits.json", "initial_raws.json"]
 
     def setUp(self):
         """Set up URLs for API calls."""

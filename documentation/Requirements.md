@@ -26,9 +26,10 @@ The **PomoloBee** app will now focus **only on image-based apple yield estimatio
     - [**4 Offline Mode Storage**](#4-offline-mode-storage)
   - [**Updated Data Flow**](#updated-data-flow)
   - [**Updated Milestones**](#updated-milestones)
+  - [**Updated Milestones**](#updated-milestones)
     - [**Phase 1 MVP Current**](#phase-1-mvp-current)
-    - [**Phase 2 AI Enhancements Manual Input**](#phase-2-ai-enhancements-manual-input)
-    - [**Phase 3 Advanced Features Video Processing**](#phase-3-advanced-features-video-processing)
+    - [**Phase 2 AI Enhancements Manual Input Access Control**](#phase-2-ai-enhancements-manual-input-access-control)
+    - [**Phase 3 Advanced Features Video Support**](#phase-3-advanced-features-video-support)
 <!-- TOC END -->
   
 </details>
@@ -99,45 +100,63 @@ The **PomoloBee** app will now focus **only on image-based apple yield estimatio
   
 ## **Updated Milestones**
 
-### **Phase 1 MVP Current**
-- **Offline image storage & manual upload.**  
-- **Basic apple detection model (YOLOv8).**  
-- **Simple backend API (Django + PostgreSQL).**  
-- **Basic processing screen to show estimation results.**  
+Great! Here's the updated **Milestones** section with your new **authentication and user-farm access control requirements** integrated into **Phase 2**.
 
 ---
 
-### **Phase 2 AI Enhancements Manual Input**
-🔹 **Local AI Model for Offline Estimation**  
-   - Farmers can analyze images **without internet** using an **on-device AI model** (OpenCV + TensorFlow Lite).  
-   - Allows instant feedback instead of waiting for backend processing.  
+## **Updated Milestones**
 
+### **Phase 1 MVP Current**
+- **Offline image storage & manual upload**  
+- **Basic apple detection model (YOLOv8)**  
+- **Simple backend API (Django + PostgreSQL)**  
+- **Basic processing screen to show estimation results**  
+
+---
+
+### **Phase 2 AI Enhancements Manual Input Access Control**
+
+🔹 **Local AI Model for Offline Estimation**  
+- Farmers can analyze images **without internet** using an **on-device AI model** (OpenCV + TensorFlow Lite)  
+- Enables instant feedback without needing backend processing  
 
 🔹 **Manual Override of AI Results**  
-   - Farmers can **adjust AI-detected apple count** if it seems inaccurate.  
-   - New **"Manual Input Mode"** in **ResultScreen** (editable apple count & weight).  
+- Farmers can **adjust apple count and yield** if AI detection seems inaccurate  
+- New **"Manual Input Mode"** added to the **ResultScreen** (editable values)
 
 🔹 **Updated Sync & Processing Workflow**  
-   - Farmers can **choose between local processing and backend processing**.  
-   - Option in **SettingsScreen** to disable backend processing and use **offline-only mode**.  
+- Farmers can choose between:
+  - **Backend AI Processing (default)**
+  - **Local-only processing mode**  
+- New toggle in **SettingsScreen** to configure this behavior  
+
+🔹 **Authentication and Access Control (NEW)**  
+- 📱 **Android app**: Login screen using **standard credentials (username/password)**  
+- 🔐 **Django backend**:
+  - Use **Django’s built-in authentication** system (Token or Session auth)
+  - Each `User` is associated with **one or more Farms**
+  - Each `Field` belongs to a **Farm**
+  - Users can **only view fields, raws, and data related to their farm(s)**
+- 🌱 Enables secure **multi-user access** and **data separation per farm**
 
 ---
 
-### **Phase 3 Advanced Features Video Processing**
+### **Phase 3 Advanced Features Video Support**
+
 🔹 **Historical Tracking & Yield Comparison**  
-   - Farmers can **view past yield estimations** in a new **"HistoryScreen"**.  
-   - Advanced comparison: **AI yield vs. manually recorded actual harvest.**  
+- View **past estimations** in a new **HistoryScreen**  
+- Compare **AI predictions vs. actual harvest** recorded manually  
 
-🔹 **Full Video-Based Apple Detection & Tracking**  
-   - Use **Optical Flow Tracking (Lucas-Kanade or Farneback)** to **avoid duplicate counting in videos**.  
-   - Farmers can **record video while walking through the orchard** instead of taking individual pictures.  
+🔹 **Video-Based Apple Detection**  
+- Record a **video walk-through** of a row instead of still photos  
+- Use **Optical Flow Tracking (Lucas-Kanade or Farneback)** to track apples frame-by-frame and **avoid duplicates**
 
-🔹 **Integration with Smart Farming Tools**  
-   - **Export yield estimations** as **CSV or PDF reports**.  
-   - **Potential API integration** with other farming tools. 
-   
-🔹 **Apple Maturity Classification (Color-Based Analysis)**  
-   - Detects **green vs. ripe apples** based on **HSV color filtering**.  
-   - Helps farmers **estimate ideal harvest time**.   
+🔹 **Export & Integration Tools**  
+- Export reports as **CSV or PDF** for local analysis  
+- API hooks for potential **integration with smart farming dashboards/tools**  
 
----
+🔹 **Apple Maturity Classification**  
+- Identify **ripe vs. unripe apples** based on color (HSV analysis)  
+- Useful for **harvest timing predictions**
+
+ 

@@ -18,6 +18,12 @@ This document defines the API interface for the Pomolobee project, specifying:
     - [2 Django to ML](#2-django-to-ml)
     - [3 ML to Django](#3-ml-to-django)
   - [Document reference](#document-reference)
+  - [**JSON Format Conventions**](#json-format-conventions)
+    - [General Rules](#general-rules)
+    - [Standard Response Structure](#standard-response-structure)
+    - [Standard Error Codes](#standard-error-codes)
+    - [Object Field Naming Conventions](#object-field-naming-conventions)
+    - [️ Reserved Keys](#reserved-keys)
 <!-- TOC END -->
  
 </details>
@@ -80,3 +86,113 @@ This document defines the API interface for the Pomolobee project, specifying:
 -  📖 3 **ML to Django** [ML to Django specification](API_3_ML_to_Django.md)
  
  
+
+## **JSON Format Conventions**
+ 
+
+To ensure clarity, consistency, and compatibility across the **PomoloBee ecosystem**, all JSON payloads exchanged between the **App** and the **Django backend** must follow the conventions below.
+
+---
+
+### General Rules
+
+| Rule               | Convention                                           |
+|--------------------|------------------------------------------------------|
+| **Encoding**        | UTF-8                                                |
+| **Key Naming**      | Use `snake_case`                                     |
+| **Identifiers**     | Always prefixed: `image_id`, `field_id`, `raw_id`   |
+| **Booleans**        | Use JSON booleans: `true` / `false`                 |
+| **Numerics**        | Use `integer` or `float` appropriately              |
+| **Dates**           | Use ISO 8601 format: `YYYY-MM-DD`                   |
+| **Timestamps**      | Use full ISO 8601: `YYYY-MM-DDTHH:MM:SS`            |
+
+✅ **Never expose raw `id` fields** — always use explicit identifiers like `image_id`.
+
+---
+
+### Standard Response Structure
+
+#### Success Responses
+
+```json
+{
+  "status": "success",
+  "data": {
+    "image_id": 24,
+    "status": "done"
+  }
+}
+```
+
+The `"data"` object contains all returned payload values for a successful request.
+
+---
+
+#### Error Responses
+
+All error responses must follow this structure:
+
+```json
+{
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable message (fallback or for logs)"
+  }
+}
+```
+
+✅ **Rules:**
+- `code`: machine-readable key used for logic & app i18n
+- `message`: developer-readable explanation (or fallback UI)
+- `locale_key`: optional key for frontend translation files
+
+---
+
+### Standard Error Codes
+
+| Error Code                | HTTP Status | Description                                                         |
+|---------------------------|-------------|---------------------------------------------------------------------|
+| `400_BAD_REQUEST`         | 400         | Generic client-side error (invalid JSON, syntax errors, etc.)       |
+| `401_UNAUTHORIZED`        | 401         | Auth required or token invalid                                      |
+| `403_FORBIDDEN`           | 403         | User is authenticated but lacks permission                         |
+| `404_NOT_FOUND`           | 404         | Resource does not exist (e.g. image, history)                       |
+| `409_CONFLICT`            | 409         | Conflict with existing resource (e.g. already processed)            |
+| `422_UNPROCESSABLE_ENTITY`| 422         | Semantically invalid data (e.g. future date, wrong state)           |
+| `500_INTERNAL_ERROR`      | 500         | Internal server error                                               |
+| `ML_UNAVAILABLE`          | 503         | ML microservice unreachable                                         |
+| `ML_PROCESSING_FAILED`    | 502         | ML failed to process the image and returned an error                |
+| `IMAGE_FORMAT_UNSUPPORTED`| 400         | File is not JPEG/PNG                                                |
+| `MISSING_PARAMETER`       | 400         | Required parameter(s) not included in the request                   |
+| `INVALID_INPUT`           | 400         | One or more fields failed validation (e.g. invalid `raw_id`)        |
+| `ALREADY_PROCESSED`       | 409         | Image has already been processed                                    |
+| `NO_HISTORY_FOUND`        | 404         | No historical estimation data found                                 |
+| `NO_ESTIMATION_FOUND`     | 404         | No yield estimation available for this image                        |
+| `RATE_LIMITED` | 429 | If rate-limiting logic is introduced |
+| `SERVICE_DEPENDENCY_ERROR` | 503 | For non-ML external services that fail (e.g., object storage) |
+| `UPLOAD_FAILED` | 500 | Image upload to storage failed |
+| `PAYLOAD_TOO_LARGE` | 413 | (Future-proof) App sends too large file |
+
+---
+
+### Object Field Naming Conventions
+
+| Entity        | Example Keys                        |
+|---------------|-------------------------------------|
+| **Field**     | `field_id`, `field_name`            |
+| **Raw**       | `raw_id`, `nb_plant`, `fruit_type`  |
+| **Fruit**     | `fruit_id`, `short_name`            |
+| **Image**     | `image_id`, `upload_date`, `status` |
+| **Estimation**| `plant_apfel`, `confidence_score`, `raw_kg` |
+
+✅ **Always use** `xxx_id` for references — never just `id`.
+
+---
+
+### ️ Reserved Keys
+
+Avoid using these reserved terms at the top-level of any payload unless specified:
+
+- `id` (always prefix)
+- `type`, `object`, `meta`, `links` (reserved for future extensions)
+
+---

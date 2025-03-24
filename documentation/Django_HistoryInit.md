@@ -16,10 +16,9 @@
     - [Step 1 Create Django Project](#step-1-create-django-project)
     - [Step 2 Install Required Packages](#step-2-install-required-packages)
     - [Step 3 Configure Django Settings](#step-3-configure-django-settings)
-    - [Set Up Database Migrations](#set-up-database-migrations)
-    - [Why Did You Create a Superuser After Setting Up PostgreSQL?](#why-did-you-create-a-superuser-after-setting-up-postgresql)
-    - [we created the equirements.txt](#we-created-the-equirementstxt)
+    - [we created the requirements.txt](#we-created-the-requirementstxt)
   - [Init Data Modele](#init-data-modele)
+    - [Why Did You Create a Superuser After Setting Up PostgreSQL?](#why-did-you-create-a-superuser-after-setting-up-postgresql)
     - [test initialisation data in table with admin console user wuth django superuser pomobee](#test-initialisation-data-in-table-with-admin-console-user-wuth-django-superuser-pomobee)
     - [test initialisation](#test-initialisation)
   - [Init Django code](#init-django-code)
@@ -225,15 +224,41 @@ mkdir media
 
 
 ---
+ 
 
-### Set Up Database Migrations
+
+
+### we created the requirements.txt
+in the PomoloBee folder :
 ```sh
-python manage.py migrate
-python manage.py createsuperuser
-# i will put pomobee this is the superuser of django admin
-python manage.py runserver
+pip freeze > requirements.txt
 ```
 
+## Init Data Modele
+
+Modify the PomoloBeeDjango/core/models.py to ad necessary models
+Customize the admin panel for better display in  PomoloBeeDjango/core/admin.py
+
+  ```bash
+  cd  PomoloBee/PomoloBeeDjango 
+  source venv/bin/activate 
+  python manage.py makemigrations core
+  python manage.py migrate
+  python manage.py migrate 
+  python manage.py loaddata core/fixtures/initial_superuser.json
+  python manage.py shell
+
+   ```
+
+  - createsuperuser should be "pomobee" this is the superuser of django admin
+
+```python 
+from django.contrib.auth.models import User
+u = User.objects.get(username='pomobee')
+u.set_password('new_secure_password')
+u.save()
+```
+ 
 
 ### Why Did You Create a Superuser After Setting Up PostgreSQL?
  
@@ -244,27 +269,7 @@ python manage.py runserver
 
 ---
   
-
-### we created the equirements.txt
-in the PomoloBee folder :
-```sh
-pip freeze > requirements.txt
-```
-
-## Init Data Modele
-
-Modify the PomoloBeeDjango/core/models.py to add modele defined in Django_Datamodele.md specification
-Customize the admin panel for better display in  PomoloBeeDjango/core/admin.py
-
-  ```bash
-  cd  PomoloBee/PomoloBeeDjango 
-  source venv/bin/activate 
-  python manage.py makemigrations core
-  python manage.py migrate
-  python manage.py runserver
-
-  ```
-
+  
 ### test initialisation data in table with admin console user wuth django superuser pomobee
 
 in your webbrowser log with the superuser  pomobee to  http://127.0.0.1:8000/admin/
@@ -293,10 +298,11 @@ VALUES
  
  ### test automatic initialisation with fixture
 
-make initialisation of table in json files core/fixtures/initial_fields.json and core/fixtures/initial_fruit.json with the data you need
+make initialisation of table in json files  with the data you need
 
 load the data
   ```bash
+ python manage.py loaddata core/fixtures/initial_farms.json
  python manage.py loaddata core/fixtures/initial_fields.json
  python manage.py loaddata core/fixtures/initial_fruits.json
  python manage.py loaddata core/fixtures/initial_raws.json
