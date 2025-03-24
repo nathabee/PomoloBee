@@ -18,7 +18,7 @@ This document defines the API interface for the Pomolobee project, specifying:
     - [️ ML Endpoint Base Path](#ml-endpoint-base-path)
     - [**Polling Strategy**](#polling-strategy)
   - [**Error Handling Strategy**](#error-handling-strategy)
-    - [Basic Contract Tests](#basic-contract-tests)
+  - [Basic Contract Tests](#basic-contract-tests)
     - [Recommended Test](#recommended-test)
   - [**JSON Format Conventions**](#json-format-conventions)
 <!-- TOC END -->
@@ -158,7 +158,7 @@ http://localhost:5000/ml/process-image/
 
 ---
 
-###   Basic Contract Tests
+##   Basic Contract Tests
 
  ### ✅ What Django Expects from ML
 
@@ -169,6 +169,7 @@ http://localhost:5000/ml/process-image/
 ### Recommended Test
 - Try curl POST to `/ml/process-image/` with a dummy payload
 - Verify that Django handles both 200 and 400 responses correctly
+-  For ML failure handling tests, see: `tests/test_ml_unavailable.py`
 
 
 ## **JSON Format Conventions**
@@ -176,3 +177,7 @@ http://localhost:5000/ml/process-image/
 📌 **IMPORTANT : see documentation  API** [API specification](API.md) defining :
 - list of existing error code
 - format and naming convention 
+- For what triggers ML calls 
+
+---
+ 

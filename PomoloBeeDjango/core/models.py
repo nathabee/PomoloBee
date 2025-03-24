@@ -67,7 +67,7 @@ class ImageHistory(models.Model):
     confidence_score = models.FloatField(null=True, blank=True)  # Store ML confidence
     processed = models.BooleanField(default=False)  # Flag if ML has processed the image
     raw = models.ForeignKey('Raw', on_delete=models.CASCADE, related_name='images')  # ✅ New: Links image to a raw
-
+    date = models.DateField(null=True, blank=True)
     def __str__(self):
         return f"Image {self.id} - {self.raw.name if self.raw else 'No Raw'}"
 

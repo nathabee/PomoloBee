@@ -59,18 +59,112 @@ class GetEndpointsTest(TestCase):
     def test_get_fields(self):
         response = self.client.get(reverse('fields-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 2)
-        self.assertEqual(response.json()[0]["name"], "North Orchard")
+        self.assertIn("fields", response.json()["data"])
+        self.assertEqual(len(response.json()["data"]["fields"]), 2)
+        self.assertEqual(response.json()["data"]["fields"][0]["name"], "North Orchard")
 
     def test_get_fruits(self):
         response = self.client.get(reverse('fruits-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 2)
-        self.assertEqual(response.json()[0]["name"], "Golden Apple")
+        self.assertIn("fruits", response.json()["data"])
+        self.assertEqual(len(response.json()["data"]["fruits"]), 2)
+        self.assertEqual(response.json()["data"]["fruits"][0]["name"], "Golden Apple")
+
 
     def test_get_locations(self):
         response = self.client.get(reverse('locations'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("locations", response.json())
-        self.assertEqual(len(response.json()["locations"]), 2)
-        self.assertEqual(len(response.json()["locations"][0]["raws"]), 2)
+        self.assertIn("locations", response.json()["data"])
+        self.assertEqual(len(response.json()["data"]["locations"]), 2)
+        self.assertEqual(len(response.json()["data"]["locations"][0]["raws"]), 2)
+
+
+     # Uploading Images
+    def test_post_image_upload(self):
+        # POST /api/images/
+        # Add upload logic and assertions
+        pass
+
+    # Checking Processing Status
+    def test_get_image_status(self):
+        # GET /api/images/{image_id}/status/
+        pass
+
+    # Fetching Estimation Results
+    def test_get_estimation_results(self):
+        # GET /api/estimations/{image_id}/
+        pass
+
+    def test_get_latest_estimations(self):
+        # GET /api/latest_estimations/
+        pass
+
+    # Fetching Image List
+    def test_get_image_list(self):
+        # GET /api/images/
+        pass
+
+    # Fetching Image Details
+    def test_get_image_details(self):
+        # GET /api/images/{image_id}/details/
+        pass
+
+    # Deleting an Image
+    def test_delete_image(self):
+        # DELETE /api/images/{image_id}/
+        pass
+
+    # Fetching Processing Errors
+    def test_get_error_log(self):
+        # GET /api/images/{image_id}/error_log
+        pass
+
+    # Fetching History of Estimations
+    def test_get_history(self):
+        # GET /api/history/
+        pass
+
+    def test_get_history_detail(self):
+        # GET /api/history/{history_id}/
+        pass
+
+    # Request Retry for ML Processing
+    def test_post_retry_processing(self):
+        # POST /api/retry_processing/
+        pass
+
+    # App fetches ML results (Django-side)
+    def test_get_ml_result_from_django(self):
+        # GET /api/images/{image_id}/ml_result
+        pass
+
+    
+    def test_get_ml_version(self):
+        response = self.client.get(reverse('ml-version'))  # Make sure your URL name is correct
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        
+        # Check standard response structure
+        self.assertIn("status", data)
+        self.assertEqual(data["status"], "success")
+        self.assertIn("data", data)
+
+        ml_data = data["data"]
+        
+        # Check required fields are present
+        self.assertIn("model_version", ml_data)
+        self.assertIn("status", ml_data)
+        self.assertIn("last_updated", ml_data)
+
+        # Check field types / values
+        self.assertIsInstance(ml_data["model_version"], str)
+        self.assertIsInstance(ml_data["status"], str)
+        self.assertRegex(ml_data["last_updated"], r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$")  # ISO 8601 datetime
+
+
+
+    # ML → Django: Posting ML result
+    def test_post_ml_result_to_django(self):
+        # POST /api/images/{image_id}/ml_result
+        pass

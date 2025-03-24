@@ -255,6 +255,15 @@ curl -X POST "https://server.com/api/images/" \
     "message": "Image and raw_id are required."
   }
 }
+
+{
+  "error": {
+    "code": "ML_UNAVAILABLE",
+    "message": "ML service unavailable. Image has been saved and can be retried.",
+    "image_id": 24
+  }
+}
+
 ```
 
 ---
@@ -835,4 +844,4 @@ curl -X POST "https://server.com/api/images/" \
 
 📌 **IMPORTANT : see documentation  API** [API specification](API.md) defining :
 - list of existing error code
-- format and naming convention 
+- format and naming convention  

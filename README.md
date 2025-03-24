@@ -8,7 +8,7 @@ This repository contains the mobile app, backend server, and ML microservice for
     <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/documentation/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
 </p>
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _44 hours_ (Auto-generated)  
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _46 hours_ (Auto-generated)  
 
 ---
 
@@ -38,7 +38,7 @@ This repository contains the mobile app, backend server, and ML microservice for
     - [5. ️ Run Your Server](#5-run-your-server)
 <!-- TOC END -->
  
-</details>
+</details> 
 
   
 ---
@@ -51,7 +51,7 @@ This repository contains the mobile app, backend server, and ML microservice for
 📖 **Workflow:** [Workflow](documentation/Workflow.md)  
 📖 **ML Specification:** [ML Specification](documentation/ML_Specification.md)  
 📖 **App Specification:** [App Specification](documentation/App_Specification.md)  [App Structure](documentation/App_Structure.md)  
-📖 **Database Specification:** [PostgresSQL Specification](documentation/Django_PostgresSQL.md)   
+📖 **Database Specification:** [PostgresSQL Specification](documentation/Django_PostgreSQL.md)   
 
 ---
 

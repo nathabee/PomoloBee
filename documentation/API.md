@@ -17,6 +17,7 @@ This document defines the API interface for the Pomolobee project, specifying:
     - [1 App to Django](#1-app-to-django)
     - [2 Django to ML](#2-django-to-ml)
     - [3 ML to Django](#3-ml-to-django)
+    - [**Trigger Map**](#trigger-map)
   - [Document reference](#document-reference)
   - [**JSON Format Conventions**](#json-format-conventions)
     - [General Rules](#general-rules)
@@ -42,8 +43,6 @@ This document defines the API interface for the Pomolobee project, specifying:
 | **Fetching Orchard Data** | `GET /api/fields/` | Fetch all available fields (orchards). | **App → Django Backend** | **SettingsScreen (🔄 Sync Data Button)** |
 | | `GET /api/fruits/` | Fetch all available fruit types. | **App → Django Backend** | **SettingsScreen (🔄 Sync Data Button)** |
 | **Location Selection API** | `GET /api/locations/` | Fetch orchard and field details for offline use. | **App → Django Backend** | **SettingsScreen (🔄 Sync Data Button)** |
-| **Updating Raw Details** | `PATCH /api/raws/{raw_id}/` | Modify details of a raw (e.g., tree count). | **App → Django Backend** | **SettingsScreen (✏️ Edit Raw Button & 💾 Save Button)** |
-| **Updating Field Information** | `PATCH /api/fields/{field_id}/` | Modify details of a field (e.g., name, orientation). | **App → Django Backend** | **SettingsScreen (✏️ Edit Field Button & 💾 Save Button)** |
 | **Uploading Images (On Demand)** | `POST /api/images/` | Upload an image for processing (includes `raw_id`). | **App → Django Backend** | **ProcessingScreen (📤 Analyze Button)** |
 | **Checking Processing Status** | `GET /api/images/{image_id}/status/` | Check if ML has processed the image. | **App → Django Backend** | **ProcessingScreen (🔄 Refresh Status Button)** |
 | **Fetching Estimation Results** | `GET /api/estimations/{image_id}/` | Fetch ML detection results (apple count, confidence, yield). | **App → Django Backend** | **ResultScreen (🔄 Load Estimation Button)** |
@@ -74,7 +73,33 @@ This document defines the API interface for the Pomolobee project, specifying:
 |-------------|--------------|-------------|----------------------|
 | | `POST /api/images/{image_id}/ml_result` | ML returns detection results to Django. | **ML Model → Django** | **After processing completion** |
 
- 
+
+###  **Trigger Map**
+
+This part show API call that are induced from other API CALL
+
+```mermaid
+graph TD
+  subgraph App
+    A1[POST /api/images/]
+    A2[GET /api/ml/version/]
+  end
+
+  subgraph Django
+    D1[Save image & metadata]
+    D2[Query ML version]
+    D3[Retry ML call internal]
+  end
+
+  subgraph ML
+    M1[POST /ml/process-image/]
+    M2[GET /ml/version/]
+  end
+
+  A1 --> D1 --> M1
+  A2 --> D2 --> M2
+  D3 --> M1
+```
 ---
  
 
@@ -144,7 +169,7 @@ All error responses must follow this structure:
 ✅ **Rules:**
 - `code`: machine-readable key used for logic & app i18n
 - `message`: developer-readable explanation (or fallback UI)
-- `locale_key`: optional key for frontend translation files
+- `image_id`: optional in case partially process image
 
 ---
 

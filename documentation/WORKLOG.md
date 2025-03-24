@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _44 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _46 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -152,7 +152,7 @@ This document tracks the number of hours worked each day and provides a brief de
 ##  Week 3 Dates from Mars 24 to Mars 30 2025
 
 ###  Mars 24 2025
-- **Hours Worked**: 8 hours
+- **Hours Worked**: 10 hours
 - **Tasks**:
   - added JSON format specification [specification API](API.md)
   - error and response wrapping in API documentation and in Django and Flask Code
@@ -164,7 +164,12 @@ This document tracks the number of hours worked each day and provides a brief de
   - create empty tree folder for PomoloBeeML sub-project
   - create Django/Core/fixtures/initial_farms.json and add id_farm in field
   - modify README.md, Django_HistoryInit.md to specifiy creation with fixture - - script pomoloBeeDjango/scripts/reset_db.sh to reset or install  database
-  
+  - Django test => views, urls and API correction
+  - pomoloBeeDjango/core/test/test_ml_unavailable.py : ok
+  - pomoloBeeDjango/core/test/test_migration.py : ok need to add default farm
+  - pomoloBeeDjango/core/test/test_endpoint.py : ok need to add missing
+  - pomoloBeeDjango/core/test/test_ml.py : to be done
+  - pomoloBeeDjango/core/test/test_worflow.py : to be done
 - **Theme**: Project Initialization 
 
 
@@ -176,10 +181,9 @@ This document tracks the number of hours worked each day and provides a brief de
   - write code for files  ui/components/ImageCard.kt , FolderPicker.kt,  PermissionManager.kt
   - write code for files  ui/screens/ProcessingScreen.kt ResultScreen.kt OrchardScreen.kt LocationScreen.kt ErrorLogScreen.kt ImageHistoryScreen.kt LocalResultScreen.kt PreviewScreen.kt SettingsRepository.kt
   - **DJANGO**
-  - at this point DjangoApp is just specified , shortly implented in code but not tested 
-  - check django is aligned with specification API_1 and API_2 spec. 
+  - at this point DjangoApp is just specified , shortly implented in code but not tested  
   - Django code must be tested. 
-  - need to test test_workflow and test_ml.  
+  - need to change and test: test_migration, test_endpoint, test_workflow and test_ml.  
   - **ML**
   - at this point ML is not specified (except API) and not implented in code. just empty nutshell to have a endpoint to test app and django
   - make Flask implementation aligned with API_2 and API_3. 
