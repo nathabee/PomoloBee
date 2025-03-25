@@ -5,6 +5,7 @@
     "DJANGO_API_URL": "http://localhost:8000/api",
     "LOG_FILE": "logs/flask.log",
     "MOK": true,
+    "MOK_RUNSERVER": false,
     "MOK_CODE": 200,
     "MOK_RETURN": { "message": "Mock OK" }, 
     "MOK_DELAY": 3,

@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _54 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _56 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -175,7 +175,7 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 ###  Mars 25 2025
-- **Hours Worked**: 8 hours
+- **Hours Worked**: 10 hours
 - **Tasks**:
   -  init Django_Specification.md base on Workflow. (merge Data Model inside)
   -  the Specification [Django](Django_Specification.md) show impact on database clearly to check endpoint test and validate implementation url and views 
@@ -186,6 +186,7 @@ This document tracks the number of hours worked each day and provides a brief de
   - pomoloBeeDjango/core/test/test_endpoints.py
   - init [Django Test](Django_Test.md) to list all test and how to run them
   - start core.test_endpoints with Flask in Debug + Mok mode
+  -  init [ML Test](ML_Test.md) to list all test and how to run them
 - **Theme**: Backend Django Code and Test  
 
  

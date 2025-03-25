@@ -35,7 +35,10 @@ except Exception as e:
 
 IS_DEBUG_MODE = FLASK_CONFIG.get("DEBUG", False)
 IS_MOCK_MODE = FLASK_CONFIG.get("MOK", False)
-
+DJANGO_API_URL = FLASK_CONFIG.get("DJANGO_API_URL", "http://django-backend:8000/api/images/")
+ML_MODEL_VERSION = FLASK_CONFIG.get("ML_MODEL_VERSION", "v1.0.0")
+LAST_UPDATED = FLASK_CONFIG.get("LAST_UPDATED", "2024-01-01T00:00:00")
+IS_MOCK_RUNSERVER = FLASK_CONFIG.get("MOK_RUNSERVER", True)
 
 # ------------------------------
 # ✅ LOG files
@@ -65,9 +68,6 @@ else:
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-DJANGO_API_URL = FLASK_CONFIG.get("DJANGO_API_URL", "http://django-backend:8000/api/images/")
-ML_MODEL_VERSION = FLASK_CONFIG.get("ML_MODEL_VERSION", "v1.0.0")
-LAST_UPDATED = FLASK_CONFIG.get("LAST_UPDATED", "2024-01-01T00:00:00")
 
 processing_queue = {}
 
@@ -93,7 +93,7 @@ def api_success(data, status_code=200):
 
 # ------------------------------
 # 🔁 POST /ml/process-image
-# ------------------------------
+# ------------------------------ 
 @app.route('/ml/process-image', methods=['POST'])
 def process_image():
     data = request.json
@@ -103,26 +103,24 @@ def process_image():
     if not image_id or not image_url:
         return api_error("INVALID_INPUT", "Invalid image URL or image ID.", 400)
 
-   
+    # ➕ Handle short-circuit mock mode when MOK_RUNSERVER == False
+    if IS_MOCK_MODE :
+        if  not IS_MOCK_RUNSERVER or FLASK_CONFIG["MOK_CODE"] >= 300:
+            logging.debug(f"🧪 MOK_SHORT: Sending immediate mock response for image {image_id}")
+            return api_error("MOCK_ERROR", FLASK_CONFIG["MOK_RETURN"].get("message", "Mock error"), FLASK_CONFIG["MOK_CODE"])
 
-    # ✅ Safety Check for Idempotency and Retry
+    # ✅ Safety check for already queued
     if image_id in processing_queue:
         status = processing_queue[image_id]["status"]
-
         if status == "completed":
             return api_error("ALREADY_PROCESSED", f"Image {image_id} was already processed.", 409)
-
         elif status == "failed":
-            logging.debug(f"🔁 Retrying failed image {image_id}...")
-            processing_queue[image_id]["status"] = "processing"  # requeue
+            logging.debug(f"🔁 Retrying failed image {image_id}")
+            processing_queue[image_id]["status"] = "processing"
+        elif status in ("processing", "moking"):
+            return api_success({"message": f"Image {image_id} is already queued for processing."})
 
-        elif status in ("processing","moking"):
-            return api_success({
-                "message": f"Image {image_id} is already queued for processing."
-            })
-
-
-    # ✅ Real Mode: Download image
+    # ✅ Real Mode: Download image (for full mock + real processing)
     image_path = os.path.join(UPLOAD_FOLDER, f"image_{image_id}.jpg")
 
     try:
@@ -133,14 +131,12 @@ def process_image():
                     f.write(chunk)
         else:
             return api_error("ML_PROCESSING_FAILED", "Failed to download image.", 502)
-
     except requests.RequestException as e:
         return api_error("500_INTERNAL_ERROR", str(e), 500)
-    
+
+    # ✅ Decide processing mode
     if IS_MOCK_MODE:
-        logging.debug("🧪 MOK MODE ENABLED. Queuing mock image for background simulation.")
-        status = "moking"
-        image_path = "mock.jpg"
+        status = "moking" 
     else:
         status = "processing"
 
@@ -150,15 +146,8 @@ def process_image():
         "queued_at": time.time()
     }
 
-    # If mock code is meant to fail immediately
-    if IS_MOCK_MODE and FLASK_CONFIG["MOK_CODE"] >= 300:
-        return api_error("MOCK_ERROR", FLASK_CONFIG["MOK_RETURN"].get("message", "Mock error"), FLASK_CONFIG["MOK_CODE"])
 
-
-
-    return api_success({
-        "message": f"Image {image_id} received, processing started."
-    })
+    return api_success({"message": f"Image {image_id} received, processing started."})
 
 
 # ------------------------------
