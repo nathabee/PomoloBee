@@ -42,14 +42,20 @@ IS_MOCK_MODE = FLASK_CONFIG.get("MOK", False)
 # ------------------------------
  
 if IS_DEBUG_MODE:
-    log_path = FLASK_CONFIG.get("LOG_FILE", "flask_debug.log")
+    log_path = FLASK_CONFIG.get("LOG_FILE", "logs/flask_debug.log")
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
-    logging.basicConfig(filename=log_path, level=logging.DEBUG, format='%(asctime)s %(message)s')
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s %(message)s',
+        handlers=[
+            logging.FileHandler(log_path),
+            logging.StreamHandler()  # <- Also output to console
+        ]
+    )
 else:
     logging.basicConfig(level=logging.CRITICAL)  # suppress logs in prod
 
- 
- 
 
 
 

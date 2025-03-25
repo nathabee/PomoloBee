@@ -1,6 +1,7 @@
 [
     {
         "model": "core.raw",
+        "pk": 1,
         "fields": {
             "short_name": "C1-R1",
             "name": "Rang 1 cote maison Swing 1",
@@ -11,6 +12,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 2,
         "fields": {
             "short_name": "C1-R2",
             "name": "Rang 2 cote maison Swing 2",
@@ -21,6 +23,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 3,
         "fields": {
             "short_name": "C1-R3",
             "name": "Rang 3 cote maison Swing 3",
@@ -31,6 +34,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 4,
         "fields": {
             "short_name": "C1-R4",
             "name": "Rang 4 cote maison Ladina 1",
@@ -41,6 +45,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 5,
         "fields": {
             "short_name": "C1-R5",
             "name": "Rang 5 cote maison Ladina 2",
@@ -51,6 +56,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 6,
         "fields": {
             "short_name": "C1-R6",
             "name": "Rang 6 cote maison Ladina 3",
@@ -61,6 +67,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 7,
         "fields": {
             "short_name": "C1-R7",
             "name": "Rang 7 cote maison Ladina 4",
@@ -71,6 +78,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 8,
         "fields": {
             "short_name": "C1-R8",
             "name": "Rang 8 cote maison Ladina 5",
@@ -81,6 +89,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 9,
         "fields": {
             "short_name": "C1-R9",
             "name": "Rang 9 cote maison Galiwa 1",
@@ -91,6 +100,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 10,
         "fields": {
             "short_name": "C1-R10",
             "name": "Rang 10 cote maison Galiwa 2",
@@ -101,6 +111,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 11,
         "fields": {
             "short_name": "C1-R11",
             "name": "Rang 11 cote maison Galiwa 3",
@@ -111,6 +122,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 12,
         "fields": {
             "short_name": "C1-R12",
             "name": "Rang 12 cote maison Galiwa 4",
@@ -121,6 +133,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 13,
         "fields": {
             "short_name": "C1-R13",
             "name": "Rang 13 cote maison Galiwa 5",
@@ -131,6 +144,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 14,
         "fields": {
             "short_name": "C1-R14",
             "name": "Rang 14 cote maison Pitch 1",
@@ -141,6 +155,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 15,
         "fields": {
             "short_name": "C1-R15",
             "name": "Rang 15 cote maison Pitch 2",
@@ -151,6 +166,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 16,
         "fields": {
             "short_name": "C1-R16",
             "name": "Rang 16 cote maison Pitch 3",
@@ -161,6 +177,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 17,
         "fields": {
             "short_name": "C1-R17",
             "name": "Rang 17 cote maison Pixie 1",
@@ -171,6 +188,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 18,
         "fields": {
             "short_name": "C1-R18",
             "name": "Rang 18 cote maison Pixie 2",
@@ -181,6 +199,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 19,
         "fields": {
             "short_name": "C1-R19",
             "name": "Rang 19 cote maison Pixie 3",
@@ -191,6 +210,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 20,
         "fields": {
             "short_name": "C1-R20",
             "name": "Rang 20 cote maison Pixie 4",
@@ -201,6 +221,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 21,
         "fields": {
             "short_name": "C1-R21",
             "name": "Rang 21 cote maison Pixie 5",
@@ -211,6 +232,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 22,
         "fields": {
             "short_name": "C1-R22",
             "name": "Rang 22 cote maison Pixie 6",
@@ -221,6 +243,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 23,
         "fields": {
             "short_name": "C1-R23",
             "name": "Rang 23 loin maison Pixie 7",
@@ -231,6 +254,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 24,
         "fields": {
             "short_name": "C1-R24",
             "name": "Rang 24 loin maison Early Grunch 1",
@@ -241,6 +265,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 25,
         "fields": {
             "short_name": "C1-R25",
             "name": "Rang 25 loin maison Early Grunch 2",
@@ -251,6 +276,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 26,
         "fields": {
             "short_name": "C1-R26",
             "name": "Rang 26 loin maison Early Grunch 3",
@@ -261,6 +287,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 27,
         "fields": {
             "short_name": "C1-R27",
             "name": "Rang 27 loin maison Early Grunch 4",
@@ -271,6 +298,7 @@
     },
     {
         "model": "core.raw",
+        "pk": 28,
         "fields": {
             "short_name": "C1-R28",
             "name": "Rang 28 loin maison Early Grunch 5",

@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=ImageHistory)
 def image_processed_handler(sender, instance, created, **kwargs):
-    print(f"🔔 Signal fired! Image ID: {instance.id}, Processed: {instance.processed}")
+    # print(f"🔔 Signal fired! Image ID: {instance.id}, Processed: {instance.processed}")
     if instance.processed and instance.nb_apfel is not None:
         logger.info(f"Triggering yield estimation for Image {instance.id}")
         # Avoid duplicate creation if history already exists

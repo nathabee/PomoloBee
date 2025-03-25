@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _52 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _54 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -175,26 +175,36 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 ###  Mars 25 2025
-- **Hours Worked**: 6 hours
+- **Hours Worked**: 8 hours
 - **Tasks**:
   -  init Django_Specification.md base on Workflow. (merge Data Model inside)
   -  the Specification [Django](Django_Specification.md) show impact on database clearly to check endpoint test and validate implementation url and views 
-  -  pomoloBeeDjango/core/test/test_migration.py: added farm, superuser and empty tables tested OK
+  - Auto-populate HistoryRaw after ML updates ImageHistory Needs post_save 
+  -  pomoloBeeDjango/core/test/test_migration.py: added farm, superuser and empty tables. add test trigger save on history_image tested OK
   - ML flask add debug mode and config file 
   - ML flask add mok ML engine (detect apple bypass,  guided return payload and code, still communicating with API and answering django)
   - pomoloBeeDjango/core/test/test_endpoints.py
-- **Theme**: Backend Django Code and Test 
+  - init [Django Test](Django_Test.md) to list all test and how to run them
+  - start core.test_endpoints with Flask in Debug + Mok mode
+- **Theme**: Backend Django Code and Test  
 
--What’s Not Yet Fully Implemented
--Planned Logic	Status
--Auto-populate HistoryRaw after ML updates ImageHistory	⚠️ Needs post_save -signal or background job
--Auto-create HistoryEstimation entry	⚠️ Optional but recommended
--Retry mechanism tracks number of retries	❌ Not yet implemented
--Image/estimation deletion cleans up History*	⚠️ Depends on use case
-
-
+ 
 
 - **PENDING**
+
+++ need to django startserver to acess media
+
+   ❌ Why Tests Fail (Summary)
+
+  | **Test**                          | **Error**            | **Likely Cause** |
+  |----------------------------------|----------------------|------------------|
+  | `test_get_estimation_results`    | Missing `"plant_kg"` | Your API returns limited data — maybe missing `HistoryRaw` join or wrong view logic |
+  | `test_post_image_upload`         | `503` instead of `201` | Your **mock config forces a `400`** (via `MOK_CODE`) — see below |
+  | `test_post_retry_processing`     | `500` not in `[200, 503]` | Retry logic fails or ML mock returns error |
+  | `test_get_latest_estimations`    | `404`                 | No data present or view not implemented |
+  | `test_get_history_detail`        | `404`                 | `HistoryRaw` not found — ID mismatch or data not created properly |
+
+
   - **APP**
   - at this point App is just specified but not implented in code. just empty nutshell
   - Check App specification aligned with API_1. 

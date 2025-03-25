@@ -69,6 +69,7 @@ class LoadFixtureDataTest(TestCase):
 
 class ModelTableExistenceTest(TestCase):
     # check existence of table that are not filled with data with fixture
+
     def setUp(self):
         # Create superuser (owner of the farm)
         self.user = User.objects.create_superuser(username="admin", password="adminpass", email="admin@example.com")
@@ -120,8 +121,15 @@ class ModelTableExistenceTest(TestCase):
 
 # check that History raw is created each time we create a Image History with process = True
 class AutoHistoryCreationTest(TestCase):
-    fixtures = ["initial_farms.json", "initial_fields.json", "initial_raws.json", "initial_fruits.json"]
-
+    
+    fixtures = [
+        "initial_superuser.json",      
+        "initial_farms.json",
+        "initial_fields.json",
+        "initial_fruits.json",
+        "initial_raws.json"
+    ]
+    
     def test_history_raw_created_after_ml_result(self):
         raw = Raw.objects.first()
         image = ImageHistory.objects.create(

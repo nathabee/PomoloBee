@@ -1,6 +1,7 @@
 [
     {
         "model": "core.fruit",
+        "pk": 1,
         "fields": {
             "short_name": "Swing_CG1",
             "name": "Cultivar Swing on CG1",
@@ -13,6 +14,7 @@
     },
     {
         "model": "core.fruit",
+        "pk": 2,
         "fields": {
             "short_name": "Ladina_CG1",
             "name": "Cultivar Ladina on CG1",
@@ -25,6 +27,7 @@
     },
     {
         "model": "core.fruit",
+        "pk": 3,
         "fields": {
             "short_name": "Gallwa_CG1",
             "name": "Cultivar Gallwa on CG1",
@@ -37,6 +40,7 @@
     },
     {
         "model": "core.fruit",
+        "pk": 4,
         "fields": {
             "short_name": "Pitch_M9",
             "name": "Cultivar Pitch on M9",
@@ -49,6 +53,7 @@
     },
     {
         "model": "core.fruit",
+        "pk": 5,
         "fields": {
             "short_name": "Pixie_CG1",
             "name": "Cultivar Pixie on CG1",
@@ -61,6 +66,7 @@
     },
     {
         "model": "core.fruit",
+        "pk": 6,
         "fields": {
             "short_name": "EarlyCrunch_M9_Nakab",
             "name": "Cultivar Early Crunch on M9 Nakab",
