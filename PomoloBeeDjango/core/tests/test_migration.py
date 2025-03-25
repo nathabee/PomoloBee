@@ -1,14 +1,29 @@
-# Unit test: Database fixtures
-
 from django.test import TestCase
-from django.urls import reverse
-from rest_framework import status
-from core.models import Field, Fruit, Raw
+from django.contrib.auth.models import User
+from core.models import ImageHistory, HistoryRaw, HistoryEstimation, Raw, Fruit, Field, Farm
+from datetime import date
+
 
 class LoadFixtureDataTest(TestCase):
     """Test if initial fixture data is correctly loaded in the test database."""
 
-    fixtures = ["initial_superuser.json","initial_farms.json","initial_fields.json", "initial_fruits.json", "initial_raws.json"]
+    fixtures = [
+        "initial_superuser.json",
+        "initial_farms.json",
+        "initial_fields.json",
+        "initial_fruits.json",
+        "initial_raws.json"
+    ]
+
+    def test_superuser_exists(self):
+        """Check if superuser 'pomobee' exists."""
+        user_exists = User.objects.filter(username="pomobee").exists()
+        self.assertTrue(user_exists, "Expected superuser 'pomobee' to exist in the database.")
+
+    def test_farms_count(self):
+        """Check that at least 1 farm is loaded from fixture."""
+        farm_count = Farm.objects.count()
+        self.assertGreaterEqual(farm_count, 1, "Expected at least 1 Farm in the database.")
 
     def test_field_count(self):
         """Check if 6 fields are correctly loaded."""
@@ -49,3 +64,74 @@ class LoadFixtureDataTest(TestCase):
         self.assertEqual(raw.nb_plant, 40)
         self.assertEqual(raw.field.id, 1)  # Foreign key to Field
         self.assertEqual(raw.fruit.id, 1)  # Foreign key to Fruit
+
+
+
+class ModelTableExistenceTest(TestCase):
+    # check existence of table that are not filled with data with fixture
+    def setUp(self):
+        # Create superuser (owner of the farm)
+        self.user = User.objects.create_superuser(username="admin", password="adminpass", email="admin@example.com")
+        
+        # Create Farm with owner
+        self.farm = Farm.objects.create(name="TestFarm", owner=self.user)
+        
+        # Create related Field and Fruit
+        self.field = Field.objects.create(short_name="TestField", name="Test Field", id_farm=self.farm)
+        self.fruit = Fruit.objects.create(
+            short_name="Apple",
+            name="Apple",
+            description="Test apple",
+            yield_start_date="2024-01-01",
+            yield_end_date="2024-12-31",
+            yield_avg_kg=2.0,
+            fruit_avg_kg=0.3
+        )
+        
+        # Create Raw for test
+        self.raw = Raw.objects.create(
+            field=self.field,
+            fruit=self.fruit,
+            name="Row A",
+            short_name="RA",
+            nb_plant=50
+        )
+
+    def test_image_history_table(self):
+        self.assertEqual(ImageHistory.objects.count(), 0)
+        img = ImageHistory.objects.create(image_path="test.jpg", raw=self.raw, date=date.today())
+        self.assertEqual(ImageHistory.objects.count(), 1)
+
+    def test_history_raw_table(self):
+        img = ImageHistory.objects.create(image_path="img.jpg", raw=self.raw, date=date.today())
+        hist = HistoryRaw.objects.create(date=date.today(), raw=self.raw, id_image=img, plant_apfel=10)
+        self.assertAlmostEqual(hist.raw_kg, hist.plant_apfel * self.fruit.fruit_avg_kg * self.raw.nb_plant)
+
+    def test_history_estimation_table(self):
+        estimation = HistoryEstimation.objects.create(
+            date=date.today(),
+            raw=self.raw,
+            estimated_yield_kg=48.5,
+            confidence_score=0.82
+        )
+        self.assertEqual(estimation.estimated_yield_kg, 48.5)
+        self.assertEqual(HistoryEstimation.objects.count(), 1)
+
+
+# check that History raw is created each time we create a Image History with process = True
+class AutoHistoryCreationTest(TestCase):
+    fixtures = ["initial_farms.json", "initial_fields.json", "initial_raws.json", "initial_fruits.json"]
+
+    def test_history_raw_created_after_ml_result(self):
+        raw = Raw.objects.first()
+        image = ImageHistory.objects.create(
+            image_path="test.jpg",
+            raw=raw,
+            date=date.today(),
+            nb_apfel=10,
+            confidence_score=0.85,
+            processed=True  # 👈 Trigger signal
+        )
+
+        self.assertTrue(HistoryRaw.objects.filter(id_image=image).exists())
+        self.assertTrue(HistoryEstimation.objects.filter(raw=raw).exists())

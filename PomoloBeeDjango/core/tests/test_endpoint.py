@@ -80,63 +80,217 @@ class GetEndpointsTest(TestCase):
 
 
      # Uploading Images
+ 
+    #POST /api/images/ → Upload image + start ML
     def test_post_image_upload(self):
-        # POST /api/images/
-        # Add upload logic and assertions
-        pass
+        from io import BytesIO
+        from PIL import Image
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        # Create dummy image in memory
+        image_file = BytesIO()
+        Image.new("RGB", (100, 100)).save(image_file, format="JPEG")
+        image_file.seek(0)
+
+        uploaded_file = SimpleUploadedFile("test.jpg", image_file.read(), content_type="image/jpeg")
+
+        response = self.client.post(
+            reverse("images"),  # Name for /api/images/
+            {
+                "image": uploaded_file,
+                "raw_id": self.raw1.id,
+                "date": "2024-03-14"
+            }
+        )
+
+        self.assertEqual(response.status_code, 201)
+        data = response.json()
+        self.assertIn("data", data)
+        self.assertIn("image_id", data["data"])
+
+
+
+
+    # Fetching Estimation Results 
+    # GET /api/estimations/{image_id}/
+    def test_get_estimation_results(self):
+        from core.models import ImageHistory, HistoryRaw, HistoryEstimation
+
+        # First create a processed image
+        img = ImageHistory.objects.create(
+            image_path="test.jpg",
+            raw=self.raw1,
+            date="2024-03-14",
+            processed=True,
+            nb_apfel=10,
+            confidence_score=0.9
+        )
+
+        # Simulate that signal has created history
+        HistoryRaw.objects.create(
+            id_image=img, raw=self.raw1, date="2024-03-14",
+            plant_apfel=10, plant_kg=3.0, raw_kg=150.0
+        )
+        HistoryEstimation.objects.create(
+            raw=self.raw1, date="2024-03-14", estimated_yield_kg=150.0, confidence_score=0.9
+        )
+
+        response = self.client.get(reverse("estimation-detail", args=[img.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("plant_kg", response.json()["data"])
+
 
     # Checking Processing Status
+    # GET /api/images/{image_id}/status/
     def test_get_image_status(self):
-        # GET /api/images/{image_id}/status/
-        pass
+        from core.models import ImageHistory
+        img = ImageHistory.objects.create(image_path="demo.jpg", raw=self.raw1, processed=True)
+        response = self.client.get(reverse("image-status", args=[img.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["data"]["processed"], True)
 
-    # Fetching Estimation Results
-    def test_get_estimation_results(self):
-        # GET /api/estimations/{image_id}/
-        pass
 
-    def test_get_latest_estimations(self):
-        # GET /api/latest_estimations/
-        pass
 
     # Fetching Image List
+    # GET /api/images/        
     def test_get_image_list(self):
-        # GET /api/images/
-        pass
+        response = self.client.get(reverse("images"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("images", response.json()["data"])
 
-    # Fetching Image Details
+
+    # Fetching Image Details 
+    # GET /api/images/{image_id}/details/
     def test_get_image_details(self):
-        # GET /api/images/{image_id}/details/
-        pass
+        from core.models import ImageHistory
+        img = ImageHistory.objects.create(image_path="demo.jpg", raw=self.raw1)
+        response = self.client.get(reverse("image-detail", args=[img.id]))
+        self.assertEqual(response.status_code, 200)
 
-    # Deleting an Image
-    def test_delete_image(self):
-        # DELETE /api/images/{image_id}/
-        pass
 
     # Fetching Processing Errors
+    # GET /api/images/{image_id}/error_log
     def test_get_error_log(self):
-        # GET /api/images/{image_id}/error_log
-        pass
+        from core.models import ImageHistory
+        img = ImageHistory.objects.create(image_path="demo.jpg", raw=self.raw1)
+        response = self.client.get(reverse("image-error-log", args=[img.id]))
+        self.assertEqual(response.status_code, 200)
+
+    # GET /api/latest_estimations/
+    def test_get_latest_estimations(self):
+        response = self.client.get(reverse("latest-estimations"))
+        self.assertEqual(response.status_code, 200)
+
 
     # Fetching History of Estimations
-    def test_get_history(self):
         # GET /api/history/
-        pass
+    def test_get_history(self):
+        response = self.client.get(reverse("history-list"))
+        self.assertIn(response.status_code, [200, 404])  # Allow empty case
 
-    def test_get_history_detail(self):
+
         # GET /api/history/{history_id}/
-        pass
+    def test_get_history_detail(self):
+        from core.models import ImageHistory, HistoryRaw
+        img = ImageHistory.objects.create(
+            image_path="test.jpg", raw=self.raw1, date="2024-03-14", processed=True
+        )
+        hr = HistoryRaw.objects.create(
+            id_image=img, raw=self.raw1, date="2024-03-14",
+            plant_apfel=10, plant_kg=3.0, raw_kg=150.0
+        )
+        response = self.client.get(reverse("history-detail", args=[hr.id]))
+        self.assertEqual(response.status_code, 200)
+ 
 
-    # Request Retry for ML Processing
-    def test_post_retry_processing(self):
+    # Deleting an Image 
+    # DELETE /api/images/{image_id}/
+    def test_delete_image(self):
+        from core.models import ImageHistory
+        image = ImageHistory.objects.create(
+            image_path="fake_path.jpg", raw=self.raw1, date="2024-03-14"
+        )
+        response = self.client.delete(reverse("image-delete", args=[image.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(ImageHistory.objects.filter(id=image.id).exists())
+
+
+    # ML → Django: Posting ML result 
+    # POST /api/images/{image_id}/ml_result
+    def test_post_ml_result_to_django(self):
+        from core.models import ImageHistory
+
+        image = ImageHistory.objects.create(
+            image_path="result_test.jpg",
+            raw=self.raw1,
+            date="2024-03-14",
+            processed=False
+        )
+
+        response = self.client.post(
+            reverse("ml-result", args=[image.id]),
+            {
+                "nb_apples": 12,
+                "confidence_score": 0.89,
+                "processed": True
+            },
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        image.refresh_from_db()
+        self.assertTrue(image.processed)
+        self.assertEqual(image.nb_apfel, 12)
+        self.assertAlmostEqual(image.confidence_score, 0.89, places=2)
+
+    # Request Retry for ML Processing 
         # POST /api/retry_processing/
-        pass
+    def test_post_retry_processing(self):
+        from core.models import ImageHistory
 
-    # App fetches ML results (Django-side)
-    def test_get_ml_result_from_django(self):
+        img = ImageHistory.objects.create(
+            image_path="test.jpg",
+            raw=self.raw1,
+            date="2024-03-14",
+            processed=False
+        )
+
+        response = self.client.post(
+            reverse("retry-processing"),
+            {"image_id": img.id},
+            content_type="application/json"
+        )
+
+        self.assertIn(response.status_code, [200, 503])  # Allow offline ML test
+
+
+    # App fetches ML results (Django-side) 
         # GET /api/images/{image_id}/ml_result
-        pass
+    def test_post_ml_result_to_django(self):
+        from core.models import ImageHistory
+
+        image = ImageHistory.objects.create(
+            image_path="fake.jpg",
+            raw=self.raw1,
+            date="2024-03-14",
+            processed=False
+        )
+
+        response = self.client.post(
+            reverse("ml-result", args=[image.id]),
+            {
+                "nb_apples": 12,
+                "confidence_score": 0.85,
+                "processed": True
+            },
+            content_type="application/json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        image.refresh_from_db()
+        self.assertTrue(image.processed)
+        self.assertEqual(image.nb_apfel, 12)
+
 
     
     def test_get_ml_version(self):
@@ -163,8 +317,3 @@ class GetEndpointsTest(TestCase):
         self.assertRegex(ml_data["last_updated"], r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$")  # ISO 8601 datetime
 
 
-
-    # ML → Django: Posting ML result
-    def test_post_ml_result_to_django(self):
-        # POST /api/images/{image_id}/ml_result
-        pass

@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _46 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _52 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -20,6 +20,7 @@
     - [Mars 23 2025](#mars-23-2025)
   - [Week 3 Dates from Mars 24 to Mars 30 2025](#week-3-dates-from-mars-24-to-mars-30-2025)
     - [Mars 24 2025](#mars-24-2025)
+    - [Mars 25 2025](#mars-25-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -47,7 +48,7 @@ This document tracks the number of hours worked each day and provides a brief de
 ###  Mars 15 2025
 - **Hours Worked**: 5 hours
 - **Tasks**:
-  - Create Documentation : DataModel, MLSpecification, API, Workflow 
+  - Create Documentation : DataModel [Data model](Django_Specification.md), MLSpecification, API, Workflow 
   - Add LICENSES
 - **Theme**:  Project Initialization 
 - **Progress**: 
@@ -68,7 +69,7 @@ This document tracks the number of hours worked each day and provides a brief de
   - STEP 6: include a App Theme and a special Font [History App](App_HistoryInit.md)
   - definition of UI and Screen in specification  [specification App](App_Specification.md)
   - modification modele add raw in image  [specification API](API.md)
-  - correction django modele to support raw for image and foreign kew to field from raw [Data Model](Django_DataModel.md)
+  - correction django modele to support raw for image and foreign kew to field from raw  [Data model](Django_Specification.md)
   - synchronised API with Workflow and DataModel   [specification API](API.md) 
 - **Theme**:  App Initialization 
 - **Progress**: Code compile need to be tested- UI not coded. Empty App
@@ -170,7 +171,26 @@ This document tracks the number of hours worked each day and provides a brief de
   - pomoloBeeDjango/core/test/test_endpoint.py : ok need to add missing
   - pomoloBeeDjango/core/test/test_ml.py : to be done
   - pomoloBeeDjango/core/test/test_worflow.py : to be done
-- **Theme**: Project Initialization 
+- **Theme**: Project Initialization + Backend Django Code and Test 
+
+
+###  Mars 25 2025
+- **Hours Worked**: 6 hours
+- **Tasks**:
+  -  init Django_Specification.md base on Workflow. (merge Data Model inside)
+  -  the Specification [Django](Django_Specification.md) show impact on database clearly to check endpoint test and validate implementation url and views 
+  -  pomoloBeeDjango/core/test/test_migration.py: added farm, superuser and empty tables tested OK
+  - ML flask add debug mode and config file 
+  - ML flask add mok ML engine (detect apple bypass,  guided return payload and code, still communicating with API and answering django)
+  - pomoloBeeDjango/core/test/test_endpoints.py
+- **Theme**: Backend Django Code and Test 
+
+-What’s Not Yet Fully Implemented
+-Planned Logic	Status
+-Auto-populate HistoryRaw after ML updates ImageHistory	⚠️ Needs post_save -signal or background job
+-Auto-create HistoryEstimation entry	⚠️ Optional but recommended
+-Retry mechanism tracks number of retries	❌ Not yet implemented
+-Image/estimation deletion cleans up History*	⚠️ Depends on use case
 
 
 

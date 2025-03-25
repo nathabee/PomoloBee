@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',  # Add Django REST Framework
-    'core',  # Your main app
+    'core.apps.CoreConfig',  # main app see core/__init__.py
 ]
 
 REST_FRAMEWORK = {

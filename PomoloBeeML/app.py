@@ -1,85 +1,125 @@
+import json
+import threading
 from flask import Flask, request, jsonify
-import os
-import time
-import cv2
-import numpy as np
-import requests
+import os, time, cv2, numpy as np, requests
+import logging
+
 
 app = Flask(__name__)
 
-# Ensure upload folder exists
-UPLOAD_FOLDER = "uploads"
+
+
+# ------------------------------
+# ✅ CONFIG: Load from JSON FILE
+# ------------------------------
+CONFIG_PATH = "flask_config.json"
+default_config = {
+    "DEBUG": False,
+    "MOK": False,
+    "MOK_CODE": 200,
+    "MOK_RETURN": {"message": "Default mock"},
+    "MOK_DELAY": 3,
+    "MOK_MLRESULT": {
+        "nb_apples": 10,
+        "confidence_score": 0.85,
+        "processed": True
+    }
+}
+try:
+    with open(CONFIG_PATH) as f:
+        FLASK_CONFIG = {**default_config, **json.load(f)}
+except Exception as e:
+    logging.debug("⚠️ Could not load config, using defaults.")
+    FLASK_CONFIG = default_config
+ 
+
+IS_DEBUG_MODE = FLASK_CONFIG.get("DEBUG", False)
+IS_MOCK_MODE = FLASK_CONFIG.get("MOK", False)
+
+
+# ------------------------------
+# ✅ LOG files
+# ------------------------------
+ 
+if IS_DEBUG_MODE:
+    log_path = FLASK_CONFIG.get("LOG_FILE", "flask_debug.log")
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
+    logging.basicConfig(filename=log_path, level=logging.DEBUG, format='%(asctime)s %(message)s')
+else:
+    logging.basicConfig(level=logging.CRITICAL)  # suppress logs in prod
+
+ 
+ 
+
+
+
+# ------------------------------
+# ML & STORAGE CONFIG
+# ------------------------------
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Django API Endpoint to POST results
-DJANGO_API_URL = os.getenv("DJANGO_API_URL", "http://django-backend:8000/api/images/")
+DJANGO_API_URL = FLASK_CONFIG.get("DJANGO_API_URL", "http://django-backend:8000/api/images/")
+ML_MODEL_VERSION = FLASK_CONFIG.get("ML_MODEL_VERSION", "v1.0.0")
+LAST_UPDATED = FLASK_CONFIG.get("LAST_UPDATED", "2024-01-01T00:00:00")
 
-# ML Model Version
-ML_MODEL_VERSION = "v1.2.5"
-LAST_UPDATED = "2024-03-10T14:00:00"
-
-# Dummy Storage for Processed Results
 processing_queue = {}
 
-
-def api_error(code, message, status_code=400):
-    return jsonify({
-        "error": {
-            "code": code,
-            "message": message
-        }
-    }), status_code
-
-def api_success(data, status_code=200):
-    return jsonify({
-        "status": "success",
-        "data": data
-    }), status_code
-
-
+# ------------------------------
+# 🧠 ML SIMULATION
+# ------------------------------
 def detect_apples(image_path):
-    """Simulated Apple Detection (Replace with real ML model later)."""
     img = cv2.imread(image_path)
     if img is None:
-        return None, None  # Image could not be read
-
-    nb_apples = np.random.randint(5, 20)  # Random apple count
-    confidence_score = round(np.random.uniform(0.7, 0.95), 2)  # Random confidence score
-
+        return None, None
+    nb_apples = np.random.randint(5, 20)
+    confidence_score = round(np.random.uniform(0.7, 0.95), 2)
     return nb_apples, confidence_score
 
+# ------------------------------
+# 🔁 API HELPERS
+# ------------------------------
+def api_error(code, message, status_code=400):
+    return jsonify({"error": {"code": code, "message": message}}), status_code
 
+def api_success(data, status_code=200):
+    return jsonify({"status": "success", "data": data}), status_code
+
+# ------------------------------
+# 🔁 POST /ml/process-image
+# ------------------------------
 @app.route('/ml/process-image', methods=['POST'])
 def process_image():
-    """Receives an image for processing, returns 200 OK immediately, then processes asynchronously."""
     data = request.json
     image_id = data.get("image_id")
     image_url = data.get("image_url")
 
     if not image_id or not image_url:
-        #return jsonify({"error": "Invalid image URL or image ID."}), 400
         return api_error("INVALID_INPUT", "Invalid image URL or image ID.", 400)
 
-    # safety check before retrying a completed image to block unneeded retry calls
-    if image_id in processing_queue and processing_queue[image_id]["status"] == "completed":
-        return api_error("ALREADY_PROCESSED", f"Image {image_id} was already processed.", 409)
+   
 
-    # requeue if pürocess failed
-    if image_id in processing_queue and processing_queue[image_id]["status"] == "failed":
-        print(f"Retrying failed image {image_id}...")
-        processing_queue[image_id]["status"] = "processing"
+    # ✅ Safety Check for Idempotency and Retry
+    if image_id in processing_queue:
+        status = processing_queue[image_id]["status"]
 
-    # If already queued and still processing, accept silently (idempotent)
-    elif image_id in processing_queue and processing_queue[image_id]["status"] != "completed":
-        return api_success({
-            "message": f"Image {image_id} is already queued for processing."
-        })
+        if status == "completed":
+            return api_error("ALREADY_PROCESSED", f"Image {image_id} was already processed.", 409)
+
+        elif status == "failed":
+            logging.debug(f"🔁 Retrying failed image {image_id}...")
+            processing_queue[image_id]["status"] = "processing"  # requeue
+
+        elif status in ("processing","moking"):
+            return api_success({
+                "message": f"Image {image_id} is already queued for processing."
+            })
 
 
+    # ✅ Real Mode: Download image
     image_path = os.path.join(UPLOAD_FOLDER, f"image_{image_id}.jpg")
 
     try:
-        # Download the image
         response = requests.get(image_url, stream=True)
         if response.status_code == 200:
             with open(image_path, 'wb') as f:
@@ -88,85 +128,103 @@ def process_image():
         else:
             return api_error("ML_PROCESSING_FAILED", "Failed to download image.", 502)
 
-
     except requests.RequestException as e:
-        # return jsonify({"error": str(e)}), 500
         return api_error("500_INTERNAL_ERROR", str(e), 500)
+    
+    if IS_MOCK_MODE:
+        logging.debug("🧪 MOK MODE ENABLED. Queuing mock image for background simulation.")
+        status = "moking"
+        image_path = "mock.jpg"
+    else:
+        status = "processing"
 
-    # Add to processing queue
     processing_queue[image_id] = {
         "image_path": image_path,
-        "status": "processing"
+        "status": status,
+        "queued_at": time.time()
     }
 
-    # ✅ Immediately return a success response to Django
-    response_message = {
-        "message": f"Image {image_id} received, processing started."
-    }
-    #return jsonify(response_message), 200
+    # If mock code is meant to fail immediately
+    if IS_MOCK_MODE and FLASK_CONFIG["MOK_CODE"] >= 300:
+        return api_error("MOCK_ERROR", FLASK_CONFIG["MOK_RETURN"].get("message", "Mock error"), FLASK_CONFIG["MOK_CODE"])
+
+
+
     return api_success({
         "message": f"Image {image_id} received, processing started."
     })
 
 
-
+# ------------------------------
+# ⏳ Background ML Processing
+# ------------------------------
 def background_process_images():
-    """Background task to process images asynchronously and send results to Django."""
     while True:
+        time.sleep(1)
+
         for image_id, data in list(processing_queue.items()):
-            if data["status"] == "processing":
-                print(f"Processing image {image_id}...")
+            status = data["status"]
 
-                # Simulate ML processing delay
-                time.sleep(30)
+            # Handle mock mode simulation (only when enough time passed)
+            if status == "moking" and IS_MOCK_MODE:
+                delay = FLASK_CONFIG.get("MOK_DELAY", 1)
+                elapsed = time.time() - data.get("queued_at", 0)
 
-                # Run Dummy Apple Detection
+                if elapsed < delay:
+                    continue  # not ready yet
+
+                logging.debug(f"🧪 MOK DONE: Sending fake ML result for image {image_id}")
+                payload = {
+                    "image_id": image_id,
+                    **FLASK_CONFIG.get("MOK_MLRESULT", {})
+                }
+                nb_apples = payload.get("nb_apples") 
+
+            elif status == "processing":
+                logging.debug(f"🔄 Processing image {image_id}...")
                 nb_apples, confidence_score = detect_apples(data["image_path"])
-
                 if nb_apples is None:
-                    print(f"Error processing image {image_id}.")
+                    processing_queue[image_id]["status"] = "failed"
+                    logging.debug(f"❌ Failed to read image {image_id}")
                     continue
-
-                # ✅ Send processed data to Django
-                ml_result_payload = {
+                payload = {
                     "image_id": image_id,
                     "nb_apples": nb_apples,
                     "confidence_score": confidence_score,
                     "processed": True
                 }
 
-                try:
-                    django_response = requests.post(
-                        f"{DJANGO_API_URL}{image_id}/ml_result/",
-                        json=ml_result_payload
-                    )
+            else:
+                continue  # skip unknown or completed/failed statuses
 
-                    if django_response.status_code == 200:
-                        print(f"✅ ML Results for Image {image_id} successfully sent to Django.")
-                        processing_queue[image_id]["status"] = "completed"
-                    else:
-                        print(f"❌ Error sending ML results for Image {image_id}.")
+            # Try to POST to Django
+            try:
+                res = requests.post(f"{DJANGO_API_URL}/images/{image_id}/ml_result/", json=payload)
+                if res.status_code == 200:
+                    processing_queue[image_id]["status"] = "completed"
+                    logging.debug(f"✅ ML Result sent for {image_id}")
+                else:
+                    processing_queue[image_id]["status"] = "failed"
+                    logging.debug(f"❌ Django rejected ML result: {res.status_code} for {image_id}")
+            except Exception as e:
+                processing_queue[image_id]["status"] = "failed"
+                logging.debug(f"❌ Exception posting to Django: {e}")
 
-                except requests.RequestException as e:
-                    print(f"❌ Failed to send ML results to Django: {str(e)}")
-
-
+# ------------------------------
+# /ml/version
+# ------------------------------
 @app.route('/ml/version', methods=['GET'])
 def get_version():
-    """Returns the current ML model version and status (wrapped)."""
-    
     return api_success({
         "model_version": ML_MODEL_VERSION,
         "status": "active",
         "last_updated": LAST_UPDATED
     })
 
-
+# ------------------------------
+# Run Flask
+# ------------------------------
 if __name__ == '__main__':
-    import threading
-
-    # Start background processing thread
-    processing_thread = threading.Thread(target=background_process_images, daemon=True)
-    processing_thread.start()
-
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    t = threading.Thread(target=background_process_images, daemon=True)
+    t.start()
+    app.run(host="0.0.0.0", port=5000, debug=FLASK_CONFIG["DEBUG"])
