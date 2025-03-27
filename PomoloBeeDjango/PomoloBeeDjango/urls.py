@@ -18,7 +18,29 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
  
- 
+from django.conf.urls import handler404, handler500
+from django.http import JsonResponse
+
+def custom_404(request, exception=None):
+    return JsonResponse({
+        "error": {
+            "code": "404_NOT_FOUND",
+            "message": "The requested endpoint does not exist."
+        }
+    }, status=404)
+
+def custom_500(request):
+    return JsonResponse({
+        "error": {
+            "code": "500_INTERNAL_ERROR",
+            "message": "An unexpected error occurred."
+        }
+    }, status=500)
+
+handler404 = custom_404
+handler500 = custom_500
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

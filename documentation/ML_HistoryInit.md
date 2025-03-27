@@ -28,8 +28,8 @@
 ## **2 Initializing PomologieML ML API with Flask/FastAPI**
 This will be your **machine learning API** that:  
 ✅ Receives images from Django 🖼️  
-✅ Runs apple detection 🍏  
-✅ Returns **number of apples (`nb_apfel`) & confidence score** 🤖  
+✅ Runs fruit detection 🍏  
+✅ Returns **number of fruit (`nb_fruit`) & confidence score** 🤖  
 
 ---
 
@@ -81,11 +81,11 @@ import numpy as np
 
 app = Flask(__name__)
 
-def detect_apples(image):
+def detect_fruit(image):
     # Placeholder ML logic (Replace with real model)
-    nb_apfel = 10  # Dummy apple count
+    nb_fruit = 10  # Dummy fruit count
     confidence_score = 0.85  # Dummy confidence score
-    return nb_apfel, confidence_score
+    return nb_fruit, confidence_score
 
 @app.route('/process-image', methods=['POST'])
 def process_image():
@@ -94,9 +94,9 @@ def process_image():
     img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
 
     # Run ML model
-    nb_apfel, confidence_score = detect_apples(img)
+    nb_fruit, confidence_score = detect_fruit(img)
 
-    return jsonify({"nb_apfel": nb_apfel, "confidence_score": confidence_score})
+    return jsonify({"nb_fruit": nb_fruit, "confidence_score": confidence_score})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)

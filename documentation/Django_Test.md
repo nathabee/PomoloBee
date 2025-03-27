@@ -10,8 +10,8 @@
     - [Purpose](#purpose)
     - [Fixtures Required](#fixtures-required)
     - [Classes Coverage](#classes-coverage)
-  - [Endpoint Tests](#endpoint-tests)
-  - [Workflow Tests](#workflow-tests)
+  - [Endpoint Tests - Integration](#endpoint-tests-integration)
+  - [Workflow Tests - Validation](#workflow-tests-validation)
     - [Prerequisites](#prerequisites)
     - [Test Coverage Mapping](#test-coverage-mapping)
   - [️ ML Unavailable Tests](#ml-unavailable-tests)
@@ -66,7 +66,7 @@ initial_raws.json
 
 
 
-## Endpoint Tests
+## Endpoint Tests - Integration
 
 See [API.md](API.md) for full spec.
 
@@ -104,9 +104,18 @@ Tested in: `core/tests/test_endpoint.py`
   ```
 
 
-## Workflow Tests
+## Workflow Tests - Validation
 
 Defined in [`Workflow.md`](Workflow.md). These tests simulate an end-to-end scenario: uploading an image, triggering ML, storing results, and retrieving estimations.
+
+Workflow validation test are a true API-only, workflow-driven integration test 
+- no manual object.create, 
+-  #only real API calls like a real mobile client + ML would do.
+- ✅ DB is initialized only from fixtures
+- ✅ POST /api/images/ is used to upload image
+- ✅ POST /ml_result/ mimics ML posting result
+- ❌ No ImageHistory.objects.create(...) anymore
+- ✅ All calls are external (API or request)
 
 ### Prerequisites
 

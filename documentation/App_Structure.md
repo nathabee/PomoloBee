@@ -34,7 +34,7 @@
     - [**12 `ui/theme/Type.kt`**](#12-uithemetypekt)
   - [**Data Handles User Preferences**](#data-handles-user-preferences)
     - [**13 `data/UserPreferences.kt`**](#13-datauserpreferenceskt)
-  - [**Utils Handles Apple Image Processing**](#utils-handles-apple-image-processing)
+  - [**Utils Handles fruit Image Processing**](#utils-handles-fruit-image-processing)
     - [**14 `utils/ImageProcessing.kt`**](#14-utilsimageprocessingkt)
   - [**Model Classes Shared between UI/Repo/API**](#model-classes-shared-between-uirepoapi)
   - [**ViewModels**](#viewmodels)
@@ -187,11 +187,11 @@ sealed class Screen(val route: String) {
 ### **4 `ui/components/CameraView.kt`**
 📌 **Purpose:**  
 - Displays the **camera preview using OpenCV**.
-- Processes camera frames using `detectApple()`.
+- Processes camera frames using `detectfruit()`.
 
 📌 **Key Responsibilities:**
 - Uses `AndroidView` to embed a native camera preview in Compose.
-- Passes frames to **`utils/ImageProcessing.kt`** for apple detection.
+- Passes frames to **`utils/ImageProcessing.kt`** for fruit detection.
 
 📌 **Example Usage in `CameraScreen.kt`:**
 ```kotlin
@@ -241,7 +241,7 @@ Button(onClick = { navController.navigate(Screen.Camera.route) }) {
 
 📌 **Key Responsibilities:**
 - Initializes OpenCV (`OpenCVLoader.initDebug()`).
-- Passes camera frames to `detectApple()` for processing.
+- Passes camera frames to `detectfruit()` for processing.
 
 ---
 
@@ -254,7 +254,7 @@ Button(onClick = { navController.navigate(Screen.Camera.route) }) {
 
 📌 **Example Usage:**
 ```kotlin
-scope.launch { UserPreferences.savePreference(context, "apple_type", selectedApple) }
+scope.launch { UserPreferences.savePreference(context, "fruit_type", selectedfruit) }
 ```
 
 ---
@@ -284,7 +284,7 @@ scope.launch { UserPreferences.savePreference(context, "apple_type", selectedApp
 - Displays **results generated from local AI model** before uploading to backend.
 
 📌 **Key Responsibilities:**
-- Show image, apple count, yield, and confidence from local detection.
+- Show image, fruit count, yield, and confidence from local detection.
 - Optionally compare against last known backend result.
 
 ---
@@ -389,28 +389,28 @@ scope.launch { UserPreferences.savePreference(context, "apple_type", selectedApp
 - Uses **Jetpack DataStore** to store and retrieve user preferences.
 
 📌 **Key Responsibilities:**
-- Saves **user settings** (e.g., preferred apple type).
+- Saves **user settings** (e.g., preferred fruit type).
 - Retrieves saved settings when the app starts.
 
 📌 **Example Usage in `SettingsScreen.kt`:**
 ```kotlin
-UserPreferences.savePreference(context, "apple_type", selectedApple)
+UserPreferences.savePreference(context, "fruit_type", selectedfruit)
 ```
 
 ---
 
-## **Utils Handles Apple Image Processing**
+## **Utils Handles fruit Image Processing**
 ### **14 `utils/ImageProcessing.kt`**
 📌 **Purpose:**  
-- Processes camera frames **to detect apples**.
+- Processes camera frames **to detect fruit**.
 
 📌 **Key Responsibilities:**
 - Converts images to grayscale.
-- Applies **edge detection** for apple recognition.
+- Applies **edge detection** for fruit recognition.
 
 📌 **Example Usage in `CameraView.kt`:**
 ```kotlin
-val processedFrame = detectApple(inputFrame.rgba())
+val processedFrame = detectfruit(inputFrame.rgba())
 ```
 ---
 ## **Model Classes Shared between UI/Repo/API**

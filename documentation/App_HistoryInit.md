@@ -14,7 +14,7 @@
   - [**STEP 1 Project Initialization**](#step-1-project-initialization)
   - [**STEP 2 Screen Management and Navigation**](#step-2-screen-management-and-navigation)
     - [**Project Architecture**](#project-architecture)
-  - [**STEP 3 Apple Detection Overview**](#step-3-apple-detection-overview)
+  - [**STEP 3 fruit Detection Overview**](#step-3-fruit-detection-overview)
   - [**STEP 4 User Preferences Jetpack DataStore**](#step-4-user-preferences-jetpack-datastore)
   - [**STEP 5 UI/UX Improvements**](#step-5-uiux-improvements)
   - [**STEP 6 include a App Theme and a special Font](#step-6-include-a-app-theme-and-a-special-font)
@@ -54,7 +54,7 @@ Since **Jetpack Compose replaces Fragments**, the project follows a **modern Com
 
 ---
 
-## **STEP 3 Apple Detection Overview**
+## **STEP 3 fruit Detection Overview**
 🔹 **Integrate OpenCV for image processing**  
 🔹 **Develop `CameraView.kt` to handle live camera feed**  
 🔹 **Process images in `utils/ImageProcessing.kt` using OpenCV**:
@@ -67,7 +67,7 @@ Since **Jetpack Compose replaces Fragments**, the project follows a **modern Com
 
 ## **STEP 4 User Preferences Jetpack DataStore**
 🔹 **Store user settings using `UserPreferences.kt`**  
-🔹 **Allow users to select preferred apple types in `SettingsScreen.kt`**  
+🔹 **Allow users to select preferred fruit types in `SettingsScreen.kt`**  
 🔹 **Save & Retrieve settings using Jetpack DataStore**  
 
 ---

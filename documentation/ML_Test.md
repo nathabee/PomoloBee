@@ -91,6 +91,7 @@ python manage.py test core.tests.test_endpoint
 ### Start Django Integration Test
 
 Used to simulate full background processing with delayed POST to Django.
+            |
 
 #### `flask_config.json`
 ```json
@@ -106,7 +107,7 @@ Used to simulate full background processing with delayed POST to Django.
     "MOK_RETURN": { "message": "Mock OK" },
     "MOK_DELAY": 3,
     "MOK_MLRESULT": {
-        "nb_apples": 10,
+        "nb_fruit": 10,
         "confidence_score": 0.85,
         "processed": true
     }
@@ -131,6 +132,8 @@ python manage.py runserver
 ```
 
 ---
+
+
 
 ### Start Django Validation Test
 
@@ -194,7 +197,7 @@ You will:
 - Test `/ml/version`
 - Test `/ml/process-image` with and without actual image
 - Simulate failure and retry logic
-- Optionally test `detect_apples()` manually
+- Optionally test `detect_fruit()` manually
 - Check mock behavior based on config
 
 ---
@@ -352,8 +355,8 @@ Even if image doesn't exist — no download or POST happens.
 If you want to test the internal function manually:
 
 ```python
-from app import detect_apples
-nb, confidence = detect_apples("uploads/image_125.jpg")
+from app import detect_fruit
+nb, confidence = detect_fruit("uploads/image_125.jpg")
 print(nb, confidence)
 ```
 
@@ -390,7 +393,7 @@ results.save()   # Save results to disk
 1. Start Flask (with MOK or real mode)
 2. Upload image via Django `/api/images/`
 3. Observe ML → Django result post
-4. Fetch estimation `/api/estimations/{id}`
+4. Fetch estimation `/api/images/{id}/estimations`
 
 ---
  

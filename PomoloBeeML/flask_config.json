@@ -1,29 +1,19 @@
 {
-    "DEBUG": true,
-    "ML_MODEL_VERSION" : "v1.2.5",
-    "LAST_UPDATED": "2024-03-10T14:00:00",
-    "DJANGO_API_URL": "http://localhost:8000/api",
-    "LOG_FILE": "logs/flask.log",
-    "MOK": true,
-    "MOK_RUNSERVER": false,
-    "MOK_CODE": 200,
-    "MOK_RETURN": { "message": "Mock OK" }, 
-    "MOK_DELAY": 3,
-    "MOK_MLRESULT": {
-      "nb_apples": 10,
+  "DEBUG": true,
+  "ML_MODEL_VERSION": "v1.2.5",
+  "LAST_UPDATED": "2024-03-10T14:00:00",
+  "DJANGO_API_URL": "http://localhost:8000/api",
+  "LOG_FILE": "logs/flask.log",
+  "MOK": true,
+  "MOK_RUNSERVER": true,
+  "MOK_CODE": 200,
+  "MOK_RETURN": { "message": "Mock OK" },
+  "MOK_DELAY": 3,
+  "MOK_MLRESULT": {
+      "nb_fruit": 10,
       "confidence_score": 0.85,
       "processed": true
-    },
-    "EXAMPLE_ERROR" : {
-      "MOK_CODE": 400,
-      "MOK_RETURN": { "message": "Fake error in mock" }
-    
-    },
-    "EXAMPLE_OK" : {
-      "MOK_CODE": 200,
-      "MOK_RETURN": { "message": "Mock OK" }    
-    }
-
+  }
 
   }
   

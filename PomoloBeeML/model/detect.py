@@ -13,6 +13,6 @@ def detect_apples_opencv(image_path):
         return None, None
 
     # Dummy logic: simulate apple count and confidence
-    nb_apples = np.random.randint(5, 20)
+    nb_fruit = np.random.randint(5, 20)
     confidence_score = round(np.random.uniform(0.7, 0.95), 2)
-    return nb_apples, confidence_score
+    return nb_fruit, confidence_score

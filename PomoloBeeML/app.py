@@ -20,7 +20,7 @@ default_config = {
     "MOK_RETURN": {"message": "Default mock"},
     "MOK_DELAY": 3,
     "MOK_MLRESULT": {
-        "nb_apples": 10,
+        "nb_fruit": 10,
         "confidence_score": 0.85,
         "processed": True
     }
@@ -74,13 +74,13 @@ processing_queue = {}
 # ------------------------------
 # 🧠 ML SIMULATION
 # ------------------------------
-def detect_apples(image_path):
+def detect_fruit(image_path):
     img = cv2.imread(image_path)
     if img is None:
         return None, None
-    nb_apples = np.random.randint(5, 20)
+    nb_fruit = np.random.randint(5, 20)
     confidence_score = round(np.random.uniform(0.7, 0.95), 2)
-    return nb_apples, confidence_score
+    return nb_fruit, confidence_score
 
 # ------------------------------
 # 🔁 API HELPERS
@@ -173,18 +173,18 @@ def background_process_images():
                     "image_id": image_id,
                     **FLASK_CONFIG.get("MOK_MLRESULT", {})
                 }
-                nb_apples = payload.get("nb_apples") 
+                nb_fruit = payload.get("nb_fruit") 
 
             elif status == "processing":
                 logging.debug(f"🔄 Processing image {image_id}...")
-                nb_apples, confidence_score = detect_apples(data["image_path"])
-                if nb_apples is None:
+                nb_fruit, confidence_score = detect_fruit(data["image_path"])
+                if nb_fruit is None:
                     processing_queue[image_id]["status"] = "failed"
                     logging.debug(f"❌ Failed to read image {image_id}")
                     continue
                 payload = {
                     "image_id": image_id,
-                    "nb_apples": nb_apples,
+                    "nb_fruit": nb_fruit,
                     "confidence_score": confidence_score,
                     "processed": True
                 }

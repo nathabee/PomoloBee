@@ -1,7 +1,7 @@
 
-# Pomolobee Apple Detection - YOLOv8 Training Notebook
+# Pomolobee fruit Detection - YOLOv8 Training Notebook
 
-This notebook walks through training a YOLOv8 model to detect apples using labeled image data.
+This notebook walks through training a YOLOv8 model to detect fruit using labeled image data.
 
 ---
 
@@ -42,7 +42,7 @@ Example `data.yaml`:
 train: ./data/images/train
 val: ./data/images/val
 nc: 1
-names: ["apple"]
+names: ["fruit"]
 ```
 
 ---

@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _56 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _68 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -21,6 +21,8 @@
   - [Week 3 Dates from Mars 24 to Mars 30 2025](#week-3-dates-from-mars-24-to-mars-30-2025)
     - [Mars 24 2025](#mars-24-2025)
     - [Mars 25 2025](#mars-25-2025)
+    - [Mars 26 2025](#mars-26-2025)
+    - [Mars 27 2025](#mars-27-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -63,7 +65,7 @@ This document tracks the number of hours worked each day and provides a brief de
   - Initialisation Android App PomoloBeeApp with JetPack Compose
   - STEP 1: PomoloBeeApp Initialization [History App](App_HistoryInit.md)
   - STEP 2: Screen Management and Navigation [History App](App_HistoryInit.md)
-  - STEP 3: Apple Detection Overview [History App](App_HistoryInit.md)
+  - STEP 3: fruit Detection Overview [History App](App_HistoryInit.md)
   - STEP 4: User Preferences (Jetpack DataStore) [History App](App_HistoryInit.md)
   - STEP 5: UI/UX Improvements [History App](App_HistoryInit.md)
   - STEP 6: include a App Theme and a special Font [History App](App_HistoryInit.md)
@@ -182,28 +184,48 @@ This document tracks the number of hours worked each day and provides a brief de
   - Auto-populate HistoryRaw after ML updates ImageHistory Needs post_save 
   -  pomoloBeeDjango/core/test/test_migration.py: added farm, superuser and empty tables. add test trigger save on history_image tested OK
   - ML flask add debug mode and config file 
-  - ML flask add mok ML engine (detect apple bypass,  guided return payload and code, still communicating with API and answering django)
+  - ML flask add mok ML engine (detect fruit bypass,  guided return payload and code, still communicating with API and answering django)
   - pomoloBeeDjango/core/test/test_endpoints.py
   - init [Django Test](Django_Test.md) to list all test and how to run them
   - start core.test_endpoints with Flask in Debug + Mok mode
   -  init [ML Test](ML_Test.md) to list all test and how to run them
-- **Theme**: Backend Django Code and Test  
+- **Theme**: Backend Django Code and Test and ML Mok API 
+
+ 
+###  Mars 26 2025
+- **Hours Worked**: 6 hours
+- **Tasks**:
+  - update [Django Test](Django_Test.md) and test_workflow : use exclusivly API call for workflow test, no direct database update
+  - found anomalies: customize standard Django error in handlers.py 
+  - keep testing a bit core.test_endpoints with Flask in Debug + Mok mode
+  - Integration test : core.test_workflow with Flask in Debug + Mok mode
+  - problem nb_apfel or nb_apple ...not always the same replaced in project with singular nb_fruit
+- **Theme**: Backend Django Code and Workflow Test  
+
+ 
+ 
+###  Mars 27 2025
+- **Hours Worked**: 6 hours
+- **Tasks**:
+ - Renamed ImageHistory ➝ Image to centralize upload + ML results.
+ - Merged HistoryRaw + HistoryEstimation ➝ single Estimation model.
+ - Removed signals, handled Estimation creation directly in view logic.
+ - Cleaned API endpoints, renamed /images/ ➝ image-upload, etc.
+ - Applied consistent API response format using BaseSuccessMixin.
+ - Updated migration tests to match new model fields and structure.
+ - Rewrote endpoint tests to reflect API changes and validate logic.
+ - Created API-only workflow tests (image upload ➝ ML ➝ estimation).
+ - Added robustness tests: missing/failed ML callbacks, retry path.
+ - Fixed broken route names in all tests (reverse() consistency).
+- **Theme**: Backend Django Model Refactor and Migration,Endpoint,Workflow Tests  
 
  
 
 - **PENDING**
 
-++ need to django startserver to acess media
-
-   ❌ Why Tests Fail (Summary)
-
-  | **Test**                          | **Error**            | **Likely Cause** |
-  |----------------------------------|----------------------|------------------|
-  | `test_get_estimation_results`    | Missing `"plant_kg"` | Your API returns limited data — maybe missing `HistoryRaw` join or wrong view logic |
-  | `test_post_image_upload`         | `503` instead of `201` | Your **mock config forces a `400`** (via `MOK_CODE`) — see below |
-  | `test_post_retry_processing`     | `500` not in `[200, 503]` | Retry logic fails or ML mock returns error |
-  | `test_get_latest_estimations`    | `404`                 | No data present or view not implemented |
-  | `test_get_history_detail`        | `404`                 | `HistoryRaw` not found — ID mismatch or data not created properly |
+finish workflow test 
+- need to django startserver to acess media
+- start also flask  
 
 
   - **APP**

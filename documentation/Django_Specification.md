@@ -28,9 +28,9 @@
 | Step | API Endpoint | Method | View | DB Impact | Consequence After Request | ➡️ Triggers Step |
 |------|--------------|--------|------|-----------|----------------------------|------------------|
 | 1️⃣ | `/api/images/` | POST | `ImageView.post()` | ✅ Creates `ImageHistory`<br>🖼️ Saves image to storage | 🔁 Sends image to ML (`/process-image/`) | ⏩ Step 2️⃣ |
-| 2️⃣ | `/api/images/<id>/ml_result/` | POST | `MLResultView.post()` | 🔄 Updates `ImageHistory`:<br>• `nb_apfel`, `confidence_score`, `processed = True` | 🧠 Triggers signal: `post_save(ImageHistory)` | ⏩ Step 3️⃣ |
+| 2️⃣ | `/api/images/<id>/ml_result/` | POST | `MLResultView.post()` | 🔄 Updates `ImageHistory`:<br>• `nb_fruit`, `confidence_score`, `processed = True` | 🧠 Triggers signal: `post_save(ImageHistory)` | ⏩ Step 3️⃣ |
 | 3️⃣ | *(Signal)* | — | `post_save` in `signals.py` | ✅ Creates:<br>• `HistoryRaw`<br>• `HistoryEstimation` | 💾 Saves estimation (calculated from raw & fruit) | ⏩ Step 4️⃣ |
-| 4️⃣ | `/api/estimations/<id>/` | GET | `EstimationView.get()` | ❌ No DB write | 📤 Returns `plant_apfel`, `plant_kg`, `raw_kg`, `confidence_score` | 🔚 Final user-visible result |
+| 4️⃣ | `/api/estimations/<id>/` | GET | `EstimationView.get()` | ❌ No DB write | 📤 Returns `plant_fruit`, `plant_kg`, `raw_kg`, `confidence_score` | 🔚 Final user-visible result |
 | 5️⃣ | `/api/retry_processing/` | POST | `RetryProcessingView` | ❌ No DB write | 🔁 Re-sends existing image to ML | ⏩ Step 2️⃣ again |
 | 6️⃣ | `/api/images/<id>/` | DELETE | `ImageDeleteView` | 🗑 Deletes `ImageHistory`<br>🖼 Deletes file from storage | ⚠️ History data not deleted | 🔚 Clean-up |
 | 7️⃣ | `/api/images/<id>/status/` | GET | `ImageStatusView` | ❌ No DB write | 📤 Returns `processed: true/false` | 🔚 Polling mechanism |

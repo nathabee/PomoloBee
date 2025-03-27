@@ -22,7 +22,7 @@ def test_ml_receives_image(client):
 
 def test_ml_sends_results_to_django():
     """Test if ML correctly sends processed results back to Django."""
-    payload = {"nb_apples": 20, "confidence_score": 0.9, "processed": True}
+    payload = {"nb_fruit": 20, "confidence_score": 0.9, "processed": True}
     response = requests.post(f"{ML_API_URL}/images/24/ml_result/", json=payload)
 
     assert response.status_code == 200

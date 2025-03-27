@@ -1,18 +1,27 @@
-# **Pomolobee Workflow Document**
+# **PomoloBee Workflow Document**
 
 <details>
 <summary>Table of Content</summary>
 
 <!-- TOC -->
-- [**Pomolobee Workflow Document**](#pomolobee-workflow-document)
+- [**PomoloBee Workflow Document**](#pomolobee-workflow-document)
   - [**Data Flow**](#data-flow)
   - [**1. Workflow Summary**](#1-workflow-summary)
     - [**Case App Initializes Data**](#case-app-initializes-data)
     - [**Case App Requests Estimation Based on a Picture**](#case-app-requests-estimation-based-on-a-picture)
     - [**Case App Displays Data**](#case-app-displays-data)
-  - [**1 API DJANGO -> APP**](#1-api-django-app)
-  - [**2 API DJANGO <-> ML**](#2-api-django-ml)
-  - [**3 Process Image API Django to ML**](#3-process-image-api-django-to-ml)
+  - [**1. API DJANGO to APP**](#1-api-django-to-app)
+    - [Image Upload Result](#image-upload-result)
+    - [Estimations](#estimations)
+    - [Orchard Data](#orchard-data)
+  - [**2. API DJANGO both ML**](#2-api-django-both-ml)
+  - [**3. Process Image Flow**](#3-process-image-flow)
+  - [**2. Detailed Requirements**](#2-detailed-requirements)
+    - [App Requirements](#app-requirements)
+    - [ML Model Requirements](#ml-model-requirements)
+    - [Django Requirements](#django-requirements)
+  - [**3. Explanation of Calculation**](#3-explanation-of-calculation)
+  - [API Short List](#api-short-list)
   - [**2. Detailed Requirements**](#2-detailed-requirements)
     - [**App Requirements**](#app-requirements)
     - [**ML Model Requirements**](#ml-model-requirements)
@@ -23,11 +32,9 @@
 
 </details>
 
-  
---- 
-## **Data Flow**
+---
 
-The following diagram illustrates the interaction between the **PomoloBee App**, **Django Backend**, and **ML Processing Service**.
+## **Data Flow**
 
 ```mermaid
 graph TD 
@@ -55,137 +62,180 @@ graph TD
   DjangoServer -- "📂 Save Image Metadata" --> Database
   DjangoServer -- "🖼️ Store Image" --> FileSystem
  
-  DjangoServer -- "🔄 Send Image to ML (POST /process)" --> MLService
-  MLService -- "✅ Acknowledge Processing (200 OK)" --> DjangoServer
-  MLService -- "⏳ Process Image (Detect Apples)" --> MLService
- 
-  MLService -- "📊 Return Detection Results (POST /ml_result)" --> DjangoServer
-  DjangoServer -- "📄 Update Image History & Store Results" --> Database
- 
-  MobileApp -- "📥 Check Processing Status (GET /ml_result)" --> DjangoServer
-  DjangoServer -- "📄 Return Status (Done/In Progress/Failed)" --> MobileApp
- 
-  MobileApp -- "📥 Fetch Estimation Results" --> DjangoServer
-  DjangoServer -- "📊 Provide Yield Data & Save to History" --> Database
-  MobileApp -- "📥 Fetch Estimation History" --> DjangoServer
+  DjangoServer -- "🔄 POST Image to ML" --> MLService
+  MLService -- "✅ 200 OK" --> DjangoServer
+  MLService -- "📊 POST Results" --> DjangoServer
+  DjangoServer -- "📄 Update Estimation" --> Database
 
+  MobileApp -- "📥 GET Image Metadata & Status" --> DjangoServer
+  MobileApp -- "📥 GET Image Estimation" --> DjangoServer
+  MobileApp -- "📥 GET Estimation History" --> DjangoServer
 ```
 
-
-
+---
 
 ## **1. Workflow Summary**
 
 ### **Case App Initializes Data**
+- `GET /api/fields/`
+- `GET /api/fruits/`
+- `GET /api/locations/`
 
-📌 `GET /api/fields/`  
-📌 `GET /api/fruits/`  
-📌 `GET /api/locations/`  
-1. **App starts up or the user refreshes data.**  
-2. **App fetches static data** from Django:  
-   - `Field`, `Raw`, `Fruit` tables.  
-   - This data is stored locally for offline use.  
-3. **App syncs periodically** to check for updates in Django.  
+App stores the orchard structure offline.
+
+- `GET /api/ml/version/`
+App retrieves ML version (get from ML by Django).
 
 ---
 
 ### **Case App Requests Estimation Based on a Picture**
 
-#### **Step 1 App Uploads Image**
-📌 `POST /api/images/`  
-📩 **App sends:** `image`, `raw_id`, `date`  
-📩 **Backend returns:** `image_id`  
+#### Step 1 Upload Image
+- `POST /api/images/`  
+  → Returns `image_id`
 
-**Django stores image & schedules ML processing:**  
-   - Saves image in the **file system** on the server.  
-   - Creates a new entry in `ImageHistory`:  
-     - `image_path`: Path to the saved image.  
-     - `nb_apfel`: Placeholder (waiting for ML result).  
+#### Step 2 Django Sends to ML
+- `POST /process-image/` (internal)
 
----
+#### Step 3 ML Sends Results
+- `POST /api/images/{image_id}/ml_result/`
 
-#### **Step 2 ML Processes Image Async Job**
-📌 **ML model detects `nb_apfel` and updates `ImageHistory`.**  
-📌 **ML also returns `confidence_score`.**  
-📌 **Django updates `ImageHistory` and creates `HistoryEstimation`.**  
+#### Step 4 App Polls for Metadata Completion
+- if processed = true and status = done
+- `GET /api/images/{image_id}`  
+  → Contains `processed`, `confidence_score`, `nb_fruit`
+ 
+#### Step 5 App Gets Full Estimation
+- `GET /api/images/{image_id}/estimations/` 
 
----
 
-#### **Step 3 Retrieve Estimation**
-📌 `GET /api/estimations/{image_id}`  
-📩 **App requests:** `image_id`  
-📩 **Backend returns:**  
-```json
-{
-    "plant_apfel": 12,
-    "plant_kg": 2.4,
-    "raw_kg": 48.0,
-    "confidence_score": 0.85,
-    "status": "done"
-}
-```
-📌 **Django creates `HistoryRaw` and `HistoryEstimation`, referencing `ImageHistory`**:  
-   - **ML results from `ImageHistory`.**  
-   - **Calculated yield per plant (`plant_kg`).**  
-   - **Total estimated yield (`raw_kg`).**  
-   - **References the saved image (`id_image`).**  
+#### option step if processed failed App can retry processing
+- if  status = failed
+  - `POST /api/retry_processing/`  
 
 ---
 
 ### **Case App Displays Data**
-1. **Displays static data (Fields, Raws, Fruits)**  
-   - Retrieved from Django and stored locally.  
+- Static data is shown from local DB (synced from API).
+- For estimations associated to a field :
+  - `GET /api/fields/{field_id}/estimations/`  
+  - Displays previous yield predictions and image data if necessary
 
-2. **Displays estimation results**  
-   - Fetches the latest `HistoryRaw` entries for the selected `Raw`.  
-   - Shows `plant_apfel`, `plant_kg`, `raw_kg`, and other ML estimations.  
-
----
-
-## **1 API DJANGO -> APP**
-**Endpoints for communication between Django and the App:**  
-- `POST /api/images/` → Uploads an image & starts ML processing  
-- `GET /api/images/{image_id}/status` → Checks if ML has processed the image  
-- `GET /api/estimations/{image_id}` → Retrieves the estimation results  
-
-| `GET /api/fields/` | fetch all fields |
-| `GET /api/fields/{field_id}/raws/` |to fetch raws for a given field | 
-
-
----
-
-## **2 API DJANGO <-> ML**
-**Endpoints for communication between Django and the ML model:**  
-- `POST /process-image/` → Django sends an image to ML for processing  
-- ML returns: `nb_apfel` (number of apples detected) and `confidence_score`  
-
----
-
-## **3 Process Image API Django to ML**
-📌 **Step 1: App uploads image** → `POST /api/images/`  
-📌 **Step 2: Django sends image to ML API** → `POST /process-image/`  
-📌 **Step 3: ML detects apples & returns results**  
-
-✅ **Django View: Sends Image to ML API**
  
+
+ 
+
+
+
+---
+
+## **1. API DJANGO to APP**
+
+### Image Upload Result
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/images/` | Upload new image |
+| `GET` | `/api/images/{image_id}` | Get image metadata and status |
+| `POST` | `/api/retry_processing/` | retry processing images |
+| `DELETE` | `/api/images/{image_id}/` | delete a picture from storage
+
+### Estimations
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/images/{image_id}/estimations/` | Get estimation for one image ✅ |
+| `GET` | `/api/fields/{field_id}/estimations/` | Get all estimations for a field ✅ |
+
+### Orchard Data
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/fields/` | List all fields |
+| `GET` | `/api/fruits/` | List all fruits |
+| `GET` | `/api/locations/` | All fields with raw rows |
+
+---
+
+## **2. API DJANGO both ML**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/process-image/` | Django sends image to ML |
+| `POST` | `/api/images/{image_id}/ml_result/` | ML sends back results ✅ |
+
+---
+
+## **3. Process Image Flow**
+1. `POST /api/images/` ← From App  
+2. `POST /process-image/` ← Django → ML  
+3. `POST /api/images/{image_id}/ml_result/` ← ML → Django  
+4. `GET /api/images/{image_id}` ← App polling  
+5. `GET /api/images/{image_id}/estimations/` ← App gets results
+
+---
+
+## **2. Detailed Requirements**
+
+### App Requirements
+- Store image locally
+- Upload image and raw_id
+- Poll and fetch estimation
+
+### ML Model Requirements
+- Accept image + ID
+- Return `nb_fruit`, `confidence_score`
+
+### Django Requirements
+- Store and track image
+- Compute `plant_kg` and `raw_kg`
+- Serve estimation & orchard data
+
+---
+
+## **3. Explanation of Calculation**
+
+- `plant_fruit = nb_fruit`
+- `plant_kg = plant_fruit * fruit_avg_kg`
+- `raw_kg = plant_kg * raw.nb_plant`
+
+---
+
+## API Short List
+
+| Type | Endpoint | Purpose |
+|------|----------|---------|
+| `GET` | `/api/fields/` | All fields |
+| `GET` | `/api/fruits/` | All fruits |
+| `GET` | `/api/locations/` | Fields + raws |
+| `GET` | `/api/fields/{field_id}/estimations/` | Estimations for a field ✅ |
+| `GET` | `/api/images/{image_id}/details` | Image metadata/status ✅ |
+| `DELETE` | `/api/images/{image_id}` | Delete Image from storage |
+| `POST` | `/api/images/` | Upload new image |
+| `POST` | `/api/retry_processing/` | Retry ML |
+| `GET` | `/api/images/{image_id}/estimations/` | Estimation from one image ✅ |
+| `POST` | `/api/images/{image_id}/ml_result/` | ML sends results ✅ |
+| `GET` | `/api/ml/version/` | Get ML version |
+
+---
+
+Let me know if you want this in **Markdown**, **OpenAPI**, or **Postman Collection** format as next step 🔧
 ---
 ## **2. Detailed Requirements**
 
 ### **App Requirements**
 ✅ Store static data locally for offline mode.  
 ✅ Send an image and raw_id to Django for estimation.  
-✅ Fetch results (`HistoryRaw`) for past estimations.  
+
+✅ Fetch results for past estimations.  
 ✅ Sync with Django when online.  
 
 ### **ML Model Requirements**
-✅ Process an image and return `nb_apfel` (number of apples detected).  
+✅ Process an image and return `nb_fruit` (number of fruit detected).  
 ✅ Return results quickly to avoid app delays.  
 ✅ Be integrated with Django, either running inside Django or as an external service.  
 
 ### **Django Backend Requirements**
 ✅ Store the image on the server file system.  
-✅ Create `ImageHistory` with image path + ML results.  
-✅ Calculate `plant_kg` and `raw_kg` before saving to `HistoryRaw`.  
+✅ Create `Image` with image path + ML results.  
+✅ Calculate `plant_kg` and `raw_kg` before saving to `Estimation`.  
 ✅ Provide API endpoints for the app to fetch data. 
 ✅ Store the image **on the local file system or a cloud storage solution (e.g., AWS S3, Google Cloud Storage)**.  
 
@@ -195,14 +245,14 @@ graph TD
 ## **3. Explanation of Calculation**
 
 ### **How Yield is Estimated**
-1. **ML Model detects apples in the image**  
+1. **ML Model detects fruit in the image**  
    - Frontend sends `image + raw ID + date` to Django.  
-   - Django stores the image path in `ImageHistory`.  
-   - ML analyzes the image and returns `nb_apfel` (number of apples detected).  
+   - Django stores the image path in `Image`.  
+   - ML analyzes the image and returns `nb_fruit` (number of fruit detected).  
 
 2. **Django calculates expected yield**  
-   - **`plant_apfel = nb_apfel`** (ML-detected apples per plant).  
-   - **`plant_kg = plant_apfel * fruit_avg_kg`** (expected weight per plant).  
+   - **`plant_fruit = nb_fruit`** (ML-detected fruit per plant).  
+   - **`plant_kg = plant_fruit * fruit_avg_kg`** (expected weight per plant).  
    - **`raw_kg = plant_kg * raw.nb_plant`** (expected total weight for the raw).  
 
 ---

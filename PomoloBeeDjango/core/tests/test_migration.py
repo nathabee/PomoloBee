@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from core.models import ImageHistory, HistoryRaw, HistoryEstimation, Raw, Fruit, Field, Farm
+from core.models import Image,  Estimation, Raw, Fruit, Field, Farm
 from datetime import date
-
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 class LoadFixtureDataTest(TestCase):
     """Test if initial fixture data is correctly loaded in the test database."""
@@ -78,7 +78,7 @@ class ModelTableExistenceTest(TestCase):
         self.farm = Farm.objects.create(name="TestFarm", owner=self.user)
         
         # Create related Field and Fruit
-        self.field = Field.objects.create(short_name="TestField", name="Test Field", id_farm=self.farm)
+        self.field = Field.objects.create(short_name="TestField", name="Test Field", farm=self.farm)
         self.fruit = Fruit.objects.create(
             short_name="Apple",
             name="Apple",
@@ -98,48 +98,50 @@ class ModelTableExistenceTest(TestCase):
             nb_plant=50
         )
 
-    def test_image_history_table(self):
-        self.assertEqual(ImageHistory.objects.count(), 0)
-        img = ImageHistory.objects.create(image_path="test.jpg", raw=self.raw, date=date.today())
-        self.assertEqual(ImageHistory.objects.count(), 1)
+    def test_image_table(self):
+        self.assertEqual(Image.objects.count(), 0)
+        
+        fake_image = SimpleUploadedFile(
+            name='test.jpg',
+            content=b'\x47\x49\x46\x38\x89\x61',  # Just some fake image bytes
+            content_type='image/jpeg'
+        )
 
-    def test_history_raw_table(self):
-        img = ImageHistory.objects.create(image_path="img.jpg", raw=self.raw, date=date.today())
-        hist = HistoryRaw.objects.create(date=date.today(), raw=self.raw, id_image=img, plant_apfel=10)
-        self.assertAlmostEqual(hist.raw_kg, hist.plant_apfel * self.fruit.fruit_avg_kg * self.raw.nb_plant)
-
-    def test_history_estimation_table(self):
-        estimation = HistoryEstimation.objects.create(
-            date=date.today(),
+        img = Image.objects.create(
+            image_file=fake_image,
             raw=self.raw,
-            estimated_yield_kg=48.5,
-            confidence_score=0.82
+            date=date.today()
         )
-        self.assertEqual(estimation.estimated_yield_kg, 48.5)
-        self.assertEqual(HistoryEstimation.objects.count(), 1)
 
+        self.assertEqual(Image.objects.count(), 1)
+ 
+    def test_estimation_computes_plant_and_raw_kg_on_save(self):
+        # Create a test image for linkage (optional, but model allows null)
+        image = Image.objects.create(image_file="test.jpg", raw=self.raw, date=date.today())
 
-# check that History raw is created each time we create a Image History with process = True
-class AutoHistoryCreationTest(TestCase):
-    
-    fixtures = [
-        "initial_superuser.json",      
-        "initial_farms.json",
-        "initial_fields.json",
-        "initial_fruits.json",
-        "initial_raws.json"
-    ]
-    
-    def test_history_raw_created_after_ml_result(self):
-        raw = Raw.objects.first()
-        image = ImageHistory.objects.create(
-            image_path="test.jpg",
-            raw=raw,
+        # Create estimation with only raw, image, plant_fruit — the rest should be auto-calculated
+        estimation = Estimation.objects.create(
+            image=image,
+            raw=self.raw,
             date=date.today(),
-            nb_apfel=10,
-            confidence_score=0.85,
-            processed=True  # 👈 Trigger signal
+            plant_fruit=12,  # 👈 Set fruit count per plant
+            estimated_yield_kg=0,  # will override in save()
+            maturation_grade=0.5,
+            confidence_score=0.9,
+            source=Estimation.EstimationSource.IMAGE
         )
 
-        self.assertTrue(HistoryRaw.objects.filter(id_image=image).exists())
-        self.assertTrue(HistoryEstimation.objects.filter(raw=raw).exists())
+        fruit_avg_kg = self.raw.fruit.fruit_avg_kg
+        nb_plant = self.raw.nb_plant
+
+        expected_plant_kg = 12 * fruit_avg_kg
+        expected_raw_kg = expected_plant_kg * nb_plant
+
+        self.assertAlmostEqual(estimation.plant_kg, expected_plant_kg, places=4)
+        self.assertAlmostEqual(estimation.raw_kg, expected_raw_kg, places=4)
+        self.assertEqual(estimation.image, image)
+        self.assertEqual(estimation.raw, self.raw)
+        self.assertEqual(estimation.source, "MLI")
+        self.assertEqual(str(estimation), f"Estimation {estimation.id} - {self.raw.name} on {estimation.date}")
+
+

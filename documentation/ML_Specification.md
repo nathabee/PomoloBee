@@ -38,8 +38,8 @@
 
 The **Pomolobee ML microservice** is a standalone backend component responsible for:
 
-- 🍎 Detecting apples in orchard images  
-- 📈 Estimating yield based on apple count  
+- 🍎 Detecting fruit in orchard images  
+- 📈 Estimating yield based on fruit count  
 - 🧠 Performing basic object detection via a simulated or real model (e.g. YOLOv8)  
 - 🔁 Communicating results asynchronously back to Django  
 
@@ -160,7 +160,7 @@ PomoloBeeML/
 ### ️ Source
 
 - Captured via **Pomolobee app**, uploaded via Django
-- Or imported from public datasets (e.g. AppleA, Roboflow)
+- Or imported from public datasets (e.g. fruitA, Roboflow)
 
 ### ️ Labeling Guidelines
 
@@ -188,14 +188,14 @@ Example `data.yaml`:
 train: ./images/train
 val: ./images/val
 nc: 1
-names: ["apple"]
+names: ["fruit"]
 ```
 
 ---
 
 ## **9. Training Process**
 
-📌 Goal: Train a **YOLOv8** object detector to count apples.
+📌 Goal: Train a **YOLOv8** object detector to count fruit.
 
 ### ️ Steps
 
@@ -210,7 +210,7 @@ path: ./data
 train: images/train
 val: images/val
 nc: 1
-names: ["apple"]
+names: ["fruit"]
 ```
 
 3. **Train**:
@@ -233,12 +233,12 @@ from ultralytics import YOLO
 
 model = YOLO("model/best.pt")
 
-def detect_apples_yolo(image_path):
+def detect_fruit_yolo(image_path):
     results = model(image_path)
     boxes = results[0].boxes
-    nb_apples = len(boxes)
-    confidence = float(boxes.conf.mean()) if nb_apples else 0
-    return nb_apples, round(confidence, 2)
+    nb_fruit = len(boxes)
+    confidence = float(boxes.conf.mean()) if nb_fruit else 0
+    return nb_fruit, round(confidence, 2)
 ```
 
 🧠 Called by Flask in background thread
@@ -247,7 +247,7 @@ def detect_apples_yolo(image_path):
 ```json
 {
   "image_id": 24,
-  "nb_apples": 12,
+  "nb_fruit": 12,
   "confidence_score": 0.91,
   "processed": true
 }
@@ -269,7 +269,7 @@ To test Django independently of the real ML model:
 ```python
 @app.route("/ml/mock", methods=["POST"])
 def mock_ml():
-    return api_success({"nb_apples": 7, "confidence_score": 0.88, "processed": True})
+    return api_success({"nb_fruit": 7, "confidence_score": 0.88, "processed": True})
 ```
 
 ---

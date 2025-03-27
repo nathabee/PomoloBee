@@ -5,7 +5,7 @@ This document defines the API interface for the Pomolobee project, specifying:
 - API calls and data exchanged
 - Endpoints and request/response format
 --- 
-  
+   
 <details>
 <summary>Table of Content</summary>
  
@@ -30,7 +30,7 @@ Here is the **detailed API specification** data, including **purpose, endpoint, 
 
 ### **ML to Django Returning Image Processing Results**
 
-📌 **Purpose:** The ML model returns **apple detection results** to Django once image analysis is complete.
+📌 **Purpose:** The ML model returns **fruit detection results** to Django once image analysis is complete.
 
 ✅ **Endpoint:**  
 
@@ -55,7 +55,7 @@ POST /api/images/{image_id}/ml_result
 
 ```json
 {
-  "nb_apples": 12,
+  "nb_fruit": 12,
   "confidence_score": 0.89,
   "processed": true
 }

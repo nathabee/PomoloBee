@@ -25,7 +25,7 @@ cat <<EOF > flask_config.json
   "MOK_RETURN": { "message": "MOK running successfully" },
   "MOK_DELAY": 3,
   "MOK_MLRESULT": {
-    "nb_apples": 7,
+    "nb_fruit": 7,
     "confidence_score": 0.92,
     "processed": true
   },
@@ -84,7 +84,7 @@ cat <<EOF > flask_config.json
   "MOK_RETURN": { "message": "Simulated MOK error" },
   "MOK_DELAY": 1,
   "MOK_MLRESULT": {
-    "nb_apples": 0,
+    "nb_fruit": 0,
     "confidence_score": 0,
     "processed": false
   },

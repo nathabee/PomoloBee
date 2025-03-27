@@ -48,7 +48,7 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema', 
 }
 
 MIDDLEWARE = [
@@ -156,3 +156,34 @@ if not BYPASS_MEDIA:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ML_API_URL = os.getenv("ML_API_URL", "http://localhost:5000/ml/")  # Default to local ML server
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {  # Log to terminal
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',  # Set root level to DEBUG
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        '__main__': {  # This is for standalone scripts, probably not used here
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'core': {  # Assuming your app is called 'core'
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}

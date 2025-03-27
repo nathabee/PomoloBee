@@ -1,7 +1,7 @@
 
 
 **PomoloBee App**
-Since **video processing is not in scope right now**, we will focus only on **image-based apple detection**.
+Since **video processing is not in scope right now**, we will focus only on **image-based fruit detection**.
 
 
 ---
@@ -282,7 +282,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 
 ### **Purpose**
 ✔ Displays **processed image** with detection markers.  
-✔ Shows **apple count, estimated yield, and confidence score**.  
+✔ Shows **fruit count, estimated yield, and confidence score**.  
 ✔ Allows **reprocessing or sharing results**.  
 
 ### **Updated Wireframe**
@@ -290,7 +290,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 +--------------------------------+
 |  🖼️ [Processed Image]         |
 |                                |
-|  🍏 Apples Detected: 12        |
+|  🍏 fruit Detected: 12        |
 |  📊 Estimated Yield: 48.0 kg   |
 |  🎯 Confidence: 85%  [Bar]     |
 |--------------------------------|
@@ -324,7 +324,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 +--------------------------------+
 |  🌱 Tree Count:  [______]      |
 |  📏 Row Length:  [______] m    |
-|  🍏 Avg. Apple Size:  [______] g |
+|  🍏 Avg. fruit Size:  [______] g |
 |--------------------------------|
 |  📂 Image Storage Path:        |
 |  /sdcard/PomoloBee/            |
@@ -364,15 +364,15 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 ```
 +----------------------------------------+
 | 🌳 Orchard: North Orchard (N)          |
-| 📝 Description: Main apple section     |
+| 📝 Description: Main fruit section     |
 |----------------------------------------|
-| 🌿 Row A  • 50 trees • 🍏 Golden Apple  |
-| 🌿 Row B  • 40 trees • 🍎 Red Apple     |
+| 🌿 Row A  • 50 trees • 🍏 Golden fruit  |
+| 🌿 Row B  • 40 trees • 🍎 Red fruit     |
 |----------------------------------------|
 | 🌳 Orchard: South Orchard (S)          |
 | 📝 Description: Mixed fruit section    |
 |----------------------------------------|
-| 🌿 Row C  • 45 trees • 🍏 Green Apple   |
+| 🌿 Row C  • 45 trees • 🍏 Green fruit   |
 +----------------------------------------+
 ```
 

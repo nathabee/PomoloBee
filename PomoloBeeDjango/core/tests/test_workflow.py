@@ -1,12 +1,32 @@
 # Validation test: Full API workflow
+
+# workflow validation test is a API-only workflow-driven integration test 
+# — no manual object.create : only real API calls like a real mobile client + ML would do.
+# ✅ DB is initialized only from fixtures
+# ✅ POST /api/images/ is used to upload image
+# ✅ POST /ml_result/ mimics ML posting result
+# ❌ No Image.objects.create(...) 
+# ✅ All calls are external (API or request)
+
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.conf import settings
 import requests
 from rest_framework import status
-from core.models import ImageHistory, Field, Fruit, Raw
+from core.models import Image, Field, Farm,User, Fruit, Raw,Image,Estimation
 
+import logging
+logger = logging.getLogger(__name__) 
+
+from django.test import override_settings
+import tempfile
+import os
+
+# Create a temp dir for test media
+TEMP_MEDIA_ROOT = tempfile.mkdtemp()
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class DjangoWorkflowTest(TestCase):
     """Test full Django workflow including database initialization, API calls, and ML processing."""
 
@@ -19,13 +39,15 @@ class DjangoWorkflowTest(TestCase):
         self.process_url = f"{settings.ML_API_URL}/process"
 
     ### 1️⃣ TEST INITIAL DATABASE STATE ###
-    def test_01_check_fixture_loading(self):
+    def test_001_check_fixture_loading(self):
         """Check if fixtures were correctly loaded."""
+        self.assertEqual(User.objects.count(), 1, "Expected 1 user in the database.")
+        self.assertEqual(Farm.objects.count(), 1, "Expected 1 farm in the database.")
         self.assertEqual(Field.objects.count(), 6, "Expected 6 fields in the database.")
         self.assertEqual(Fruit.objects.count(), 6, "Expected 6 fruits in the database.")
         self.assertEqual(Raw.objects.count(), 28, "Expected 28 raws in the database.")
 
-    def test_02_check_example_data(self):
+    def test_002_check_example_data(self):
         """Check that specific raw, fruit, and field exist with correct values."""
         field = Field.objects.get(short_name="C1")
         self.assertEqual(field.name, "ChampMaison")
@@ -40,83 +62,347 @@ class DjangoWorkflowTest(TestCase):
         self.assertEqual(raw.fruit.id, 1)  # Foreign key to Fruit
 
     ### 2️⃣ TEST INITIAL API ENDPOINTS ###
-    def test_03_get_fields(self):
+    def test_003_get_fields(self):
         """Test GET /api/fields/ returns the correct data."""
         response = self.client.get(reverse("fields-list"))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 6)  # Expecting 6 fields
-        self.assertEqual(response.json()[0]["short_name"], "C1")
 
-    def test_04_get_fruits(self):
+        self.assertEqual(response.status_code, status.HTTP_200_OK) 
+
+        fields = response.json()["data"]["fields"]
+        self.assertEqual(len(fields), 6)  # ✅ Now correctly checking the list
+        self.assertEqual(fields[0]["short_name"], "C1")
+
+
+    def test_004_get_fruits(self):
         """Test GET /api/fruits/ returns the correct data."""
         response = self.client.get(reverse("fruits-list"))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 6)  # Expecting 6 fruits
-        self.assertEqual(response.json()[0]["short_name"], "Swing_CG1")
+        fruits = response.json()["data"]["fruits"]
+        self.assertEqual(len(fruits), 6)  # ✅ Now correctly checking the list
 
-    def test_05_get_locations(self):
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(fruits), 6)  # Expecting 6 fruits
+        self.assertEqual(fruits[0]["short_name"], "Swing_CG1")
+
+    def test_005_get_locations(self):
         """Test GET /api/locations/ returns fields + associated raws."""
         response = self.client.get(reverse("locations"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("locations", response.json())
-        self.assertEqual(len(response.json()["locations"]), 6)  # Expecting 6 fields
-        self.assertEqual(len(response.json()["locations"][0]["raws"]), 2)  # Example: Field 1 has 2 raws
+        self.assertIn("data", response.json())
+        locations = response.json()["data"]["locations"]
+        self.assertEqual(len(locations), 6) # Expecting 6 fields 
+        self.assertEqual(len(locations[0]["raws"]), 28)  # Example: Field 1 has 28 raws
 
     ### 3️⃣ TEST IMAGE UPLOAD & PROCESSING ###
-    def test_06_upload_image(self):
+
+
+    def test_006_upload_image(self): 
         """Test image upload to Django."""
-        image = SimpleUploadedFile("orchard.jpg", b"file_content", content_type="image/jpeg")
-        response = self.client.post(self.upload_url, {"image": image, "raw_id": 1, "date": "2024-03-14"}, format="multipart")
+        with open("media/images/orchard.jpg", "rb") as img_file:
+            image = SimpleUploadedFile("orchard.jpg", img_file.read(), content_type="image/jpeg")
+        
+        response = self.client.post(
+            self.upload_url,
+            {"image": image, "raw_id": 1, "date": "2024-03-14"},
+            format="multipart"
+        )
+
+        # print("PRINT - Upload response:", response.status_code, response.json())  # optional debug
+        logger.debug("LOG - Upload response: %s %s", response.status_code, response.json())
+ 
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("image_id", response.json()["data"])
+ 
+    def test_007_django_sends_image_to_ml(self):
+        """Test if Django sends image to ML via API, after image upload."""
+
+        with open("media/images/orchard.jpg", "rb") as img:
+            upload_response = self.client.post(
+                reverse("image-upload"),
+                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                format="multipart"
+            )
+            logger.debug("LOG - Upload response: %s %s", upload_response.status_code, upload_response.json())
+        self.assertEqual(upload_response.status_code, 201)
+        if upload_response.status_code != 201:
+            print("Upload failed:", upload_response.status_code, upload_response.content)
+
+        self.assertEqual(upload_response.status_code, 201)
+        image_id = upload_response.json()["data"]["image_id"]
+
+        payload = {
+            "image_url": f"{settings.MEDIA_URL}images/image-{image_id}.jpg",
+            "image_id": image_id
+        }
+
+        response = requests.post(self.process_url, json=payload)
+        #logger.debug("LOG - Upload response: %s %s", response.status_code, response.json())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("message", response.json()["data"])
+
+    def test_008_ml_sends_results_back_to_django(self): 
+        """Simulate ML returning results to Django."""
+        with open("media/images/orchard.jpg", "rb") as img:
+            upload_response = self.client.post(
+                reverse("image-upload"),
+                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                format="multipart"
+            )
+        self.assertEqual(upload_response.status_code, 201)
+        if upload_response.status_code != 201:
+            print("Upload failed:", upload_response.status_code, upload_response.content)
+
+        self.assertEqual(upload_response.status_code, 201)
+        image_id = upload_response.json()["data"]["image_id"]
+
+        payload = {"nb_fruit": 15, "confidence_score": 0.85, "processed": True}
+        response = self.client.post(
+            reverse("ml-result", args=[image_id]),
+            data=payload,
+            content_type="application/json"
+        )
+
+        
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("message", response.json()["data"])
+
+        img_obj = Image.objects.get(id=image_id)
+        self.assertTrue(Estimation.objects.filter(image=img_obj).exists())
+        self.assertEqual(img_obj.nb_fruit, 15)
+        self.assertTrue(img_obj.processed)
+
+
+    def test_009_django_fetches_ml_results(self): 
+        """Ensure Django returns ML results for a processed image."""
+
+        with open("media/images/orchard.jpg", "rb") as img:
+            upload_response = self.client.post(
+                reverse("image-upload"),
+                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                format="multipart"
+            ) 
+
+        if upload_response.status_code != 201:
+            print("Upload failed:", upload_response.status_code, upload_response.content)
+
+        self.assertEqual(upload_response.status_code, 201)
+        image_id = upload_response.json()["data"]["image_id"]
+
+        # Simulate ML result
+        self.client.post(
+            reverse("ml-result", args=[image_id]),
+            data={"nb_fruit": 10, "confidence_score": 0.9, "processed": True},
+            content_type="application/json"
+        )
+
+        response = self.client.get(reverse("ml-result", args=[image_id]))
+        logger.debug("LOG - Upload response: %s %s", response.status_code, response.json())
+
+        self.assertEqual(response.status_code, 200) 
+        self.assertEqual(response.json()["data"]["nb_fruit"], 10)
+        self.assertEqual(response.json()["data"]["confidence_score"], 0.9)
+ 
+
+
+    def test_010_fetch_estimations(self):
+        """Test if Django correctly returns yield estimations."""
+        response = self.client.get(reverse("image-estimations", args=[1]))  # Assuming image_id=1 exists
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("plant_fruit", response.json()["data"])
+
+
+    def test_012_full_image_to_estimation_workflow(self): 
+        from core.models import Image
+
+        # 1️⃣ Upload image (as App would do)
+        with open("media/images/orchard.jpg", "rb") as img:
+            response = self.client.post(
+                reverse("image-upload"),
+                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                format="multipart"
+            )
+            logger.debug("LOG - Upload response: %s %s", response.status_code, response.json())
 
         self.assertEqual(response.status_code, 201)
-        self.assertIn("image_id", response.json())
+        image_id = response.json()["data"]["image_id"]
 
-    def test_07_django_sends_image_to_ml(self):
-        """Test if Django correctly sends an image processing request to ML."""
-        image = ImageHistory.objects.create(image_path="test_image.jpg", processed=False)
-
-        payload = {"image_url": f"{settings.MEDIA_URL}{image.image_path}", "image_id": image.id}
-        response = requests.post(self.process_url, json=payload)
-
+        # 2️⃣ Simulate ML posting result
+        ml_result_payload = {
+            "nb_fruit": 12,
+            "confidence_score": 0.88,
+            "processed": True
+        }
+        response = self.client.post(
+            reverse("ml-result", args=[image_id]),
+            data=ml_result_payload,
+            content_type="application/json"
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("message", response.json())
 
-    def test_08_ml_sends_results_back_to_django(self):
-        """Test if ML successfully sends processing results back to Django."""
-        image = ImageHistory.objects.create(image_path="test_image.jpg", processed=False)
+        # 3️⃣ Get ML result from Django
+        response = self.client.get(reverse("ml-result", args=[image_id]))
+        self.assertEqual(response.status_code, 200) 
+        self.assertEqual(response.json()["data"]["nb_fruit"], 12)
+        self.assertEqual(response.json()["data"]["confidence_score"], 0.88)
 
-        payload = {"nb_apples": 15, "confidence_score": 0.85, "processed": True}
-        response = self.client.post(reverse("ml-result", args=[image.id]), data=payload, content_type="application/json")
-
+        # 4️⃣ Check Estimation endpoint
+        response = self.client.get(reverse("image-estimations", args=[image_id]))
         self.assertEqual(response.status_code, 200)
-        self.assertIn("message", response.json())
+        self.assertIn("plant_kg", response.json()["data"])
 
-        # Check if ImageHistory is updated
-        image.refresh_from_db()
-        self.assertEqual(image.nb_apfel, 15)
-        self.assertEqual(image.confidence_score, 0.85)
-        self.assertTrue(image.processed)
 
-    def test_09_django_fetches_ml_results(self):
-        """Test if Django retrieves ML results."""
-        image = ImageHistory.objects.create(image_path="test_image.jpg", nb_apfel=10, confidence_score=0.9, processed=True)
 
-        response = self.client.get(reverse("ml-result", args=[image.id]))
-
+    def test_013_get_estimations_by_field(self):
+        """GET /fields/{field_id}/estimations/"""
+        # Upload + process
+        ...
+        response = self.client.get(reverse("field-estimations", args=[1]))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["nb_apples"], 10)
-        self.assertEqual(response.json()["confidence_score"], 0.9)
+        self.assertIn("latest_estimations", response.json()["data"])
 
-    def test_10_fetch_estimations(self):
-        """Test if Django correctly returns yield estimations."""
-        response = self.client.get(reverse("estimation-detail", args=[1]))  # Assuming image_id=1 exists
+    def test_014_delete_uploaded_image(self):
+        with open("media/images/orchard.jpg", "rb") as img:
+            upload_response = self.client.post(
+                reverse("image-upload"), {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                format="multipart"
+            )
+        if upload_response.status_code != 201:
+            print("Upload failed:", upload_response.status_code, upload_response.content)
 
+        self.assertEqual(upload_response.status_code, 201)
+        image_id = upload_response.json()["data"]["image_id"]
+        response = self.client.delete(reverse("image-delete", args=[image_id]))
         self.assertEqual(response.status_code, 200)
-        self.assertIn("plant_apfel", response.json())
 
-    def test_11_fetch_estimation_history(self):
-        """Test if Django correctly fetches history."""
-        response = self.client.get(reverse("history-list"))
 
+    def test_015_get_ml_version(self):
+        response = self.client.get(reverse("ml-version"))
         self.assertEqual(response.status_code, 200)
-        self.assertIn("history", response.json())
+        self.assertIn("model_version", response.json()["data"])
+
+
+    def test_016_retry_processing(self):
+        """Test retrying ML processing for an uploaded image that is not yet processed."""
+
+        with open("media/images/orchard.jpg", "rb") as img:
+            upload_response = self.client.post(
+                reverse("image-upload"),
+                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                format="multipart"
+            )
+        self.assertEqual(upload_response.status_code, 201)
+        if upload_response.status_code != 201:
+            print("Upload failed:", upload_response.status_code, upload_response.content)
+
+        self.assertEqual(upload_response.status_code, 201)
+        image_id = upload_response.json()["data"]["image_id"]
+
+        # Make sure image is not marked as processed
+        image_obj = Image.objects.get(id=image_id)
+        self.assertFalse(image_obj.processed)
+
+        # Send retry request
+        retry_response = self.client.post(
+            reverse("retry-processing"),
+            {"image_id": image_id},
+            content_type="application/json"
+        )
+
+        self.assertIn(retry_response.status_code, [200, 503])
+        if retry_response.status_code == 200:
+            self.assertIn("message", retry_response.json()["data"])
+        elif retry_response.status_code == 503:
+            self.assertIn("ML service unavailable", retry_response.json()["error"]["message"])
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
+class DjangoWorkflowRobustnessTest(TestCase):
+    """Test full Django workflow including database initialization, API calls, and ML processing."""
+
+    fixtures = ["initial_superuser.json","initial_farms.json","initial_fields.json", "initial_fruits.json", "initial_raws.json"]
+
+    def setUp(self):
+        """Set up URLs for API calls."""
+        self.upload_url = reverse("image-upload")
+        self.ml_result_url = reverse("ml-result", args=[1])  # Assuming ML result for image_id=1
+        self.process_url = f"{settings.ML_API_URL}/process"
+
+
+    def test_101_estimation_requested_without_result(self): 
+        """App uploads image but ML never responds → estimation should not be available."""
+
+        with open("media/images/orchard.jpg", "rb") as img:
+            upload_response = self.client.post(
+                reverse("image-upload"),
+                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                format="multipart"
+            )
+        if upload_response.status_code != 201:
+            print("Upload failed:", upload_response.status_code, upload_response.content)
+
+        self.assertEqual(upload_response.status_code, 201)
+        image_id = upload_response.json()["data"]["image_id"]
+
+        response = self.client.get(reverse("image-estimations", args=[image_id]))
+        logger.debug("LOG - Upload response: %s %s", response.status_code, response.json())
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("error", response.json())
+        self.assertEqual(response.json()["error"]["code"], "404_NOT_FOUND")
+
+
+    def test102_estimation_after_ml_refused_image(self): 
+        """Simulate ML refusing image (e.g. bad request) → estimation should not exist."""
+
+        with open("media/images/orchard.jpg", "rb") as img:
+            upload_response = self.client.post(
+                reverse("image-upload"),
+                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                format="multipart"
+            )
+        if upload_response.status_code != 201:
+            print("Upload failed:", upload_response.status_code, upload_response.content)
+
+        self.assertEqual(upload_response.status_code, 201)
+        image_id = upload_response.json()["data"]["image_id"]
+
+        # Simulate ML rejecting the image processing request
+        # → send an intentionally incomplete payload
+        bad_payload = {"image_id": image_id}  # image_url missing
+
+        ml_response = requests.post(self.process_url, json=bad_payload)
+        #logger.debug("LOG - Upload response: %s %s", ml_response.status_code, ml_response.json())
+        self.assertEqual(ml_response.status_code, 404)
+
+        # App tries to fetch estimation even though ML never processed it
+        response = self.client.get(reverse("image-estimations", args=[image_id]))
+        logger.debug("LOG - Upload response: %s %s", response.status_code, response.json())
+        self.assertEqual(response.status_code, 404)
+
+
+    def test_103_estimation_after_failed_result_post(self): 
+        """Simulate ML trying to return results, but Django rejects them (e.g. invalid payload)."""
+
+        with open("media/images/orchard.jpg", "rb") as img:
+            upload_response = self.client.post(
+                reverse("image-upload"),
+                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                format="multipart"
+            )
+        if upload_response.status_code != 201:
+            print("Upload failed:", upload_response.status_code, upload_response.content)
+
+        self.assertEqual(upload_response.status_code, 201)
+        image_id = upload_response.json()["data"]["image_id"]
+
+        # Simulate ML POSTing result with invalid data
+        bad_payload = {"nb_fruit": None, "processed": True}  # invalid missing score
+        post_response = self.client.post(
+            reverse("ml-result", args=[image_id]),
+            data=bad_payload,
+            content_type="application/json"
+        )
+        self.assertIn(post_response.status_code, [400, 500])
+
+        # Still try to fetch estimation
+        response = self.client.get(reverse("image-estimations", args=[image_id]))
+        self.assertEqual(response.status_code, 404)

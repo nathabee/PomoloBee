@@ -3,7 +3,7 @@
         "model": "core.field",
         "pk": 1,
         "fields": {
-            "id_farm": 1,
+            "farm": 1,
             "short_name": "C1",
             "name": "ChampMaison",
             "description": "Champ situé sur la parcelle de la maison",
@@ -14,7 +14,7 @@
         "model": "core.field",
         "pk": 2,
         "fields": {
-            "id_farm": 1,
+            "farm": 1,
             "short_name": "C2",
             "name": "ChampSud",
             "description": "Champ situé au sud de la propriété, très ensoleillé.",
@@ -25,7 +25,7 @@
         "model": "core.field",
         "pk": 3,
         "fields": {
-            "id_farm": 1,
+            "farm": 1,
             "short_name": "C3",
             "name": "VergerHaut",
             "description": "Verger en hauteur avec terre calcaire.",
@@ -36,7 +36,7 @@
         "model": "core.field",
         "pk": 4,
         "fields": {
-            "id_farm": 1,
+            "farm": 1,
             "short_name": "C4",
             "name": "VergerBas",
             "description": "Verger en contrebas, plus humide.",
@@ -47,7 +47,7 @@
         "model": "core.field",
         "pk": 5,
         "fields": {
-            "id_farm": 1,
+            "farm": 1,
             "short_name": "C5",
             "name": "PlaineOuest",
             "description": "Grande plaine à l'ouest, sol fertile.",
@@ -58,7 +58,7 @@
         "model": "core.field",
         "pk": 6,
         "fields": {
-            "id_farm": 1,
+            "farm": 1,
             "short_name": "C6",
             "name": "TestZone",
             "description": "Petite parcelle expérimentale.",

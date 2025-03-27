@@ -19,19 +19,16 @@ This document defines the API interface for the Pomolobee project, specifying:
   - [Section B Image Upload ML Processing](#section-b-image-upload-ml-processing)
     - [**Upload an Image for Processing**](#upload-an-image-for-processing)
     - [**Request Retry for ML Processing**](#request-retry-for-ml-processing)
-    - [**Fetch ML Results from Django**](#fetch-ml-results-from-django)
     - [**Fetch the Current ML Model Version**](#fetch-the-current-ml-model-version)
     - [**Check Image Processing Status**](#check-image-processing-status)
   - [Section C Estimations Yield Results](#section-c-estimations-yield-results)
-    - [**Fetch Apple Detection Results**](#fetch-apple-detection-results)
+    - [**Fetch fruit Detection Results**](#fetch-fruit-detection-results)
     - [**Fetch Latest Completed Estimations**](#fetch-latest-completed-estimations)
-    - [**Fetch List of Uploaded Images**](#fetch-list-of-uploaded-images)
     - [**Fetch Metadata of a Specific Uploaded Image**](#fetch-metadata-of-a-specific-uploaded-image)
     - [**Delete an Image**](#delete-an-image)
-    - [**Fetching Processing Errors**](#fetching-processing-errors)
   - [Section D History Analytics](#section-d-history-analytics)
-    - [**Fetching all Historical Records**](#fetching-all-historical-records)
-    - [**Fetching a Single Historical Record**](#fetching-a-single-historical-record)
+    - [**Fetching all Estimation Records**](#fetching-all-estimation-records)
+    - [**Fetching a Estimation Record for an image**](#fetching-a-estimation-record-for-an-image)
   - [**4. API Design**](#4-api-design)
     - [Query Examples](#query-examples)
     - [**API Call Order**](#api-call-order)
@@ -71,7 +68,7 @@ GET /api/fields/
             "field_id": 1,
             "short_name": "North_Field",
             "name": "North Orchard",
-            "description": "Main orchard section for apples.",
+            "description": "Main orchard section for fruit.",
             "orientation": "N"
         },
         {
@@ -107,9 +104,9 @@ GET /api/fruits/
     "fruits": [
         {
             "fruit_id": 5,
-            "short_name": "Golden_Apple",
-            "name": "Golden Apple",
-            "description": "Sweet yellow apples, ripe in autumn.",
+            "short_name": "Golden_fruit",
+            "name": "Golden fruit",
+            "description": "Sweet yellow fruit, ripe in autumn.",
             "yield_start_date": "2024-09-01",
             "yield_end_date": "2024-10-15",
             "yield_avg_kg": 2.5,
@@ -117,9 +114,9 @@ GET /api/fruits/
         },
         {
             "fruit_id": 6,
-            "short_name": "Red_Apple",
-            "name": "Red Apple",
-            "description": "Crunchy red apples, available in late summer.",
+            "short_name": "Red_fruit",
+            "name": "Red fruit",
+            "description": "Crunchy red fruit, available in late summer.",
             "yield_start_date": "2024-07-15",
             "yield_end_date": "2024-08-30",
             "yield_avg_kg": 2.8,
@@ -160,7 +157,7 @@ GET /api/locations/
                     "name": "Row A",
                     "nb_plant": 50,
                     "fruit_id": 5,
-                    "fruit_type": "Golden Apple"
+                    "fruit_type": "Golden fruit"
                 },
                 {
                     "raw_id": 102,
@@ -168,7 +165,7 @@ GET /api/locations/
                     "name": "Row B",
                     "nb_plant": 40,
                     "fruit_id": 6,
-                    "fruit_type": "Red Apple"
+                    "fruit_type": "Red fruit"
                 }
             ]
         },
@@ -183,7 +180,7 @@ GET /api/locations/
                     "name": "Row C",
                     "nb_plant": 45,
                     "fruit_id": 7,
-                    "fruit_type": "Green Apple"
+                    "fruit_type": "Green fruit"
                 }
             ]
         }
@@ -210,7 +207,7 @@ GET /api/locations/
 
 
 ### **Upload an Image for Processing**
-📌 **Purpose:** Upload an **image** and associate it with a **specific raw (tree row)** for apple detection.
+📌 **Purpose:** Upload an **image** and associate it with a **specific raw (tree row)** for fruit detection.
 
 ✅ **Endpoint:**  
 ```
@@ -230,7 +227,7 @@ POST /api/images/
 ```bash
 curl -X POST "https://server.com/api/images/" \
 -H "Content-Type: multipart/form-data" \
--F "image=@apple_photo.jpg" \
+-F "image=@fruit_photo.jpg" \
 -F "raw_id=3" \
 -F "date=2024-03-14"
 ```
@@ -321,46 +318,6 @@ or
 
 ---
 
-### **Fetch ML Results from Django**
-📌 **Purpose:** The App fetches apple detection results from Django after ML has returned them.
-
-
-✅ **Endpoint:**  
-```
-GET /api/images/{image_id}/ml_result
-```
-✅ **Caller → Receiver:**  
-- **Django Backend → ML Model**
-
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `image_id` | `integer` | ✅ Yes | Unique ID of the image whose result is requested. |
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-
-  "status": "success",
-  "data": {
-    "image_id": 24,
-    "nb_apples": 12,
-    "confidence_score": 0.89,
-    "processed": true
-}
-}
-```
-
-✅ **Response (Error - 404 Not Found)**
-```json
-{
-  "error": {
-    "code": "404_NOT_FOUND",
-    "message": "ML results not found for this image."
-  }
-}
-```
-
 ---
 
 ### **Fetch the Current ML Model Version**
@@ -409,7 +366,7 @@ GET /api/ml/version/
 
 ✅ **Endpoint:**  
 ```
-GET /api/images/{image_id}/status/
+GET /api/images/{image_id}/details 
 ```
 ✅ **Caller → Receiver:**  
 - **App → Django Backend**
@@ -428,7 +385,7 @@ GET /api/images/{image_id}/status/
     "image_id": 24,
     "status": "done",
     "processed": true,
-    "nb_apfel": 15,
+    "nb_fruit": 15,
     "confidence_score": 0.87
 }
 }
@@ -463,12 +420,12 @@ GET /api/images/{image_id}/status/
 📌 **Purpose:** Fetch estimation/yield results computed by ML and stored in Django.
 
 
-### **Fetch Apple Detection Results**
-📌 **Purpose:** Retrieve the **apple count, confidence score, and estimated yield** for a processed image.
+### **Fetch fruit Detection Results**
+📌 **Purpose:** Retrieve the **fruit count, confidence score, and estimated yield** for a processed image.
 
 ✅ **Endpoint:**  
 ```
-GET /api/estimations/{image_id}/
+GET /api/images/{image_id}/estimations/
 ```
 ✅ **Caller → Receiver:**  
 - **App → Django Backend**
@@ -484,12 +441,19 @@ GET /api/estimations/{image_id}/
 
   "status": "success",
   "data": {
-    "image_id": 24,
-    "plant_apfel": 12,
-    "plant_kg": 2.4,
-    "raw_kg": 48.0,
-    "confidence_score": 0.85,
-    "status": "done"
+  "image_id": 24,
+  "plant_fruit": 12,
+  "plant_kg": 2.4,
+  "raw_kg": 48.0,
+  "confidence_score": 0.85,
+  "maturation_grade": 0.4,
+  "source": "Machine Learning from image",
+  "field_id": 1,
+  "field_name": "ChampMaison",
+  "raw_id": 3,
+  "raw_name": "C1-R3",
+  "fruit_type": "Swing on CG1",
+  "status": "done"
 }
 }
 ```
@@ -509,11 +473,11 @@ GET /api/estimations/{image_id}/
 
 
 ### **Fetch Latest Completed Estimations**
-📌 **Purpose:** Retrieve the **most recent** completed estimations.
+📌 **Purpose:** Retrieve the estimations associated to a field.
 
 ✅ **Endpoint:**  
 ```
-GET /api/latest_estimations/
+GET /api/fields/{field_id}/estimations/
 ```
 ✅ **Caller → Receiver:**  
 - **App → Django Backend**
@@ -527,21 +491,32 @@ GET /api/latest_estimations/
         "latest_estimations": [
             {
                 "image_id": 24,
-                "raw_id": 3,
-                "plant_apfel": 12,
+                "plant_fruit": 12,
                 "plant_kg": 2.4,
                 "raw_kg": 48.0,
                 "confidence_score": 0.85,
-                "date": "2024-03-14"
+                "date": "2024-03-01"
+                "field_id": 1,
+                "field_name": "ChampMaison",
+                "raw_id": 3,
+                "raw_name": "C1-R3",
+                "fruit_type": "Swing on CG1",
+                "status": "done" 
             },
             {
                 "image_id": 25,
                 "raw_id": 4,
-                "plant_apfel": 10,
+                "plant_fruit": 10,
                 "plant_kg": 2.0,
                 "raw_kg": 40.0,
                 "confidence_score": 0.83,
                 "date": "2024-03-13"
+                "field_id": 1,
+                "field_name": "ChampMaison",
+                "raw_id": 3,
+                "raw_name": "C1-R3",
+                "fruit_type": "Swing on CG1",
+                "status": "done"
             }
         ]
     }
@@ -553,39 +528,15 @@ GET /api/latest_estimations/
 {
   "error": {
     "code": "404_NOT_FOUND",
-    "message": "No recent estimation found."
+    "message": "No estimation found."
   }
 }
 ```
-
-### **Fetch List of Uploaded Images**
-📌 **Purpose:** Retrieve all uploaded images and their statuses.
-
-✅ **Endpoint:**  
-```
-GET /api/images/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-  "status": "success",
-    "data": 
-    {
-        "images": [
-            { "image_id": 24, "raw_id": 3, "status": "done", "upload_date": "2024-03-10" },
-            { "image_id": 25, "raw_id": 5, "status": "processing", "upload_date": "2024-03-12" }
-        ]
-    }
-}
-```
-
+ 
 ---
 
 ### **Fetch Metadata of a Specific Uploaded Image**
-📌 **Purpose:** Retrieve **detailed metadata** of an uploaded image.
+📌 **Purpose:** Retrieve **detailed metadata** of an uploaded image inclusive status.
 
 ✅ **Endpoint:**  
 ```
@@ -603,7 +554,7 @@ GET /api/images/{image_id}/details/
         "image_id": 24,
         "raw_id": 3,
         "field_id": 1,
-        "fruit_type": "Golden Apple",
+        "fruit_type": "Golden fruit",
         "status": "done",
         "upload_date": "2024-03-10",
         "image_url": "https://server.com/images/24.jpg"
@@ -645,55 +596,19 @@ DELETE /api/images/{image_id}/
 ```
 ---
 
-### **Fetching Processing Errors**
-📌 **Purpose:** Retrieve **error logs** related to a specific image processing failure.
-
-✅ **Endpoint:**  
-```
-GET /api/images/{image_id}/error_log/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `image_id` | `integer` | ✅ Yes | Unique ID of the uploaded image. |
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-  "status": "success",
-  "data": {
-        "image_id": 24,
-        "status": "failed",
-        "error_log": "ML model failed to detect apples due to poor image quality.",
-        "timestamp": "2024-03-14T08:45:00"
-        }
-}
-```
-
-✅ **Response (Error - 404 Not Found)**  
-```json
-{
-  "error": {
-    "code": "404_NOT_FOUND",
-    "message": "No error log found for this image."
-  }
-}
-```
+ 
 --- 
-
+ 
 
 ## Section D History Analytics
 📌 **Purpose:**  Retrieve previously estimated yields and details.
 
 
-### **Fetching all Historical Records**
-📌 **Purpose:** Retrieve the **detailed results of all past yield estimation**  
+### **Fetching all Estimation Records**
+📌 **Purpose:** Retrieve the **detailed results of all past yield estimation for a field**  
 ✅ **Endpoint:**  
 ```
-GET /api/history/
+GET /api/fields/{field_id}/estimations/
 ```
 ✅ **Caller → Receiver:**  
 - **App → Django Backend**
@@ -703,25 +618,27 @@ GET /api/history/
 {
   "status": "success",
   "data": {
-    "history": [
+    "estimations": [
         {
-            "history_id": 12,
+            "estimation_id": 12,
+            "image_id": 12,
             "raw_id": 3,
             "raw_name": "Row A",
             "field_id": 1,
             "field_name": "North Orchard",
-            "fruit_type": "Golden Apple",
+            "fruit_type": "Golden fruit",
             "estimated_yield_kg": 50.0,
             "confidence_score": 0.88,
             "date": "2024-03-05"
         },
         {
-            "history_id": 13,
+            "estimation_id": 13,
+            "image_id": 13,
             "raw_id": 5,
             "raw_name": "Row B",
             "field_id": 2,
             "field_name": "South Orchard",
-            "fruit_type": "Red Apple",
+            "fruit_type": "Red fruit",
             "estimated_yield_kg": 30.0,
             "confidence_score": 0.75,
             "date": "2024-03-08"
@@ -736,7 +653,7 @@ GET /api/history/
  {
   "error": {
     "code": "404_NOT_FOUND",
-    "message": "No history records found."
+    "message": "No estimation records found."
   }
 }
 ```
@@ -745,12 +662,12 @@ GET /api/history/
  
 ---
 
-### **Fetching a Single Historical Record**
+### **Fetching a Estimation Record for an image**
 📌 **Purpose:** Retrieve the **detailed results of a past yield estimation** for a specific record.
 
 ✅ **Endpoint:**  
 ```
-GET /api/history/{history_id}/
+GET /api/images/{image_id}/estimations
 ```
 ✅ **Caller → Receiver:**  
 - **App → Django Backend**
@@ -758,7 +675,7 @@ GET /api/history/{history_id}/
 ✅ **Path Parameters:**
 | **Parameter** | **Type** | **Required?** | **Description** |
 |--------------|---------|-------------|---------------|
-| `history_id` | `integer` | ✅ Yes | Unique ID of the estimation history record. |
+| `image_id` | `integer` | ✅ Yes | ID of the image used for estimation record. |
 
 ✅ **Response (Success - 200 OK)**
 ```json
@@ -766,12 +683,12 @@ GET /api/history/{history_id}/
 {
   "status": "success",
   "data": {
-        "history_id": 12,
+        "image_id": 12,
         "raw_id": 3,
         "raw_name": "Row A",
         "field_id": 1,
         "field_name": "North Orchard",
-        "fruit_type": "Golden Apple",
+        "fruit_type": "Golden fruit",
         "estimated_yield_kg": 50.0,
         "confidence_score": 0.88,
         "image_url": "https://server.com/images/processed_12.jpg",
@@ -786,7 +703,7 @@ GET /api/history/{history_id}/
  {
   "error": {
     "code": "404_NOT_FOUND",
-    "message": "Estimation history not found."
+    "message": "Estimation not found for this image."
   }
 }
 ```
@@ -799,26 +716,26 @@ GET /api/history/{history_id}/
 
 ###  Query Examples
 ```sh
-curl -X GET "https://server.com/api/images/24/status/"
+curl -X GET "https://server.com/api/images/24/details/"
 ```
 
 ```bash
 curl -X POST "https://server.com/api/images/" \
 -H "Content-Type: multipart/form-data" \
--F "image=@apple_photo.jpg" \
+-F "image=@fruit_photo.jpg" \
 -F "raw_id=3" \
 -F "date=2024-03-14"
 ```
 
 ### **API Call Order**
 📌 `POST /api/images/` (Upload Image)  
-📌 `GET /api/images/{image_id}/status` (Check Processing Status)  
-📌 `GET /api/estimations/{image_id}` (Fetch Estimation Results)  
+📌 `GET /api/images/{image_id}/details` (Check Processing Status)  
+📌 `GET /api/images/{image_id}/estimations` (Fetch Estimation Results)  
 
 ---
 
 ### **Polling Strategy**
-📌 The app checks `GET /api/images/{image_id}/status` every **minute**.  
+📌 The app checks `GET /api/images/{image_id}/details` every **minute**.  
 📌 If `status = "done"`, the app fetches results.  
 📌 If the process takes longer than **5 retries (5 minutes)**, the app should **show a warning**.  
 📌 If ML takes longer than 5 minutes, Django should **log the delay** and optionally **send a retry request to ML**.  
@@ -832,7 +749,7 @@ curl -X POST "https://server.com/api/images/" \
 
 ## **Error Handling Strategy in DJANGO**
 📌 **What if ML processing fails?**  
-- If ML **returns an error**, Django should mark `processed = false` in `ImageHistory`.  
+- If ML **returns an error**, Django should mark `processed = false` in `Image`.  
 - The app should **stop polling after 5 attempts** and **display an error message**.
 
 📌 **What if the app sends an invalid image?**  

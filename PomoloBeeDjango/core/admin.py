@@ -1,6 +1,5 @@
 from django.contrib import admin
- 
-from .models import Field, Raw, Fruit, ImageHistory, HistoryRaw, HistoryEstimation
+from .models import Field, Raw, Fruit, Image, Estimation
 
 
 @admin.register(Field)
@@ -24,24 +23,18 @@ class FruitAdmin(admin.ModelAdmin):
     list_filter = ('yield_start_date', 'yield_end_date')
 
 
-@admin.register(ImageHistory)
-class ImageHistoryAdmin(admin.ModelAdmin):
-    list_display = ('image_path', 'raw', 'nb_apfel', 'confidence_score', 'processed')
-    search_fields = ('image_path',)
-    list_filter = ('processed',)
+@admin.register(Image)
+class ImageAdmin(admin.ModelAdmin):
+    list_display = ('image_file', 'raw', 'date', 'nb_fruit', 'confidence_score', 'processed', 'processed_at')
+    search_fields = ('image_file',)
+    list_filter = ('processed', 'raw')
 
 
-@admin.register(HistoryRaw)
-class HistoryRawAdmin(admin.ModelAdmin):
-    list_display = ('id_image', 'date', 'raw', 'plant_apfel', 'plant_kg', 'raw_kg', 'maturation_grade')
+@admin.register(Estimation)
+class EstimationAdmin(admin.ModelAdmin):
+    list_display = (
+        'image', 'date', 'raw', 'plant_fruit', 'plant_kg', 'raw_kg',
+        'maturation_grade', 'estimated_yield_kg', 'confidence_score', 'source'
+    )
     search_fields = ('raw__name',)
-    list_filter = ('date', 'raw')
-
-
-@admin.register(HistoryEstimation)
-class HistoryEstimationAdmin(admin.ModelAdmin):
-    list_display = ('raw', 'date', 'estimated_yield_kg', 'confidence_score')
-    search_fields = ('raw__name',)
-    list_filter = ('date', 'raw')
-
-
+    list_filter = ('date', 'raw', 'source')
