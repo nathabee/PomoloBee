@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _68 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _75 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -23,6 +23,7 @@
     - [Mars 25 2025](#mars-25-2025)
     - [Mars 26 2025](#mars-26-2025)
     - [Mars 27 2025](#mars-27-2025)
+    - [Mars 28 2025](#mars-28-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -219,9 +220,52 @@ This document tracks the number of hours worked each day and provides a brief de
  - Fixed broken route names in all tests (reverse() consistency).
 - **Theme**: Backend Django Model Refactor and Migration,Endpoint,Workflow Tests  
 
+
+ 
+###  Mars 28 2025
+- **Hours Worked**: 7 hours
+- **Tasks**:
+ - unit test workflow test /core/tests/test_workflow
+ - check API and serializer have the same data, had missing data in API and 
+ - problem with date time format
+ - integration test with curl  (test/integration_workflows --integ )
+ - save snapshot for non regression test  (test/integration_workflows --snapshot )
+ - non-regression test (test/integration_workflows --nonreg )
+ - anomalie found : error uncatched by delete a non exiting image
+- **Theme**: Backend Django Integration Test + creation non regression test for next time
+
+
  
 
 - **PENDING**
+
+rqiase error to fix in views.py:
+⚠️ Views With Hidden Risks
+These are okay-ish, but could fail in edge cases (e.g., filesystem issues, malformed request data, etc.)
+
+🧠 ImageView.post(...)
+Risk areas:
+
+default_storage.save(...) → may fail if disk full or permission denied
+
+os.rename(...) → raises FileNotFoundError, PermissionError, etc.
+
+image_file.name may be weird if it's manually crafted
+
+📌 Fix: Wrap file ops in try/except, log, and raise clean APIError
+
+⚠️ MLResultView.post(...)
+Risk areas:
+
+Doesn't validate the type of nb_fruit, confidence_score, processed (could be string, not int/bool)
+
+Assumes image has a raw and raw.fruit → might be None if DB is misconfigured
+
+📌 Fix:
+
+Add type checks (isinstance(nb_fruit, int) etc.)
+
+Validate image.raw and raw.fruit before accessing
 
 finish workflow test 
 - need to django startserver to acess media

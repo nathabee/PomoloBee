@@ -46,18 +46,20 @@ class FieldLocationSerializer(serializers.ModelSerializer):
         fields = ['field_id', 'field_name', 'orientation', 'raws']
 
 
-# IMAGE
 class ImageSerializer(serializers.ModelSerializer):
     image_id = serializers.IntegerField(source='id', read_only=True)
     raw_id = serializers.IntegerField(source='raw.id', read_only=True)
     field_id = serializers.IntegerField(source='raw.field.id', read_only=True)
     fruit_type = serializers.CharField(source='raw.fruit.name', read_only=True)
     image_url = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
-    upload_date = serializers.DateField(source='date', read_only=True)
+    status = serializers.CharField(source='get_status_display', read_only=True)  # 🧠 This is the key line
 
-    def get_status(self, obj):
-        return "done" if obj.processed else "processing"
+    date = serializers.DateField(read_only=True, format="%Y-%m-%d")
+    upload_date = serializers.DateField(read_only=True, format="%Y-%m-%d")
+    processed_at = serializers.DateTimeField(read_only=True, format="%Y-%m-%dT%H:%M:%S")
+
+
+    original_filename = serializers.CharField(read_only=True)
 
     def get_image_url(self, obj):
         request = self.context.get('request')
@@ -70,10 +72,11 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = [
-            'image_id', 'raw_id', 'field_id', 'fruit_type',  
-            'date', 'upload_date', 'image_url',
+            'image_id', 'raw_id', 'field_id', 'fruit_type',
+            'upload_date', 'date', 'image_url', 'original_filename',
             'processed', 'processed_at', 'nb_fruit', 'confidence_score', 'status'
         ]
+
 
 
 
@@ -94,12 +97,15 @@ class EstimationSerializer(serializers.ModelSerializer):
     fruit_type = serializers.CharField(source='raw.fruit.name', read_only=True)
     image_id = serializers.IntegerField(source='image.id', read_only=True)
     confidence_score = serializers.FloatField()
-    source = serializers.CharField()
+    source = serializers.CharField(source='get_source_display', read_only=True)
     status = serializers.SerializerMethodField()
+    timestamp = serializers.DateTimeField(read_only=True, format="%Y-%m-%dT%H:%M:%S")
+
 
     def get_status(self, obj):
-        return "done"
-
+        if obj.image and getattr(obj.image, 'status', None):
+            return obj.image.status
+        return "unknown"
 
     class Meta:
         model = Estimation
@@ -109,6 +115,7 @@ class EstimationSerializer(serializers.ModelSerializer):
             'plant_fruit', 'plant_kg', 'raw_kg', 'estimated_yield_kg',
             'maturation_grade', 'confidence_score', 'source', 'status'
         ]
+
 
 
 # ML RESULT (Simplified)

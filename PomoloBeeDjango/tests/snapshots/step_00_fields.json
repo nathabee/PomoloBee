@@ -1,0 +1,49 @@
+{
+  "status": "success",
+  "data": {
+    "fields": [
+      {
+        "field_id": 1,
+        "short_name": "C1",
+        "name": "ChampMaison",
+        "description": "Champ situé sur la parcelle de la maison",
+        "orientation": "NW"
+      },
+      {
+        "field_id": 2,
+        "short_name": "C2",
+        "name": "ChampSud",
+        "description": "Champ situé au sud de la propriété, très ensoleillé.",
+        "orientation": "S"
+      },
+      {
+        "field_id": 3,
+        "short_name": "C3",
+        "name": "VergerHaut",
+        "description": "Verger en hauteur avec terre calcaire.",
+        "orientation": "E"
+      },
+      {
+        "field_id": 4,
+        "short_name": "C4",
+        "name": "VergerBas",
+        "description": "Verger en contrebas, plus humide.",
+        "orientation": "W"
+      },
+      {
+        "field_id": 5,
+        "short_name": "C5",
+        "name": "PlaineOuest",
+        "description": "Grande plaine à l'ouest, sol fertile.",
+        "orientation": "W"
+      },
+      {
+        "field_id": 6,
+        "short_name": "C6",
+        "name": "TestZone",
+        "description": "Petite parcelle expérimentale.",
+        "orientation": "N"
+      }
+    ]
+  }
+}

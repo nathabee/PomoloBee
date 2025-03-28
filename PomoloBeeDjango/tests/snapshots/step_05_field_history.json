@@ -1,0 +1,26 @@
+{
+  "status": "success",
+  "data": {
+    "estimations": [
+      {
+        "estimation_id": 15,
+        "image_id": 15,
+        "date": "2024-03-14",
+        "timestamp": "2025-03-28T13:41:58",
+        "raw_id": 1,
+        "raw_name": "Rang 1 cote maison Swing 1",
+        "field_id": 1,
+        "field_name": "ChampMaison",
+        "fruit_type": "Cultivar Swing on CG1",
+        "plant_fruit": 10,
+        "plant_kg": 2,
+        "raw_kg": 76,
+        "estimated_yield_kg": 76,
+        "maturation_grade": 0,
+        "confidence_score": 0.85,
+        "source": "Machine Learning (Image)",
+        "status": "done"
+      }
+    ]
+  }
+}

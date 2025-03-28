@@ -51,14 +51,27 @@ class Raw(models.Model):
 
 # Image storage for estimation analysis
 class Image(models.Model):
+    STATUS_CHOICES = [
+        ("processing", "Processing"),
+        ("done", "Done"),
+        ("failed", "Failed"),
+        ("badjpg", "Invalid Image"),
+    ]
     raw = models.ForeignKey('Raw', on_delete=models.CASCADE, related_name='images')
-    date = models.DateField(null=True, blank=True)  # Date of capture (from app)
+    date = models.DateField(null=True, blank=True)  # Date of capture (from app) (no time)
+    upload_date =  models.DateField(null=True, blank=True)  # Date of upload in django (no time)
     image_file = models.ImageField(upload_to='images/')  # Stores uploaded image
+    original_filename = models.CharField(max_length=255, blank=True, null=True) 
 
     # ML result
     nb_fruit = models.FloatField(null=True, blank=True)
     confidence_score = models.FloatField(null=True, blank=True)
     processed = models.BooleanField(default=False)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="processing"
+    )
     processed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

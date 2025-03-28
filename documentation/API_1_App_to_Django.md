@@ -20,11 +20,10 @@ This document defines the API interface for the Pomolobee project, specifying:
     - [**Upload an Image for Processing**](#upload-an-image-for-processing)
     - [**Request Retry for ML Processing**](#request-retry-for-ml-processing)
     - [**Fetch the Current ML Model Version**](#fetch-the-current-ml-model-version)
-    - [**Check Image Processing Status**](#check-image-processing-status)
+    - [**Check Image Processing Details and Status**](#check-image-processing-details-and-status)
   - [Section C Estimations Yield Results](#section-c-estimations-yield-results)
     - [**Fetch fruit Detection Results**](#fetch-fruit-detection-results)
     - [**Fetch Latest Completed Estimations**](#fetch-latest-completed-estimations)
-    - [**Fetch Metadata of a Specific Uploaded Image**](#fetch-metadata-of-a-specific-uploaded-image)
     - [**Delete an Image**](#delete-an-image)
   - [Section D History Analytics](#section-d-history-analytics)
     - [**Fetching all Estimation Records**](#fetching-all-estimation-records)
@@ -360,8 +359,8 @@ GET /api/ml/version/
 
 
 
-### **Check Image Processing Status**
-📌 **Purpose:** Retrieve the **status** of an uploaded image (whether processing is complete or still ongoing).
+### **Check Image Processing Details and Status**
+📌 **Purpose:** Retrieve the **status** of an uploaded image (whether processing is complete or still ongoing) and other details.
  The **app periodically checks** if an uploaded image has been processed.
 
 ✅ **Endpoint:**  
@@ -376,33 +375,71 @@ GET /api/images/{image_id}/details
 |--------------|---------|-------------|---------------|
 | `image_id` | `integer` | ✅ Yes | Unique ID of the uploaded image. |
 
-✅ **Response (Success - 200 OK)**
+✅ **Response (Success )**
 ```json
 {
 
   "status": "success",
   "data": {
     "image_id": 24,
-    "status": "done",
+    "raw_id": 3,
+    "date":  "2024-03-05",    
+    "field_id": 1,
+    "fruit_type": "Golden fruit",
+    "upload_date": "2024-03-10",
+    "image_url": "https://server.com/media/images/images-24.jpg",
+    "original_filename": "orchard20251201.jpg",
+    "status": "Done",
     "processed": true,
+    "processed_at": "2024-03-10T13:01:00",
     "nb_fruit": 15,
     "confidence_score": 0.87
 }
 }
 ```
+ 
 
-✅ **Response (Still Processing - 200 OK)**
+
+✅ **Response (Still Processing )**
 ```json
 {
 
   "status": "success",
   "data": {
     "image_id": 24,
-    "status": "processing",
+    "raw_id": 3,
+    "date":  "2024-03-05",    
+    "field_id": 1,
+    "fruit_type": "Golden fruit",
+    "upload_date": "2024-03-10",
+    "image_url": "https://server.com/media/images/images-24.jpg",
+    "original_filename": "orchard20251201.jpg",
+    "status": "Processing",
     "processed": false
 }
 }
 ```
+
+✅ **Response (Error During process )**
+```json
+{
+
+  "status": "success",
+  "data": {
+    "image_id": 24,
+    "raw_id": 3,
+    "date":  "2024-03-05",    
+    "field_id": 1,
+    "fruit_type": "Golden fruit",
+    "upload_date": "2024-03-10",
+    "image_url": "https://server.com/media/images/images-24.jpg",
+    "original_filename": "orchard20251201.jpg",
+    "status": "Failed",
+    "processed": false
+}
+}
+```
+
 
 ✅ **Response (Error - 404 Not Found)**
 ```json
@@ -441,19 +478,21 @@ GET /api/images/{image_id}/estimations/
 
   "status": "success",
   "data": {
-  "image_id": 24,
-  "plant_fruit": 12,
-  "plant_kg": 2.4,
-  "raw_kg": 48.0,
-  "confidence_score": 0.85,
-  "maturation_grade": 0.4,
-  "source": "Machine Learning from image",
-  "field_id": 1,
-  "field_name": "ChampMaison",
-  "raw_id": 3,
-  "raw_name": "C1-R3",
-  "fruit_type": "Swing on CG1",
-  "status": "done"
+    "image_id": 24,
+    "field_id": 1,
+    "field_name": "ChampMaison",
+    "raw_id": 3,
+    "raw_name": "C1-R3",
+    "fruit_type": "Swing on CG1",
+    "date": "2024-03-01",
+    "plant_fruit": 12,
+    "plant_kg": 2.4,
+    "raw_kg": 48.0,
+    "estimated_yield_kg": 4000,
+    "confidence_score": 0.85,
+    "maturation_grade": 0.4,
+    "source": "Machine Learning (Image)",
+    "status": "Done"
 }
 }
 ```
@@ -488,35 +527,41 @@ GET /api/fields/{field_id}/estimations/
 
   "status": "success",
     "data": {
-        "latest_estimations": [
+        "estimations": [
             {
-                "image_id": 24,
-                "plant_fruit": 12,
-                "plant_kg": 2.4,
-                "raw_kg": 48.0,
-                "confidence_score": 0.85,
-                "date": "2024-03-01"
-                "field_id": 1,
-                "field_name": "ChampMaison",
-                "raw_id": 3,
-                "raw_name": "C1-R3",
-                "fruit_type": "Swing on CG1",
-                "status": "done" 
+            "image_id": 24,
+            "field_id": 1,
+            "field_name": "ChampMaison",
+            "raw_id": 3,
+            "raw_name": "C1-R3",
+            "fruit_type": "Swing on CG1",
+            "date": "2024-03-01",
+            "plant_fruit": 12,
+            "plant_kg": 2.4,
+            "raw_kg": 48.0,
+            "estimated_yield_kg": 4000,
+            "confidence_score": 0.85,
+            "maturation_grade": 0.4,
+            "source": "Machine Learning (Image)",
+            "status": "Done"
+
             },
             {
-                "image_id": 25,
-                "raw_id": 4,
-                "plant_fruit": 10,
-                "plant_kg": 2.0,
-                "raw_kg": 40.0,
-                "confidence_score": 0.83,
-                "date": "2024-03-13"
-                "field_id": 1,
-                "field_name": "ChampMaison",
-                "raw_id": 3,
-                "raw_name": "C1-R3",
-                "fruit_type": "Swing on CG1",
-                "status": "done"
+            "image_id": 25,
+            "field_id": 1,
+            "field_name": "ChampMaison",
+            "raw_id": 4,
+            "raw_name": "C1-R4",
+            "fruit_type": "Swing on CG1",
+            "date": "2024-03-01",
+            "plant_fruit": 10,
+            "plant_kg": 2.0,
+            "raw_kg": 40.0, 
+            "estimated_yield_kg": 4000,
+            "confidence_score": 0.85,
+            "maturation_grade": 0.4,
+            "source": "Machine Learning (Image)",
+            "status": "Done"
             }
         ]
     }
@@ -533,34 +578,7 @@ GET /api/fields/{field_id}/estimations/
 }
 ```
  
----
-
-### **Fetch Metadata of a Specific Uploaded Image**
-📌 **Purpose:** Retrieve **detailed metadata** of an uploaded image inclusive status.
-
-✅ **Endpoint:**  
-```
-GET /api/images/{image_id}/details/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-
-  "status": "success",
-    "data": {
-        "image_id": 24,
-        "raw_id": 3,
-        "field_id": 1,
-        "fruit_type": "Golden fruit",
-        "status": "done",
-        "upload_date": "2024-03-10",
-        "image_url": "https://server.com/images/24.jpg"
-    }
-}
-```
+ 
 
 ---
 
@@ -583,6 +601,17 @@ DELETE /api/images/{image_id}/
         "message": "Image deleted successfully."
     }
 }
+```
+✅ **Response (Success - 200 OK)**
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Image deleted successfully.",
+    "warning": "Could not delete file: [Errno 2] No such file or directory"
+  }
+}
+
 ```
 
 ✅ **Response (Error - 404 Not Found)**
@@ -618,32 +647,43 @@ GET /api/fields/{field_id}/estimations/
 {
   "status": "success",
   "data": {
-    "estimations": [
-        {
-            "estimation_id": 12,
-            "image_id": 12,
-            "raw_id": 3,
-            "raw_name": "Row A",
+        "estimations": [
+            {
+            "image_id": 24,
             "field_id": 1,
-            "field_name": "North Orchard",
-            "fruit_type": "Golden fruit",
-            "estimated_yield_kg": 50.0,
-            "confidence_score": 0.88,
-            "date": "2024-03-05"
-        },
-        {
-            "estimation_id": 13,
-            "image_id": 13,
-            "raw_id": 5,
-            "raw_name": "Row B",
-            "field_id": 2,
-            "field_name": "South Orchard",
-            "fruit_type": "Red fruit",
-            "estimated_yield_kg": 30.0,
-            "confidence_score": 0.75,
-            "date": "2024-03-08"
-        }
-    ]
+            "field_name": "ChampMaison",
+            "raw_id": 3,
+            "raw_name": "C1-R3",
+            "fruit_type": "Swing on CG1",
+            "date": "2024-03-01",
+            "plant_fruit": 12,
+            "plant_kg": 2.4,
+            "raw_kg": 48.0,
+            "estimated_yield_kg": 4000,
+            "confidence_score": 0.85,
+            "maturation_grade": 0.4,
+            "source": "Machine Learning (Image)",
+            "status": "Done"
+
+            },
+            {
+            "image_id": 25,
+            "field_id": 1,
+            "field_name": "ChampMaison",
+            "raw_id": 4,
+            "raw_name": "C1-R4",
+            "fruit_type": "Swing on CG1",
+            "date": "2024-03-01",
+            "plant_fruit": 10,
+            "plant_kg": 2.0,
+            "raw_kg": 40.0, 
+            "estimated_yield_kg": 4000,
+            "confidence_score": 0.85,
+            "maturation_grade": 0.4,
+            "source": "Machine Learning (Image)",
+            "status": "Done"
+            }
+        ]
   }
 }
 ```
@@ -683,16 +723,21 @@ GET /api/images/{image_id}/estimations
 {
   "status": "success",
   "data": {
-        "image_id": 12,
-        "raw_id": 3,
-        "raw_name": "Row A",
-        "field_id": 1,
-        "field_name": "North Orchard",
-        "fruit_type": "Golden fruit",
-        "estimated_yield_kg": 50.0,
-        "confidence_score": 0.88,
-        "image_url": "https://server.com/images/processed_12.jpg",
-        "timestamp": "2024-03-05T12:00:00"
+            "image_id": 25,
+            "field_id": 1,
+            "field_name": "ChampMaison",
+            "raw_id": 4,
+            "raw_name": "C1-R4",
+            "fruit_type": "Swing on CG1",
+            "date": "2024-03-01",
+            "plant_fruit": 10,
+            "plant_kg": 2.0,
+            "raw_kg": 40.0, 
+            "estimated_yield_kg": 4000,
+            "confidence_score": 0.85,
+            "maturation_grade": 0.4,
+            "source": "Machine Learning (Image)",
+            "status": "Done"
     }
 }
 ```

@@ -48,105 +48,57 @@ Importing XbmImagePlugin
 Importing XpmImagePlugin
 Importing XVThumbImagePlugin
 Starting new HTTP connection (1): 192.168.178.71:5000
-http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 500 186
-Service Unavailable: /api/images/
+http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 200 72
+Starting new HTTP connection (1): 192.168.178.71:5000
+http://192.168.178.71:5000 "POST /ml/process HTTP/1.1" 404 207
+Not Found: /api/images/1/estimations/
+LOG - Upload response: 404 {'error': {'code': '404_NOT_FOUND', 'message': 'Estimation not found.'}}
+.Starting new HTTP connection (1): 192.168.178.71:5000
+http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 200 72
+Not Found: /api/images/2/estimations/
+LOG - Upload response: 404 {'error': {'code': '404_NOT_FOUND', 'message': 'Estimation not found.'}}
+.Starting new HTTP connection (1): 192.168.178.71:5000
+http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 200 72
+Bad Request: /api/images/3/ml_result/
+Not Found: /api/images/3/estimations/
+......Starting new HTTP connection (1): 192.168.178.71:5000
+http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 200 72
+LOG - Upload response: 201 {'status': 'success', 'data': {'image_id': 4, 'message': 'Image uploaded successfully and queued for processing.'}}
+.Starting new HTTP connection (1): 192.168.178.71:5000
+http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 200 72
+LOG - Upload response: 201 {'status': 'success', 'data': {'image_id': 5, 'message': 'Image uploaded successfully and queued for processing.'}}
+Starting new HTTP connection (1): 192.168.178.71:5000
+http://192.168.178.71:5000 "POST /ml/process HTTP/1.1" 404 207
 FStarting new HTTP connection (1): 192.168.178.71:5000
-http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 500 202
-Service Unavailable: /api/images/
+http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 200 72
+Triggering yield estimation for Image 6
+.Starting new HTTP connection (1): 192.168.178.71:5000
+http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 200 72
+Triggering yield estimation for Image 7
+LOG - Upload response: 200 {'status': 'success', 'data': {'image_id': 7, 'nb_fruit': 10.0, 'confidence_score': 0.9, 'processed': True}}
+.Not Found: /api/images/1/estimations/
 FStarting new HTTP connection (1): 192.168.178.71:5000
-http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 500 202
-Service Unavailable: /api/images/
-F.....Starting new HTTP connection (1): 192.168.178.71:5000
-http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 500 202
-Service Unavailable: /api/images/
-LOG - Upload response: 503 {'error': {'code': 'ML_UNAVAILABLE', 'message': 'ML call failed', 'image_id': 4}}
+http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 200 72
+LOG - Upload response: 201 {'status': 'success', 'data': {'image_id': 8, 'message': 'Image uploaded successfully and queued for processing.'}}
+Triggering yield estimation for Image 8
+.Not Found: /api/fields/1/estimations/
 FStarting new HTTP connection (1): 192.168.178.71:5000
-http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 500 202
-Service Unavailable: /api/images/
-LOG - Upload response: 503 {'error': {'code': 'ML_UNAVAILABLE', 'message': 'ML call failed', 'image_id': 5}}
-FStarting new HTTP connection (1): 192.168.178.71:5000
-http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 500 202
-Service Unavailable: /api/images/
-FStarting new HTTP connection (1): 192.168.178.71:5000
-http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 500 202
-Service Unavailable: /api/images/
-FNot Found: /api/images/1/estimations/
-FStarting new HTTP connection (1): 192.168.178.71:5000
-http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 500 202
-Service Unavailable: /api/images/
-LOG - Upload response: 503 {'error': {'code': 'ML_UNAVAILABLE', 'message': 'ML call failed', 'image_id': 8}}
-FNot Found: /api/fields/1/estimations/
-FStarting new HTTP connection (1): 192.168.178.71:5000
-http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 500 202
-Service Unavailable: /api/images/
-FStarting new HTTP connection (1): 192.168.178.71:5000
+http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 200 72
+.Starting new HTTP connection (1): 192.168.178.71:5000
 http://192.168.178.71:5000 "GET /ml/version HTTP/1.1" 200 140
 .Starting new HTTP connection (1): 192.168.178.71:5000
-http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 500 202
-Service Unavailable: /api/images/
-F
-======================================================================
-FAIL: test102_estimation_after_ml_refused_image (core.tests.test_workflow.DjangoWorkflowRobustnessTest)
-Simulate ML refusing image (e.g. bad request) → estimation should not exist.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/nathalie/coding/PomoloBee/PomoloBeeDjango/core/tests/test_workflow.py", line 365, in test102_estimation_after_ml_refused_image
-    self.assertEqual(upload_response.status_code, 201)
-AssertionError: 503 != 201
-
-======================================================================
-FAIL: test_101_estimation_requested_without_result (core.tests.test_workflow.DjangoWorkflowRobustnessTest)
-App uploads image but ML never responds → estimation should not be available.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/nathalie/coding/PomoloBee/PomoloBeeDjango/core/tests/test_workflow.py", line 343, in test_101_estimation_requested_without_result
-    self.assertEqual(upload_response.status_code, 201)
-AssertionError: 503 != 201
-
-======================================================================
-FAIL: test_103_estimation_after_failed_result_post (core.tests.test_workflow.DjangoWorkflowRobustnessTest)
-Simulate ML trying to return results, but Django rejects them (e.g. invalid payload).
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/nathalie/coding/PomoloBee/PomoloBeeDjango/core/tests/test_workflow.py", line 394, in test_103_estimation_after_failed_result_post
-    self.assertEqual(upload_response.status_code, 201)
-AssertionError: 503 != 201
-
-======================================================================
-FAIL: test_006_upload_image (core.tests.test_workflow.DjangoWorkflowTest)
-Test image upload to Django.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/nathalie/coding/PomoloBee/PomoloBeeDjango/core/tests/test_workflow.py", line 112, in test_006_upload_image
-    self.assertEqual(response.status_code, 201)
-AssertionError: 503 != 201
-
+http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 200 72
+Starting new HTTP connection (1): 192.168.178.71:5000
+http://192.168.178.71:5000 "POST /ml/process-image HTTP/1.1" 200 72
+.
 ======================================================================
 FAIL: test_007_django_sends_image_to_ml (core.tests.test_workflow.DjangoWorkflowTest)
 Test if Django sends image to ML via API, after image upload.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/home/nathalie/coding/PomoloBee/PomoloBeeDjango/core/tests/test_workflow.py", line 125, in test_007_django_sends_image_to_ml
-    self.assertEqual(upload_response.status_code, 201)
-AssertionError: 503 != 201
-
-======================================================================
-FAIL: test_008_ml_sends_results_back_to_django (core.tests.test_workflow.DjangoWorkflowTest)
-Simulate ML returning results to Django.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/nathalie/coding/PomoloBee/PomoloBeeDjango/core/tests/test_workflow.py", line 150, in test_008_ml_sends_results_back_to_django
-    self.assertEqual(upload_response.status_code, 201)
-AssertionError: 503 != 201
-
-======================================================================
-FAIL: test_009_django_fetches_ml_results (core.tests.test_workflow.DjangoWorkflowTest)
-Ensure Django returns ML results for a processed image.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/nathalie/coding/PomoloBee/PomoloBeeDjango/core/tests/test_workflow.py", line 188, in test_009_django_fetches_ml_results
-    self.assertEqual(upload_response.status_code, 201)
-AssertionError: 503 != 201
+  File "/home/nathalie/coding/PomoloBee/PomoloBeeDjango/core/tests/test_workflow.py", line 139, in test_007_django_sends_image_to_ml
+    self.assertEqual(response.status_code, 200)
+AssertionError: 404 != 200
 
 ======================================================================
 FAIL: test_010_fetch_estimations (core.tests.test_workflow.DjangoWorkflowTest)
@@ -158,14 +110,6 @@ Traceback (most recent call last):
 AssertionError: 404 != 200
 
 ======================================================================
-FAIL: test_012_full_image_to_estimation_workflow (core.tests.test_workflow.DjangoWorkflowTest)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/nathalie/coding/PomoloBee/PomoloBeeDjango/core/tests/test_workflow.py", line 227, in test_012_full_image_to_estimation_workflow
-    self.assertEqual(response.status_code, 201)
-AssertionError: 503 != 201
-
-======================================================================
 FAIL: test_013_get_estimations_by_field (core.tests.test_workflow.DjangoWorkflowTest)
 GET /fields/{field_id}/estimations/
 ----------------------------------------------------------------------
@@ -174,25 +118,8 @@ Traceback (most recent call last):
     self.assertEqual(response.status_code, 200)
 AssertionError: 404 != 200
 
-======================================================================
-FAIL: test_014_delete_uploaded_image (core.tests.test_workflow.DjangoWorkflowTest)
 ----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/nathalie/coding/PomoloBee/PomoloBeeDjango/core/tests/test_workflow.py", line 273, in test_014_delete_uploaded_image
-    self.assertEqual(upload_response.status_code, 201)
-AssertionError: 503 != 201
+Ran 18 tests in 0.321s
 
-======================================================================
-FAIL: test_016_retry_processing (core.tests.test_workflow.DjangoWorkflowTest)
-Test retrying ML processing for an uploaded image that is not yet processed.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/nathalie/coding/PomoloBee/PomoloBeeDjango/core/tests/test_workflow.py", line 294, in test_016_retry_processing
-    self.assertEqual(upload_response.status_code, 201)
-AssertionError: 503 != 201
-
-----------------------------------------------------------------------
-Ran 18 tests in 0.276s
-
-FAILED (failures=12)
+FAILED (failures=3)
 Destroying test database for alias 'default'...

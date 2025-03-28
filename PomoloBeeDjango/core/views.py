@@ -1,3 +1,4 @@
+import os
 from rest_framework import status
 from django.core.files.storage import default_storage
 from django.conf import settings
@@ -16,7 +17,9 @@ from .serializers import (
 from .utils import BaseAPIView, BaseReadOnlyViewSet
 
 logger = logging.getLogger(__name__)
-ML_API_URL = settings.ML_API_URL
+
+ 
+
 
 
 # ---------- FIELD + FRUIT ----------
@@ -50,15 +53,27 @@ class ImageDetailView(BaseAPIView):
         return self.success(serializer.data)
 
 
- 
-
 class ImageDeleteView(BaseAPIView):
     def delete(self, request, image_id):
         image = get_object_or_error(Image, id=image_id)
-        if image.image_file:
-            default_storage.delete(image.image_file.path)
+        warning = None
+
+        try:
+            if image.image_file and default_storage.exists(image.image_file.name):
+                default_storage.delete(image.image_file.name)
+        except Exception as e:
+            warning = f"Could not delete file: {e}"
+            print(f"Warning: {warning}")
+
         image.delete()
-        return self.success({"message": "Image deleted successfully."})
+
+        response_data = {"message": "Image deleted successfully."}
+        if warning:
+            response_data["warning"] = warning
+
+        return self.success(response_data)
+
+
 
 
 class ImageView(BaseAPIView):
@@ -68,22 +83,55 @@ class ImageView(BaseAPIView):
             image_file = serializer.validated_data['image']
             raw_id = serializer.validated_data['raw_id']
             date = serializer.validated_data['date']
-            file_path = default_storage.save(f'images/{image_file.name}', image_file)
+            # Save original name (optional, for dedup or trace)
+            original_filename = image_file.name
 
+            existing = Image.objects.filter(
+                original_filename=original_filename,
+                raw_id=raw_id,
+                date=date
+            ).first()
+
+            if existing:
+                return self.success({"image_id": existing.id, "message": "Already uploaded."})
+
+
+
+
+            # Save temp with any name first
+            file_path = default_storage.save(f'images/temp_{original_filename}', image_file)
+
+            # Create the Image record
             image = Image.objects.create(
                 image_file=file_path,
                 raw_id=raw_id,
                 date=date,
-                processed=False
+                upload_date=timezone.now().date(),
+                processed=False,
+                status="processing",
+                original_filename=original_filename
             )
 
+            # Compute new desired name: image-{id}.jpg
+            ext = os.path.splitext(original_filename)[1]  # e.g., .jpg
+            new_filename = f"images/image-{image.id}{ext}"
+            new_full_path = os.path.join(settings.MEDIA_ROOT, new_filename)
+
+            # Rename the file on disk
+            os.rename(os.path.join(settings.MEDIA_ROOT, file_path), new_full_path)
+
+            # Update the model to point to the new name
+            image.image_file.name = new_filename 
+            image.save()
+
+            image_url = request.build_absolute_uri(image.image_file.url)
             payload = {
-                "image_url": settings.MEDIA_URL + image.image_file.name,
+                "image_url": image_url,
                 "image_id": image.id
             }
 
             try:
-                response = requests.post(f"{ML_API_URL}/process-image", json=payload, timeout=5)
+                response = requests.post(f"{settings.ML_API_URL}/process-image", json=payload, timeout=5)
                 if response.status_code == 200:
                     return self.success({
                         "image_id": image.id,
@@ -108,7 +156,7 @@ class FieldEstimationListView(BaseAPIView):
         serializer = EstimationSerializer(estimations, many=True)
         return self.success({"estimations": serializer.data})
 
- 
+
 
 class EstimationView(BaseAPIView):
     def get(self, request, image_id):
@@ -118,7 +166,7 @@ class EstimationView(BaseAPIView):
         serializer = EstimationSerializer(estimation)
         return self.success( serializer.data)
 
- 
+    
 
 # ---------- ML RESULT ----------
 class MLResultView(BaseAPIView):
@@ -141,6 +189,7 @@ class MLResultView(BaseAPIView):
         image.confidence_score = confidence_score
         image.processed = processed
         image.processed_at = timezone.now()
+        image.status = "done" if processed else "failed"  
         image.save()
 
         logger.info(f"Triggering yield estimation for Image {image.id}")
@@ -174,13 +223,15 @@ class RetryProcessingView(BaseAPIView):
         if image.processed:
             raise APIError("ALREADY_PROCESSED", "Image already processed successfully.", status.HTTP_409_CONFLICT)
 
+        image_url = request.build_absolute_uri(image.image_file.url)
         payload = {
-            "image_url": settings.MEDIA_URL + image.image_file.name,
-            "image_id": image.id,
+            "image_url": image_url,
+            "image_id": image.id
         }
 
+
         try:
-            response = requests.post(f"{ML_API_URL}/process-image", json=payload, timeout=5)
+            response = requests.post(f"{settings.ML_API_URL}/process-image", json=payload, timeout=5)
             if response.status_code == 200:
                 return self.success({"message": "Image processing retry has been requested."})
             else:
@@ -193,7 +244,7 @@ class RetryProcessingView(BaseAPIView):
 class MLVersionView(BaseAPIView):
     def get(self, request):
         try:
-            response = requests.get(f"{ML_API_URL}/version", timeout=5)
+            response = requests.get(f"{settings.ML_API_URL}/version", timeout=5)
             if response.status_code == 200:
                 return self.success(response.json().get("data", {}))
             else:

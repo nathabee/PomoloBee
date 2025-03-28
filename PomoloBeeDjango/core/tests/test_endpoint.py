@@ -69,13 +69,31 @@ class APITest(TestCase):
         response = self.client.delete(reverse("image-delete", args=[image.id]))
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Image.objects.filter(id=image.id).exists())
-
+        
     def test_post_retry_processing(self):
-        image = Image.objects.create(raw=self.raw, date="2024-03-25", processed=False)
+        # Generate a dummy image file
+        image_file = BytesIO()
+        PILImage.new("RGB", (100, 100)).save(image_file, format="JPEG")
+        image_file.seek(0)
+        uploaded_file = SimpleUploadedFile("retry.jpg", image_file.read(), content_type="image/jpeg")
+
+        # Upload via the API to simulate the real flow
+        upload_response = self.client.post(reverse("image-upload"), {
+            "image": uploaded_file,
+            "raw_id": self.raw.id,
+            "date": "2024-03-25"
+        })
+
+        self.assertEqual(upload_response.status_code, 201)
+        image_id = upload_response.json()["data"]["image_id"]
+
+        # Now call the retry endpoint
         response = self.client.post(reverse("retry-processing"), {
-            "image_id": image.id
+            "image_id": image_id
         }, content_type="application/json")
+
         self.assertIn(response.status_code, [200, 503])
+
 
     def test_get_image_estimation(self):
         image = Image.objects.create(raw=self.raw, date="2024-03-25", processed=True)
