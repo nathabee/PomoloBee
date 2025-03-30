@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _75 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _86 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -24,6 +24,8 @@
     - [Mars 26 2025](#mars-26-2025)
     - [Mars 27 2025](#mars-27-2025)
     - [Mars 28 2025](#mars-28-2025)
+    - [Mars 29 2025](#mars-29-2025)
+    - [Mars 30 2025](#mars-30-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -225,17 +227,39 @@ This document tracks the number of hours worked each day and provides a brief de
 ###  Mars 28 2025
 - **Hours Worked**: 7 hours
 - **Tasks**:
- - unit test workflow test /core/tests/test_workflow
- - check API and serializer have the same data, had missing data in API and 
- - problem with date time format
- - integration test with curl  (test/integration_workflows --integ )
- - save snapshot for non regression test  (test/integration_workflows --snapshot )
  - non-regression test (test/integration_workflows --nonreg )
- - anomalie found : error uncatched by delete a non exiting image
+ - Implemented full test coverage of all documented API endpoints, including robustness check on non-existent resources.
+Improved the delete endpoint handling by catching file deletion errors and returning structured warnings.
+Fixed issues with invalid JSON and runtime errors by appending missing slashes and handling error responses cleanly.
+Standardized snapshot generation and regression comparison to apply consistent filtering (e.g., limiting estimation history).
+Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identically in --snapshot, --nonreg, and --integ modes. 
 - **Theme**: Backend Django Integration Test + creation non regression test for next time
+
+  
+###  Mars 29 2025
+- **Hours Worked**: 3 hours
+- **Tasks**:
+ - added SVG concept in fields : impact on App spec 
+ - creation of SVG for field1 "C1"
+- **Theme**:  Frontend Spec
+ 
 
 
  
+###  Mars 30 2025
+- **Hours Worked**: 8 hours
+- **Tasks**:
+  - Added SVG map support in Django API spec, model, serializer, fixture  
+  - Created SVG file for field "C1"  
+  - Reset DB and ran unit + non-regression tests (`reset_db.sh`)  
+  - Migration tests still weak: `python manage.py test core.tests.test_migration` should fail if needed  
+  - Switched to relative image paths (`/media/...`) – updated spec, serializers, Flask app, and views  
+  - Introduced `DJANGO_API_URL` vs `DJANGO_MEDIA_URL` distinction – updated Flask + App spec settings  
+  - add a installation_test.sh to make all unit test and non regression after an installation
+  - correction tests , adapt non red to new SVG
+- **Theme**: SVG integration – backend + API spec + app connectivity + non-regression test coverage
+
+
 
 - **PENDING**
 

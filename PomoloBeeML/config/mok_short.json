@@ -1,0 +1,14 @@
+{
+  "DEBUG": true,
+  "UPLOAD_FOLDER": "./uploads",
+  "ML_MODEL_VERSION": "v1.2.5",
+  "LAST_UPDATED": "2024-03-10T14:00:00",
+  "DJANGO_API_URL": "http://localhost:8000",
+  "DJANGO_MEDIA_URL": "http://localhost:8000/",
+  "LOG_FILE": "logs/flask.log",  
+  "MOK": true,
+  "MOK_RUNSERVER": false,
+  "MOK_CODE": 200,
+  "MOK_RETURN": { "message": "Mock OK" }
+  }
+  

@@ -24,18 +24,25 @@ Since **video processing is not in scope right now**, we will focus only on **im
     - [**Purpose**](#purpose)
     - [**Main UI Elements**](#main-ui-elements)
     - [**Updated Wireframe**](#updated-wireframe)
+  - [**`SvgMapScreen`**](#svgmapscreen)
+    - [**Purpose**](#purpose)
+    - [**Main UI Elements**](#main-ui-elements)
+    - [**Updated Wireframe**](#updated-wireframe)
   - [**`ProcessingScreen`**](#processingscreen)
     - [**Purpose**](#purpose)
     - [**Two-Part Display**](#two-part-display)
     - [**Updated Wireframe**](#updated-wireframe)
     - [**API Calls**](#api-calls)
+    - [**Polling Strategy**](#polling-strategy)
     - [**Triggered API Behavior**](#triggered-api-behavior)
   - [**`ResultScreen`**](#resultscreen)
     - [**Purpose**](#purpose)
     - [**Updated Wireframe**](#updated-wireframe)
   - [**`SettingsScreen`**](#settingsscreen)
     - [**Purpose**](#purpose)
+    - [**New Feature Test Connection**](#new-feature-test-connection)
     - [**Wireframe**](#wireframe)
+    - [API Calls](#api-calls)
   - [**`OrchardScreen`**](#orchardscreen)
     - [**Purpose**](#purpose)
     - [**Wireframe**](#wireframe)
@@ -69,29 +76,30 @@ Since **video processing is not in scope right now**, we will focus only on **im
 ```mermaid
 graph TD  
   A[📷 CameraScreen] -->|User selects image| B[🖼️ Image Preview]
- 
   B -->|Select Field & Raw| L[📍 LocationScreen]
-  L -->|User selects Field & Raw| B1[✅ Field & Raw Selected]
+  L -->|Select Field| L1[Field Selected]
+  L1 -->|Dropdown Raw| L2[Raw Selected from Dropdown]
+  L1 -->|Select from Image| M[🗺️ SvgMapScreen]
+  M -->|Tap Row & Confirm| L3[Raw Selected from SVG]
+  L2 -->|Confirm| B1[✅ Location Confirmed]
+  L3 -->|Confirm| B1
+
   B1 -->|Back to CameraScreen| A
- 
   A -->|Save Image Locally| S[💾 Local Storage]
- 
+
   S -->|Go to Processing Screen| D[📡 ProcessingScreen]
-   
   D -->|Pending Local Images| U[🖼️ Unsent Images List]
-  U -->|User clicks Analyze| X[📤 Upload to Backend]
-  U -->|User clicks Preview| Y[🖥️ Local AI Model]
- 
+  U -->|Analyze| X[📤 Upload to Backend]
+  U -->|Preview| Y[🖥️ Local AI Model]
+
   D -->|Uploaded Images| E[📊 Processed Results]
-  E -->|User views detection results| F[✅ Done]
- 
   E -->|Open Result| R[📊 ResultScreen]
- 
+
   A --> G[ℹ️ AboutScreen]
- 
   A --> H1[⚙️ SettingsScreen]
- 
-  A --> H2[🌳 OrchardsScreen]
+  A --> H2[🌳 OrchardScreen]
+  H2 -->|Visualize Field| M
+
 ```
 
 ---
@@ -107,33 +115,41 @@ graph TD
 
 ## **Explanation of Flow**
 once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fruits** manually.
-1️⃣ **User starts in `CameraScreen`** and **captures an image** or **selects from the gallery**.  
-2️⃣ **User must choose a field and raw** (`LocationScreen`) and return to `CameraScreen`.  
-3️⃣ **Instead of immediate upload**, the image is **saved locally** with metadata:
-   - Stored in an **app-specific folder** (configurable in `SettingsScreen`).
-   - Metadata (`image path`, `raw_id`, `date`) is **added to a local waiting list**.
 
-4️⃣ **User moves to `ProcessingScreen`, which has two sections**:
-   - **(A) Locally Stored (Unsent) Images**:
-     - Displays images **waiting for upload**.
-     - Offers two actions:
-       - **"Analyze" Button** → Sends image to the backend **when online**.
-       - **"Preview" Button** → Runs a **local ML model** (if available).
-   - **(B) Sent & Processed Images**:
-     - Shows images that have been uploaded and **already processed by the backend**.
-     - Works like the original `ProcessingScreen`.
+1️⃣ **User starts in `CameraScreen`** and captures an image or selects from the gallery.  
+2️⃣ User taps **"Select Location"**, which opens `LocationScreen`.
 
-5️⃣ **After an image is uploaded**, its status appears in `ProcessingScreen` as `"Processing"` until completed.  
-6️⃣ **Once processing is complete**, users can **click on an image** to view detailed results in `ResultScreen`.  
-7️⃣ **Users can access `AboutScreen` anytime from `CameraScreen`.**  
-8️⃣ **Users can access `SettingsScreen` anytime** to:  
-   - Synchronize **fields, raws, and fruits** manually.
-   - Configure the **local image storage folder**.
-   - View the number of **pending images** in local storage.
-9️⃣ **Users can access `OrchardScreen` anytime** to:  
-   - Visualize current orchard structure  
-   - Understand raw-to-fruit mapping*
- 
+3️⃣ In `LocationScreen`, the user:
+- Selects a **field** from a dropdown.
+- Then **either**:
+  - Selects a **raw from a dropdown**, or  
+  - Taps **"Select from Image"**, which opens `SvgMapScreen` to pick a raw visually.
+
+4️⃣ In `SvgMapScreen`, the field’s SVG layout is shown.  
+The user taps on a raw and confirms the selection, which returns to `LocationScreen`.  
+(Only one raw can be selected.)
+
+5️⃣ After selecting both field and raw, the user taps **"Confirm & Continue"**, returning to `CameraScreen`.  
+The app now shows the selected field and raw.
+
+6️⃣ The image is saved **locally**, not uploaded immediately.
+
+7️⃣ User navigates to `ProcessingScreen`, where:
+- All **unsent images** are listed, each with:
+  - **Analyze** → sends to backend  
+  - **Preview** → runs local ML (if available)
+- Previously uploaded and processed images appear below with status.
+
+8️⃣ Once an image is processed, the user can open it in `ResultScreen` to see:
+- Detected fruit
+- Estimated yield
+- Confidence score
+
+9️⃣ User can also visit:
+- **SettingsScreen** → to sync orchard data, configure paths, or debug  
+- **OrchardScreen** → view fields/rows & visualize SVG maps (read-only)
+- **AboutScreen** → view version, GitHub, etc.
+
 ---
 
 # UI Frame
@@ -192,17 +208,21 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 |------------|---------|----------------|
 | **🌱 Field Dropdown** | `Dropdown` | Lists fields are retrieved from storage. | 
 | **🌿 Raw Dropdown** | `Dropdown` | Lists all raws within the selected field retrieved from storage . |
+| **✅ select from image** | `Button` | open a sren that shows the selected field to select a raw instead of selecting from cmbobox `SvgMapScreen`. |
 | **✅ Confirm Button** | `Button` | Saves selection & navigates back to `CameraScreen`. |
 
 ### **Updated Wireframe**
 ```
 +--------------------------------+
 |  🌱 Select Field: [Dropdown ▼] |
-|  🌿 Select Raw:   [Dropdown ▼] |
+|  🌿 Select Raw:   [Dropdown ▼] [select from image]|
 |--------------------------------|
 |  [✅ Confirm & Continue]       |
 +--------------------------------+
 ```
+🔹 **`select from image Button`**  
+- Ensures the user has **selected a field* before opening SvgMapScreen.
+
 🔹 **`Confirm & Continue Button`**  
 - Ensures the user has **selected both a field and a raw** before proceeding.
 
@@ -217,23 +237,68 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 
 ---
 
+ 
 
-## **`ProcessingScreen`**
-
+## **`SvgMapScreen`**
 
 
 ### **Purpose**
-- manage the lifecycle of captured images, from local storage to backend processing
-- display their processing status and results
+- Enable to select a location of the (raw) by selecting a Raw on a SVG field representation (field shown is the one selected before )
+
+ 
+### **Main UI Elements**
+| **Element** | **Type** | **Description** |
+|------------|---------|----------------|
+| 🖼️ SVG Field View | `Interactive SVG Image` | Displays the selected field's layout. Rows are tappable regions in the SVG. |
+| **✅ Confirm Button** | `Button` | Saves selection & navigates back to `CameraScreen`. |
+
+### **Updated Wireframe**
+```
++--------------------------------+
++--------------------------------+
+|  🖼️ [SVG Field View]           |
+|  📍 Selected Raw: raw_4        |
+|--------------------------------|
+|  [✅ Confirm & Continue]       |
++--------------------------------+
+ 
+``` 
+
+🔹 **`Confirm & Continue Button`**  
+- Ensures the user has **selected a raw** before proceeding.
+
+ 
+
+- **Triggered API Calls:**
+**none**
+
+ 
+
+
+
+---
+ 
+## **`ProcessingScreen`**
+
+### **Purpose**
+- Manage the lifecycle of captured images, from local storage to backend processing  
+- Display their processing status and results  
+
+---
 
 ### **Two-Part Display**
-✔ **(1) Local Images (Unsent):**  
-- Shows images **waiting for upload**.
-- Includes **Analyze Button** (Send to Backend) & **Preview Button** (Run Local Model).
 
-✔ **(2) Sent & Processed Images:**  
-- Displays **previously uploaded images & results**.
-- Works like the old ProcessingScreen.
+✔ **(1) Local Images (Unsent):**  
+- Shows images **waiting for upload**  
+- Includes:
+  - **📤 Analyze** → Sends to backend  
+  - **🔍 Preview** → Runs local ML (offline)
+
+✔ **(2) Uploaded Images (Processed/Pending):**  
+- Shows all **images already uploaded** to Django  
+- Displays their **processing status** and allows reprocessing
+
+---
 
 ### **Updated Wireframe**
 ```
@@ -254,28 +319,43 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 ---
 
 ### **API Calls**
-- `POST /api/images/` (**Analyze** button → Upload to Backend)
-- `GET /api/images/{image_id}/status/` (**Automatic Polling** after upload)
-- `GET /api/images/{image_id}/ml_result/` (**Triggered if status = "done" and results not yet loaded**)
-- `GET /api/images/` (**Manual Refresh Button**)
-- `GET /api/images/{image_id}/details/` (**Click on Image**)
-- `DELETE /api/images/{image_id}/` (**Delete Image** button)
-- `POST /api/retry_processing/` (**Retry Processing** button)
-- `GET /api/images/{image_id}/error_log/` (**Check processing errors**)
+| Action | Endpoint |
+|--------|----------|
+| Upload image | `POST /api/images/` |
+| Poll image status | `GET /api/images/{image_id}/details/` |
+| Get result (if processed) | `GET /api/images/{image_id}/estimations/` |
+| Delete image | `DELETE /api/images/{image_id}/` |
+| Retry processing | `POST /api/retry_processing/` |
+| Manual refresh | `GET /api/images/` |
+| Debug error log (optional) | `GET /api/images/{image_id}/error_log/` |
+
+---
+
+### **Polling Strategy**
+- The app checks `GET /api/images/{image_id}/details/` every **60 seconds**
+- If `status = "Done"` and `processed = true`, the app calls:  
+  → `GET /api/images/{image_id}/estimations/`
+- If `status = "Processing"` after **5 retries**, app shows a warning:
+  > “Processing is taking too long. You may retry or continue later.”
+- After 5 retries:
+  - App **stops polling**
+  - Django may choose to **automatically retry ML call**
+  - User can **manually retry** via UI
 
 ---
 
 ### **Triggered API Behavior**
-- **🔄 Refresh Status** → Calls `GET /api/images/{image_id}/status/`  
-  📌 *If* `status = "done"` **and results not yet fetched** →  
-  → **Trigger** `GET /api/images/{image_id}/ml_result/` to retrieve detection results.
-  
-- **📤 Analyze** → Uploads image to backend.
-- **🔍 Preview** → Runs a **local model**, no backend call.
-- **🗑 Delete Image** → Deletes uploaded image from backend.
-- **🔁 Retry Processing** → Requests backend to reprocess image.
- 
+| UI Action | Behavior |
+|-----------|----------|
+| 🔄 Refresh Status | Reloads all image states from backend |
+| 📤 Analyze | Uploads image to Django |
+| 🔍 Preview | Uses local ML model |
+| 🔁 Retry Processing | Triggers Django to re-send image to ML |
+| 🗑 Delete Image | Removes image from backend & app |
+| ⏳ Processing → ✅ Done | App detects status change via polling and fetches results |
+
 ---
+ 
 
 ## **`ResultScreen`**
 
@@ -307,46 +387,97 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
   - **📊 View Results** → Fetch yield estimation.
   - **📜 View History** → Fetch previous estimations.
 ---
-
+ 
 ## **`SettingsScreen`**
 
-
-
 ### **Purpose**
-✔ Defines **local storage path** for images.  
-✔ Synchronizes **fields, raws, and fruits** for offline use.  
-✔ Displays the number of **pending local images**.  
-✔  **"Pending Uploads" value is fetched from local storage (`Jetpack DataStore`).**  
 
+This screen must be used **at least once during the first app launch** to synchronize orchard data (fields, raws, fruits). Without this step, the app cannot assign location metadata to photos or perform yield estimations.
+
+This screen enables users to:
+
+- **Configure and test** the base API and Media URLs
+- **Synchronize essential orchard data**
+- **Set the image storage path**
+- **View and manage pending uploads**
+
+---
+
+🧠 **Orchard data is required** for using the app — without it, users cannot assign location metadata to images or run yield estimation.
+
+✔ Displays the number of **pending local images**  
+✔ All user input is saved using **Jetpack DataStore**
+
+---
+
+| **Setting**        | **Description** |
+|--------------------|-----------------|
+| `DJANGO_API_URL`   | Used for all backend communication (`/api/...`) |
+| `DJANGO_MEDIA_URL` | Used for all media access (`/media/...`) |
+
+---
+
+### **New Feature Test Connection**
+
+📌 The **Test Connection** button verifies both endpoints:
+
+- Sends a `GET /api/ml/version/` to `DJANGO_API_URL`
+- Sends a `HEAD` or `GET` to `{DJANGO_MEDIA_URL}/media/svg/fields/default_map.svg`
+
+✅ **Success:**  
+→ Show green check: `"Connection OK"`
+
+❌ **Failure:**  
+→ Show error popup:  
+- `"Cannot reach Django API"` or  
+- `"Cannot reach media endpoint"`  
+→ Suggest the user to check the URL values
+
+---
 
 ### **Wireframe**
 ```
 +--------------------------------+
-|  🌱 Tree Count:  [______]      |
-|  📏 Row Length:  [______] m    |
-|  🍏 Avg. fruit Size:  [______] g |
+|  🌱 Tree Count:     [______]   |
+|  📏 Row Length:     [______] m |
+|  🍏 Avg. Fruit Size: [______] g |
+|--------------------------------|
+|  📂 API Endpoint:              |
+|  https://api.pomolobee.com     |
+|  📂 Media Endpoint:            |
+|  https://media.pomolobee.com   |
+|  [🔌 Test Connection] ✅        |
 |--------------------------------|
 |  📂 Image Storage Path:        |
 |  /sdcard/PomoloBee/            |
 |--------------------------------|
+|  [💾 Save Settings]            |
+|--------------------------------|
 |  🔄 Sync Orchard Data Now      |
 |  Pending Uploads: 3 Images     |
 |--------------------------------|
-|  [💾 Save]   [🔄 Sync]          |
+|  Last Sync: 2025-03-30 10:00   |
+|  [🔄 Sync Now]                 |
 +--------------------------------+
+
 ```
 
-- ✅ **API Calls:**
-  - `GET /api/locations/` (**Sync Orchard Data Now** button)
-  - `GET /api/fields/` (**Sync Orchard Data Now** button)
-  - `GET /api/fruits/` (**Sync Orchard Data Now** button)
-  - `GET /api/ml/version/` (**Debug Mode Button**)
-- **Triggered API Calls:**
-  - **🔄 Sync Orchard Data Now** → Fetch all fields, raws, fruits.
-  - **💾 Save** → Update field/raw details.
-  - **🛠 Debug Mode** → Fetch ML model version.
-  
 ---
+
+### API Calls
+
+| Trigger | Endpoint | Purpose |
+|--------|----------|---------|
+| `🔄 Sync Orchard Data` | `GET /api/locations/` | Combined field + raw |
+|                        | `GET /api/fields/`    | Orchard details |
+|                        | `GET /api/fruits/`    | Fruit types |
+| `🔌 Test Connection` | `GET /api/ml/version/` | Verifies API endpoint |
+|                      | `HEAD /media/svg/fields/default_map.svg` | Verifies media access |
+| `🛠 Debug Mode`      | `GET /api/ml/version/` | Show model version |
+| `💾 Save`            | _none_ | Locally stores settings in DataStore |
+
+---
+ 
 
 
 ## **`OrchardScreen`**
@@ -355,8 +486,7 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 ✔ Display all **fields (orchards)** and their respective **tree rows (raws)**  
 ✔ Allow users to **view structure, orientation, and fruit types**  
 ✔ Acts as a **read-only orchard overview**, paving the way for future field/raw editing  
-
-🔸 **Note:** Editing orchard data (fields/raws) is **not yet implemented** but planned via upcoming PATCH endpoints.
+ 
 
 ---
 
@@ -365,17 +495,20 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 +----------------------------------------+
 | 🌳 Orchard: North Orchard (N)          |
 | 📝 Description: Main fruit section     |
+| 📝 Visualize button    |
 |----------------------------------------|
 | 🌿 Row A  • 50 trees • 🍏 Golden fruit  |
 | 🌿 Row B  • 40 trees • 🍎 Red fruit     |
 |----------------------------------------|
 | 🌳 Orchard: South Orchard (S)          |
 | 📝 Description: Mixed fruit section    |
+| 📝 Visualize button    |
 |----------------------------------------|
 | 🌿 Row C  • 45 trees • 🍏 Green fruit   |
 +----------------------------------------+
 ```
-
+ 
+The "Visualize" button allows users to preview the layout of a field. Unlike the `LocationScreen`, raw selection is **optional** and no changes are applied.
 ---
 
 - ✅ **API Calls (Read-Only):**

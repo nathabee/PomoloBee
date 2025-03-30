@@ -26,10 +26,10 @@ The **PomoloBee** app will now focus **only on image-based fruit yield estimatio
     - [**4 Offline Mode Storage**](#4-offline-mode-storage)
   - [**Updated Data Flow**](#updated-data-flow)
   - [**Updated Milestones**](#updated-milestones)
-  - [**Updated Milestones**](#updated-milestones)
     - [**Phase 1 MVP Current**](#phase-1-mvp-current)
     - [**Phase 2 AI Enhancements Manual Input Access Control**](#phase-2-ai-enhancements-manual-input-access-control)
     - [**Phase 3 Advanced Features Video Support**](#phase-3-advanced-features-video-support)
+  - [**API Endpoint Mapping and Flow Diagram**](#api-endpoint-mapping-and-flow-diagram)
 <!-- TOC END -->
   
 </details>
@@ -98,11 +98,7 @@ The **PomoloBee** app will now focus **only on image-based fruit yield estimatio
 
 ---
   
-## **Updated Milestones**
-
-Great! Here's the updated **Milestones** section with your new **authentication and user-farm access control requirements** integrated into **Phase 2**.
-
----
+ 
 
 ## **Updated Milestones**
 
@@ -115,10 +111,7 @@ Great! Here's the updated **Milestones** section with your new **authentication 
 ---
 
 ### **Phase 2 AI Enhancements Manual Input Access Control**
-
-🔹 **Local AI Model for Offline Estimation**  
-- Farmers can analyze images **without internet** using an **on-device AI model** (OpenCV + TensorFlow Lite)  
-- Enables instant feedback without needing backend processing  
+  
 
 🔹 **Manual Override of AI Results**  
 - Farmers can **adjust fruit count and yield** if AI detection seems inaccurate  
@@ -127,7 +120,7 @@ Great! Here's the updated **Milestones** section with your new **authentication 
 🔹 **Updated Sync & Processing Workflow**  
 - Farmers can choose between:
   - **Backend AI Processing (default)**
-  - **Local-only processing mode**  
+  - **Local-only mode : configuration can be loaded with json files locally**  
 - New toggle in **SettingsScreen** to configure this behavior  
 
 🔹 **Authentication and Access Control (NEW)**  
@@ -138,6 +131,14 @@ Great! Here's the updated **Milestones** section with your new **authentication 
   - Each `Field` belongs to a **Farm**
   - Users can **only view fields, raws, and data related to their farm(s)**
 - 🌱 Enables secure **multi-user access** and **data separation per farm**
+
+
+🔹 **User Access Model**
+- Each user is tied to one or more **Farms**
+- Users can:
+  - View only their **fields**, **raws**, and **estimations**
+  - Upload images only to **authorized rows**
+- Auth method: **Token-based login**
 
 ---
 
@@ -159,4 +160,14 @@ Great! Here's the updated **Milestones** section with your new **authentication 
 - Identify **ripe vs. unripe fruit** based on color (HSV analysis)  
 - Useful for **harvest timing predictions**
 
+ 
+## **API Endpoint Mapping and Flow Diagram**
+📌 All API endpoints, request/response examples, and error codes are detailed in:
+
+📖 [Full API Specification → API.md](API.md)
+
+📌  Flow Diagram is detailed in:
+
+📖 [Full API Specification → Workflow.md](Workflow.md)
+ 
  

@@ -1,8 +1,11 @@
 import json
 import threading
 from flask import Flask, request, jsonify
-import os, time, cv2, numpy as np, requests
+import os, time, cv2
+import numpy as np, requests
 import logging
+import sys 
+
 
 
 app = Flask(__name__)
@@ -12,31 +15,51 @@ app = Flask(__name__)
 # ------------------------------
 # ✅ CONFIG: Load from JSON FILE
 # ------------------------------
-CONFIG_PATH = "flask_config.json"
-default_config = { 
-    "DEBUG": False,
-    "MOK": False,
-    "ML_MODEL_VERSION": "v0.0.1",
-    "LAST_UPDATED": "2025-01-01T00:00:00",
-    "DJANGO_API_URL": "http://localhost:8000/api",
-    "LOG_FILE": "logs/flask.log", 
-    "MOK_RUNSERVER": True,
-    "MOK_CODE": 200,
-    "MOK_RETURN": { "message": "Default mock" },
-    "MOK_DELAY": 3,
-    "MOK_MLRESULT": {
-        "nb_fruit": 10,
-        "confidence_score": 0.85,
-        "processed": True
-  }
-}
+# ---------------------
+# Step 1: Get argument
+# ---------------------
+if len(sys.argv) < 2:
+    print("❌ Usage: python app.py <config_name>")
+    sys.exit(1)
 
-try:
-    with open(CONFIG_PATH) as f:
-        FLASK_CONFIG = {**default_config, **json.load(f)}
-except Exception as e:
-    logging.debug("⚠️ Could not load config, using defaults.")
-    FLASK_CONFIG = default_config
+config_name = sys.argv[1]
+config_path = os.path.join("config", f"{config_name}.json")
+
+# ---------------------
+# Step 2: Load config
+# ---------------------
+if not os.path.exists(config_path):
+    print(f"❌ Config file not found: {config_path}")
+    sys.exit(1)
+
+with open(config_path, "r") as f:
+    try:
+        FLASK_CONFIG = json.load(f)
+    except json.JSONDecodeError as e:
+        print(f"❌ Invalid JSON: {e}")
+        sys.exit(1)
+
+# ---------------------
+# Step 3: Validate config
+# ---------------------
+REQUIRED_KEYS = [
+    "DEBUG",
+    "UPLOAD_FOLDER",
+    "ML_MODEL_VERSION",
+    "LAST_UPDATED",
+    "DJANGO_API_URL",
+    "DJANGO_MEDIA_URL",
+    "LOG_FILE",
+    "MOK",
+    "MOK_RUNSERVER"
+]
+
+missing_keys = [k for k in REQUIRED_KEYS if k not in FLASK_CONFIG]
+if missing_keys:
+    print(f"❌ Missing required config keys: {', '.join(missing_keys)}")
+    logging.debug(f"❌ Missing required config keys: {', '.join(missing_keys)}")
+    sys.exit(1)
+
  
 
  
@@ -66,8 +89,9 @@ else:
 # ------------------------------
 # ML & STORAGE CONFIG
 # ------------------------------
-UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
+UPLOAD_FOLDER = os.path.abspath(FLASK_CONFIG["UPLOAD_FOLDER"])
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 logging.debug(f"📁 Saving image to: {UPLOAD_FOLDER}")
 
 processing_queue = {}
@@ -92,14 +116,30 @@ def api_error(code, message, status_code=400):
 def api_success(data, status_code=200):
     return jsonify({"status": "success", "data": data}), status_code
 
+
 # ------------------------------
 # 🔁 POST /ml/process-image
 # ------------------------------ 
+
 @app.route('/ml/process-image', methods=['POST'])
 def process_image():
     data = request.json
     image_id = data.get("image_id")
     image_url = data.get("image_url")
+
+    # If this is NOT a relative path, it’s a bug!
+    if not image_id or not image_url:
+        logging.debug(f"INVALID_INPUT Invalid image URL or image ID. error 400")
+        return api_error("INVALID_INPUT", "Invalid image URL or image ID.", 400)
+ 
+    if not image_url.startswith("/media/"):
+        logging.debug(f"❌ REJECTED: image_url must be relative, got: {image_url}")
+        return api_error("INVALID_PATH", "image_url must be a relative /media path.", 400)
+
+
+    # Always prepend DJANGO_MEDIA_URL
+    image_url = FLASK_CONFIG["DJANGO_MEDIA_URL"].rstrip("/") + image_url
+
     logging.debug(f"📥 Trying to download image from: {image_url}")
 
 
@@ -108,10 +148,19 @@ def process_image():
         return api_error("INVALID_INPUT", "Invalid image URL or image ID.", 400)
 
     # ➕ Handle short-circuit mock mode when MOK_RUNSERVER == False
-    if FLASK_CONFIG["MOK"] :
-        if  not FLASK_CONFIG["MOK_RUNSERVER"] or FLASK_CONFIG["MOK_CODE"] >= 300:
+    if FLASK_CONFIG["MOK"]:
+        if not FLASK_CONFIG["MOK_RUNSERVER"]:
             logging.debug(f"🧪 MOK_SHORT: Sending immediate mock response for image {image_id}")
-            return api_error("MOK_ERROR", FLASK_CONFIG["MOK_RETURN"].get("message", "Mock error"), FLASK_CONFIG["MOK_CODE"])
+            
+            if FLASK_CONFIG["MOK_CODE"] == 200:
+                # ✅ Simulate a proper success response structure
+                return api_success({
+                    "image_id": image_id,
+                    "message": "Mocked image received, processing started."
+                })
+            else:
+                return api_error("MOK_ERROR", FLASK_CONFIG["MOK_RETURN"].get("message", "Mock error"), FLASK_CONFIG["MOK_CODE"])
+
 
     # ✅ Safety check for already queued
     if image_id in processing_queue:
@@ -121,8 +170,12 @@ def process_image():
         elif status == "failed":
             logging.debug(f"🔁 Retrying failed image {image_id}")
             processing_queue[image_id]["status"] = "processing"
-        elif status in ("processing", "moking"):
-            return api_success({"message": f"Image {image_id} is already queued for processing."})
+        elif status in ("processing", "moking"): 
+                return api_success({
+                    "image_id": image_id,
+                    "message": "Image is already queued for processing.."
+                 })
+
 
     # ✅ Real Mode: Download image (for full mock + real processing)
     image_path = os.path.join(UPLOAD_FOLDER, f"image_{image_id}.jpg")
@@ -155,7 +208,11 @@ def process_image():
     }
 
 
-    return api_success({"message": f"Image {image_id} received, processing started."})
+    return api_success({
+            "image_id": image_id,
+            "message": "Image received, processing started."
+        })
+
 
 
 # ------------------------------
@@ -202,7 +259,7 @@ def background_process_images():
 
             # Try to POST to Django
             try:
-                res = requests.post(f"{FLASK_CONFIG['DJANGO_API_URL']}/images/{image_id}/ml_result/", json=payload)
+                res = requests.post(f"{FLASK_CONFIG['DJANGO_API_URL']}/api/images/{image_id}/ml_result/", json=payload)
                 if res.status_code == 200:
                     processing_queue[image_id]["status"] = "completed"
                     logging.debug(f"✅ ML Result sent for {image_id}")

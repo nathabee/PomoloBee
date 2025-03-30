@@ -52,7 +52,7 @@ POST /ml/process-image/
 ✅ **Example Request:**
 ```json
 {
-    "image_url": "https://server.com/images/image_24.jpg",
+    "image_url": "/media/images/image_24.jpg",
     "image_id": 24
 }
 ```
@@ -101,12 +101,12 @@ or if ML receives a duplicate processing request,
 
 ✅ **Endpoint:**  
 ```
-GET /version/
+GET /ml/version/  
 ```
 ✅ **Caller → Receiver:**  
 - **Django -> ML**
 
-✅ **Triggered by**: App GET /ml/version/ → Django → ML
+✅ **Triggered by**: App GET /ml/version/ → Django GET /ml/version/ → ML
 
 ✅ **Response (Success - 200 OK)**
 ```json
@@ -138,6 +138,7 @@ GET /version/
 - Example full URL Django will call:
 ```text
 http://localhost:5000/ml/process-image/
+{ML_API_URL}/process-image/
 ```
 
 ### **Polling Strategy**

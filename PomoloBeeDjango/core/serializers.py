@@ -3,12 +3,33 @@ from .models import Field, Fruit, Raw, Image, Estimation
 
 
 # FIELD
+#class FieldSerializer(serializers.ModelSerializer):
+#    field_id = serializers.IntegerField(source='id', read_only=True)
+
+#    class Meta:
+#        model = Field
+#        fields = ['field_id', 'short_name', 'name', 'description', 'orientation']
+
+
 class FieldSerializer(serializers.ModelSerializer):
     field_id = serializers.IntegerField(source='id', read_only=True)
+    svg_map_url = serializers.SerializerMethodField()
+    background_image_url = serializers.SerializerMethodField()
+
+    def get_svg_map_url(self, obj):
+        if obj.svg_map:
+            return obj.svg_map.url  # ✅ Always relative
+        return None
+
+    def get_background_image_url(self, obj):
+        if hasattr(obj, 'background_image') and obj.background_image:
+            return obj.background_image.url  # ✅ Always relative
+        return None
+
 
     class Meta:
         model = Field
-        fields = ['field_id', 'short_name', 'name', 'description', 'orientation']
+        fields = ['field_id', 'short_name','name',  'description', 'orientation', 'svg_map_url', 'background_image_url']
 
 
 # FRUIT
@@ -39,11 +60,36 @@ class RawSerializer(serializers.ModelSerializer):
 class FieldLocationSerializer(serializers.ModelSerializer):
     field_id = serializers.IntegerField(source='id', read_only=True)
     field_name = serializers.CharField(source='name', read_only=True)
+    svg_map_url = serializers.SerializerMethodField()
+    background_image_url = serializers.SerializerMethodField()
     raws = RawSerializer(many=True, read_only=True)
 
+
+    def get_svg_map_url(self, obj):
+        if obj.svg_map:
+            return obj.svg_map.url  # ✅ Always relative
+        return None
+
+    def get_background_image_url(self, obj):
+        if hasattr(obj, 'background_image') and obj.background_image:
+            return obj.background_image.url  # ✅ Always relative
+        return None
+
+
+    
     class Meta:
         model = Field
-        fields = ['field_id', 'field_name', 'orientation', 'raws']
+        fields = [
+            'field_id',
+            'field_name',
+            'orientation',
+            'svg_map_url',
+            'background_image_url',
+            'raws'
+        ]
+
+ 
+
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -60,14 +106,12 @@ class ImageSerializer(serializers.ModelSerializer):
 
 
     original_filename = serializers.CharField(read_only=True)
-
+    
     def get_image_url(self, obj):
-        request = self.context.get('request')
-        if obj.image_file and request:
-            return request.build_absolute_uri(obj.image_file.url)
-        elif obj.image_file:
-            return obj.image_file.url
+        if obj.image_file:
+            return obj.image_file.url  # ✅ Always relative
         return None
+
 
     class Meta:
         model = Image

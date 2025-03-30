@@ -6,6 +6,8 @@
         "field_id": 1,
         "field_name": "ChampMaison",
         "orientation": "NW",
+        "svg_map_url": "/media/svg/fields/C1_map.svg",
+        "background_image_url": null,
         "raws": [
           {
             "raw_id": 1,
@@ -237,30 +239,40 @@
         "field_id": 2,
         "field_name": "ChampSud",
         "orientation": "S",
+        "svg_map_url": "/media/svg/fields/default_map.svg",
+        "background_image_url": null,
         "raws": []
       },
       {
         "field_id": 3,
         "field_name": "VergerHaut",
         "orientation": "E",
+        "svg_map_url": "/media/svg/fields/default_map.svg",
+        "background_image_url": null,
         "raws": []
       },
       {
         "field_id": 4,
         "field_name": "VergerBas",
         "orientation": "W",
+        "svg_map_url": "/media/svg/fields/default_map.svg",
+        "background_image_url": null,
         "raws": []
       },
       {
         "field_id": 5,
         "field_name": "PlaineOuest",
         "orientation": "W",
+        "svg_map_url": "/media/svg/fields/default_map.svg",
+        "background_image_url": null,
         "raws": []
       },
       {
         "field_id": 6,
         "field_name": "TestZone",
         "orientation": "N",
+        "svg_map_url": "/media/svg/fields/default_map.svg",
+        "background_image_url": null,
         "raws": []
       }
     ]

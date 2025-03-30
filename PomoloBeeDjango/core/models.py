@@ -23,18 +23,42 @@ class Farm(models.Model):
 
     def __str__(self):
         return f"Farm: {self.name}"
+ 
 
+def svg_upload_path(instance, filename):
+    # Save SVGs to media/svg/fields/<field_short_name>.svg
+    return f"svg/fields/{instance.short_name}_{filename}"
 
-# Defines a Field (Agricultural Field)
+def background_image_upload_path(instance, filename):
+    return f"images/backgrounds/{instance.short_name}_{filename}"
+
 class Field(models.Model):
-    farm = models.ForeignKey(Farm, on_delete=models.CASCADE, related_name='fields', default=1)
+    farm = models.ForeignKey('Farm', on_delete=models.CASCADE, related_name='fields', default=1)
     short_name = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     orientation = models.CharField(max_length=50, blank=True, null=True)
 
-    def __str__(self):
-        return self.name
+    svg_map = models.FileField(
+        upload_to=svg_upload_path,
+        blank=True,
+        null=True,
+        default='svg/fields/default_map.svg',
+        help_text="Upload SVG map of the field layout."
+    )
+
+    background_image = models.ImageField(  # ✅ ADD THIS
+        upload_to=background_image_upload_path,
+        blank=True,
+        null=True,
+        help_text="Upload background image for the field layout."
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.svg_map:
+            self.svg_map.name = 'svg/fields/default_map.svg'
+        super().save(*args, **kwargs)
+
 
 
 # Defines a Raw (a section in a field)

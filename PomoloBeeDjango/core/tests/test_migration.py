@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from core.models import Image,  Estimation, Raw, Fruit, Field, Farm
 from datetime import date
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import connection
 
 class LoadFixtureDataTest(TestCase):
     """Test if initial fixture data is correctly loaded in the test database."""
@@ -65,7 +66,23 @@ class LoadFixtureDataTest(TestCase):
         self.assertEqual(raw.field.id, 1)  # Foreign key to Field
         self.assertEqual(raw.fruit.id, 1)  # Foreign key to Fruit
 
+    def test_default_svg_map_applied_on_save(self):
+        """Test that default SVG map path is applied when not set."""
+        # Create a minimal farm for testing
+        farm = Farm.objects.create(name="DummyFarm", owner=User.objects.create_user("dummy", password="1234"))
+        field = Field.objects.create(short_name="TestField", name="Test Field", farm=farm)
+ 
 
+        self.assertTrue(field.svg_map)  # Should not be None
+        self.assertEqual(str(field.svg_map), 'svg/fields/default_map.svg')
+
+    def test_svg_map_field_properties(self):
+        field = Field._meta.get_field("svg_map")
+        self.assertTrue(field.null)
+        self.assertEqual(field.default, 'svg/fields/default_map.svg')
+
+
+ 
 
 class ModelTableExistenceTest(TestCase):
     # check existence of table that are not filled with data with fixture
@@ -145,3 +162,46 @@ class ModelTableExistenceTest(TestCase):
         self.assertEqual(str(estimation), f"Estimation {estimation.id} - {self.raw.name} on {estimation.date}")
 
 
+
+class SchemaColumnCheckTest(TestCase):
+    def get_column_names(self, model):
+        """Returns set of column names for given model."""
+        with connection.cursor() as cursor:
+            return set(
+                column.name for column in connection.introspection.get_table_description(cursor, model._meta.db_table)
+            )
+
+    def assertColumnsExactly(self, model, expected_columns):
+        actual_columns = self.get_column_names(model)
+        missing = expected_columns - actual_columns
+        unexpected = actual_columns - expected_columns
+        self.assertFalse(missing, f"Missing columns in {model.__name__}: {missing}")
+        self.assertFalse(unexpected, f"Unexpected columns in {model.__name__}: {unexpected}")
+
+    def test_field_model_columns(self):
+        self.assertColumnsExactly(Field, {
+            "id", "short_name", "name", "description", "orientation", "farm_id", "svg_map", "background_image"
+        })
+
+    def test_fruit_model_columns(self):
+        self.assertColumnsExactly(Fruit, {
+            "id", "short_name", "name", "description",
+            "yield_start_date", "yield_end_date", "yield_avg_kg", "fruit_avg_kg"
+        })
+
+    def test_raw_model_columns(self):
+        self.assertColumnsExactly(Raw, {
+            "id", "short_name", "name", "nb_plant", "fruit_id", "field_id"
+        })
+
+    def test_image_model_columns(self):
+        self.assertColumnsExactly(Image, {
+            "id", "raw_id", "date", "upload_date", "image_file", "original_filename",
+            "nb_fruit", "confidence_score", "processed", "status", "processed_at"
+        })
+
+    def test_estimation_model_columns(self):
+        self.assertColumnsExactly(Estimation, {
+            "id", "image_id", "raw_id", "date", "timestamp", "plant_fruit", "plant_kg",
+            "raw_kg", "estimated_yield_kg", "maturation_grade", "confidence_score", "source"
+        })

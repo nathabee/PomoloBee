@@ -36,7 +36,7 @@ class DjangoWorkflowTest(TestCase):
         """Set up URLs for API calls."""
         self.upload_url = reverse("image-upload")
         self.ml_result_url = reverse("ml-result", args=[1])  # Assuming ML result for image_id=1
-        self.process_url = f"{settings.ML_API_URL}/process"
+        self.process_url = f"{settings.ML_API_URL}/process-image"
 
     ### 1️⃣ TEST INITIAL DATABASE STATE ###
     def test_001_check_fixture_loading(self):
@@ -135,9 +135,16 @@ class DjangoWorkflowTest(TestCase):
         }
 
         response = requests.post(self.process_url, json=payload)
-        #logger.debug("LOG - Upload response: %s %s", response.status_code, response.json())
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("message", response.json()["data"])
+        logger.debug("LOG - Upload response: %s %s", response.status_code, response.json())
+        response_json = response.json()
+        if response.status_code != 200:
+            print("ML error:", response.status_code, response_json)
+            self.fail(f"ML failed to accept image for processing: {response_json}")
+        else:
+            self.assertIn("message", response_json["data"])
+
+
+ 
 
     def test_008_ml_sends_results_back_to_django(self): 
         """Simulate ML returning results to Django."""
@@ -205,11 +212,29 @@ class DjangoWorkflowTest(TestCase):
 
 
     def test_010_fetch_estimations(self):
-        """Test if Django correctly returns yield estimations."""
-        response = self.client.get(reverse("image-estimations", args=[1]))  # Assuming image_id=1 exists
+        """Test if Django correctly returns yield estimations.""" 
 
+        # Upload image
+        with open("media/images/orchard.jpg", "rb") as img:
+            upload_response = self.client.post(
+                reverse("image-upload"),
+                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                format="multipart"
+            )
+        image_id = upload_response.json()["data"]["image_id"]
+
+        # Simulate ML result
+        self.client.post(
+            reverse("ml-result", args=[image_id]),
+            data={"nb_fruit": 12, "confidence_score": 0.88, "processed": True},
+            content_type="application/json"
+        )
+
+        # Fetch estimation
+        response = self.client.get(reverse("image-estimations", args=[image_id]))
         self.assertEqual(response.status_code, 200)
         self.assertIn("plant_fruit", response.json()["data"])
+
 
 
     def test_012_full_image_to_estimation_workflow(self): 
@@ -256,10 +281,30 @@ class DjangoWorkflowTest(TestCase):
     def test_013_get_estimations_by_field(self):
         """GET /fields/{field_id}/estimations/"""
         # Upload + process
+
         ...
+
+        # Upload image
+        with open("media/images/orchard.jpg", "rb") as img:
+            upload_response = self.client.post(
+                reverse("image-upload"),
+                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                format="multipart"
+            )
+        image_id = upload_response.json()["data"]["image_id"]
+
+        # Simulate ML result
+        self.client.post(
+            reverse("ml-result", args=[image_id]),
+            data={"nb_fruit": 12, "confidence_score": 0.88, "processed": True},
+            content_type="application/json"
+        )
+
+        # Fetch estimation 
+
         response = self.client.get(reverse("field-estimations", args=[1]))
         self.assertEqual(response.status_code, 200)
-        self.assertIn("latest_estimations", response.json()["data"])
+        self.assertIn("estimations", response.json()["data"])
 
     def test_014_delete_uploaded_image(self):
         with open("media/images/orchard.jpg", "rb") as img:
@@ -325,7 +370,7 @@ class DjangoWorkflowRobustnessTest(TestCase):
         """Set up URLs for API calls."""
         self.upload_url = reverse("image-upload")
         self.ml_result_url = reverse("ml-result", args=[1])  # Assuming ML result for image_id=1
-        self.process_url = f"{settings.ML_API_URL}/process"
+        self.process_url = f"{settings.ML_API_URL}/process-image"
 
 
     def test_101_estimation_requested_without_result(self): 
@@ -371,7 +416,8 @@ class DjangoWorkflowRobustnessTest(TestCase):
 
         ml_response = requests.post(self.process_url, json=bad_payload)
         #logger.debug("LOG - Upload response: %s %s", ml_response.status_code, ml_response.json())
-        self.assertEqual(ml_response.status_code, 404)
+        self.assertIn(ml_response.status_code, [400, 404])
+
 
         # App tries to fetch estimation even though ML never processed it
         response = self.client.get(reverse("image-estimations", args=[image_id]))

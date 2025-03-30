@@ -39,7 +39,7 @@ class LocationListView(BaseAPIView):
         fields = Field.objects.prefetch_related('raws__fruit').all()
         if not fields.exists():
             raise APIError("NO_DATA", "No field and raw data available.", status.HTTP_404_NOT_FOUND)
-        serializer = FieldLocationSerializer(fields, many=True)
+        serializer = FieldLocationSerializer(fields, many=True, context={'request': request})
         return self.success({"locations": serializer.data})
 
 
@@ -124,7 +124,7 @@ class ImageView(BaseAPIView):
             image.image_file.name = new_filename 
             image.save()
 
-            image_url = request.build_absolute_uri(image.image_file.url)
+            image_url = image.image_file.url 
             payload = {
                 "image_url": image_url,
                 "image_id": image.id
@@ -145,6 +145,45 @@ class ImageView(BaseAPIView):
 
         logger.warning("ImageUploadSerializer failed: %s", serializer.errors)
         raise APIError("INVALID_INPUT", serializer.errors, status.HTTP_400_BAD_REQUEST)
+
+
+class RetryProcessingView(BaseAPIView):
+    def post(self, request):
+        image_id = request.data.get("image_id")
+        image = get_object_or_error(Image, id=image_id)
+
+        if image.processed:
+            raise APIError("ALREADY_PROCESSED", "Image already processed successfully.", status.HTTP_409_CONFLICT)
+
+        image_url = image.image_file.url 
+        payload = {
+            "image_url": image_url,
+            "image_id": image.id
+        }
+
+
+        try:
+            response = requests.post(f"{settings.ML_API_URL}/process-image", json=payload, timeout=5)
+            if response.status_code == 200:
+                return self.success({"message": "Image processing retry has been requested."})
+            else:
+                raise APIError("ML_RETRY_FAILED", "Retry failed. ML service issue.", status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except requests.RequestException as e:
+            raise MLUnavailableError(detail=f"ML retry failed: {str(e)}", image_id=image.id)
+
+
+# ---------- ML VERSION ----------
+class MLVersionView(BaseAPIView):
+    def get(self, request):
+        try:
+            response = requests.get(f"{settings.ML_API_URL}/version", timeout=5)
+            if response.status_code == 200:
+                return self.success(response.json().get("data", {}))
+            else:
+                raise MLUnavailableError(detail="ML service returned error")
+        except requests.RequestException as e:
+            raise MLUnavailableError(detail=f"ML service unavailable: {str(e)}")
+
 
 
 # ---------- ESTIMATION ----------
@@ -214,40 +253,3 @@ class MLResultView(BaseAPIView):
 
         return self.success({"message": "ML result successfully received."})
 
-
-class RetryProcessingView(BaseAPIView):
-    def post(self, request):
-        image_id = request.data.get("image_id")
-        image = get_object_or_error(Image, id=image_id)
-
-        if image.processed:
-            raise APIError("ALREADY_PROCESSED", "Image already processed successfully.", status.HTTP_409_CONFLICT)
-
-        image_url = request.build_absolute_uri(image.image_file.url)
-        payload = {
-            "image_url": image_url,
-            "image_id": image.id
-        }
-
-
-        try:
-            response = requests.post(f"{settings.ML_API_URL}/process-image", json=payload, timeout=5)
-            if response.status_code == 200:
-                return self.success({"message": "Image processing retry has been requested."})
-            else:
-                raise APIError("ML_RETRY_FAILED", "Retry failed. ML service issue.", status.HTTP_500_INTERNAL_SERVER_ERROR)
-        except requests.RequestException as e:
-            raise MLUnavailableError(detail=f"ML retry failed: {str(e)}", image_id=image.id)
-
-
-# ---------- ML VERSION ----------
-class MLVersionView(BaseAPIView):
-    def get(self, request):
-        try:
-            response = requests.get(f"{settings.ML_API_URL}/version", timeout=5)
-            if response.status_code == 200:
-                return self.success(response.json().get("data", {}))
-            else:
-                raise MLUnavailableError(detail="ML service returned error")
-        except requests.RequestException as e:
-            raise MLUnavailableError(detail=f"ML service unavailable: {str(e)}")

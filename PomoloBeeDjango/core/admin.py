@@ -4,9 +4,16 @@ from .models import Field, Raw, Fruit, Image, Estimation
 
 @admin.register(Field)
 class FieldAdmin(admin.ModelAdmin):
-    list_display = ('name', 'short_name', 'orientation', 'description')
+    list_display = ('name', 'short_name', 'orientation', 'description', 'svg_preview')
     search_fields = ('name', 'short_name')
     list_filter = ('orientation',)
+
+    def svg_preview(self, obj):
+        if obj.svg_map:
+            return f"<a href='{obj.svg_map.url}' target='_blank'>Preview</a>"
+        return "No SVG"
+    svg_preview.allow_tags = True
+    svg_preview.short_description = "SVG Map"
 
 
 @admin.register(Raw)

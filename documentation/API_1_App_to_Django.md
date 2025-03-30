@@ -4,6 +4,9 @@
 This document defines the API interface for the Pomolobee project, specifying:
 - API calls and data exchanged
 - Endpoints and request/response format
+
+🔗 All media asset paths (e.g., image_url, svg_map_url) are returned as relative paths. 
+The app or ML service must prepend its configured Django base URL.
 ---
 
 <details>
@@ -28,8 +31,11 @@ This document defines the API interface for the Pomolobee project, specifying:
   - [Section D History Analytics](#section-d-history-analytics)
     - [**Fetching all Estimation Records**](#fetching-all-estimation-records)
     - [**Fetching a Estimation Record for an image**](#fetching-a-estimation-record-for-an-image)
+  - [Section E Media Asset Usage](#section-e-media-asset-usage)
+    - [**Fetch Media Assets for Each Field**](#fetch-media-assets-for-each-field)
   - [**4. API Design**](#4-api-design)
     - [Query Examples](#query-examples)
+    - [URL acess](#url-acess)
     - [**API Call Order**](#api-call-order)
     - [**Polling Strategy**](#polling-strategy)
   - [**Error Handling Strategy in DJANGO**](#error-handling-strategy-in-django)
@@ -61,25 +67,29 @@ GET /api/fields/
 {
   "status": "success",
   "data": {
-
     "fields": [
         {
             "field_id": 1,
             "short_name": "North_Field",
             "name": "North Orchard",
             "description": "Main orchard section for fruit.",
-            "orientation": "N"
+            "orientation": "N",
+            "svg_map_url": "/media/svg/fields/North_Field_map.svg",
+            "background_image_url": "/media/backgrounds/North_Field_background.jpg"
         },
         {
             "field_id": 2,
             "short_name": "South_Field",
             "name": "South Orchard",
             "description": "Smaller orchard with mixed fruit trees.",
-            "orientation": "S"
+            "orientation": "S",
+            "svg_map_url": "/media/svg/fields/default_map.svg",
+            "background_image_url": null
         }
-     ]
-    }
+    ]
+  }
 }
+
 ```
 
 ---
@@ -141,51 +151,55 @@ GET /api/locations/
 ✅ **Response (Success - 200 OK)**
 ```json
 {
-
   "status": "success",
   "data": {
     "locations": [
-        {
-            "field_id": 1,
-            "field_name": "North Orchard",
-            "orientation": "N",
-            "raws": [
-                {
-                    "raw_id": 101,
-                    "short_name": "Row_A",
-                    "name": "Row A",
-                    "nb_plant": 50,
-                    "fruit_id": 5,
-                    "fruit_type": "Golden fruit"
-                },
-                {
-                    "raw_id": 102,
-                    "short_name": "Row_B",
-                    "name": "Row B",
-                    "nb_plant": 40,
-                    "fruit_id": 6,
-                    "fruit_type": "Red fruit"
-                }
-            ]
-        },
-        {
-            "field_id": 2,
-            "field_name": "South Orchard",
-            "orientation": "S",
-            "raws": [
-                {
-                    "raw_id": 201,
-                    "short_name": "Row_C",
-                    "name": "Row C",
-                    "nb_plant": 45,
-                    "fruit_id": 7,
-                    "fruit_type": "Green fruit"
-                }
-            ]
-        }
+      {
+        "field_id": 1,
+        "field_name": "North Orchard",
+        "orientation": "N",
+        "svg_map_url": "/media/svg/fields/C1_map.svg",
+        "background_image_url": "/media/images/C1_background.jpg",
+        "raws": [
+          {
+            "raw_id": 101,
+            "short_name": "Row_A",
+            "name": "Row A",
+            "nb_plant": 50,
+            "fruit_id": 5,
+            "fruit_type": "Golden fruit"
+          },
+          {
+            "raw_id": 102,
+            "short_name": "Row_B",
+            "name": "Row B",
+            "nb_plant": 40,
+            "fruit_id": 6,
+            "fruit_type": "Red fruit"
+          }
+        ]
+      },
+      {
+        "field_id": 2,
+        "field_name": "South Orchard",
+        "orientation": "S",
+        "svg_map_url": "/media/svg/fields/default_map.svg",
+        "background_image_url": null,
+        "raws": [
+          {
+            "raw_id": 201,
+            "short_name": "Row_C",
+            "name": "Row C",
+            "nb_plant": 45,
+            "fruit_id": 7,
+            "fruit_type": "Green fruit"
+          }
+        ]
+      }
     ]
   }
 }
+
 ```
 
 ✅ **Response (Error - 404 Not Found)**
@@ -387,7 +401,7 @@ GET /api/images/{image_id}/details
     "field_id": 1,
     "fruit_type": "Golden fruit",
     "upload_date": "2024-03-10",
-    "image_url": "https://server.com/media/images/images-24.jpg",
+    "image_url": "/media/images/images-24.jpg",
     "original_filename": "orchard20251201.jpg",
     "status": "Done",
     "processed": true,
@@ -412,7 +426,7 @@ GET /api/images/{image_id}/details
     "field_id": 1,
     "fruit_type": "Golden fruit",
     "upload_date": "2024-03-10",
-    "image_url": "https://server.com/media/images/images-24.jpg",
+    "image_url": "/media/images/images-24.jpg",
     "original_filename": "orchard20251201.jpg",
     "status": "Processing",
     "processed": false
@@ -432,7 +446,7 @@ GET /api/images/{image_id}/details
     "field_id": 1,
     "fruit_type": "Golden fruit",
     "upload_date": "2024-03-10",
-    "image_url": "https://server.com/media/images/images-24.jpg",
+    "image_url": "/media/images/images-24.jpg",
     "original_filename": "orchard20251201.jpg",
     "status": "Failed",
     "processed": false
@@ -754,8 +768,41 @@ GET /api/images/{image_id}/estimations
 ```
 
 ---
-
  
+
+## Section E Media Asset Usage
+
+📌 **Purpose:**  
+Explain how the **app retrieves SVG maps and background images** for orchard fields from the `media/` folder.
+
+---
+
+### **Fetch Media Assets for Each Field**
+
+✅ **Media is NOT embedded** in any endpoint. The API provides **URLs to static assets**, and the **frontend must download them manually** when needed.
+
+✅ **These URLs are returned in**:
+- `GET /api/fields/`
+- `GET /api/locations/`
+- `GET /api/images/{image_id}/details/`
+
+✅ Example snippet from the `/api/fields/` response:
+```json
+{
+  "field_id": 1,
+  "short_name": "North_Field",
+  "name": "North Orchard",
+  "svg_map_url": "/media/svg/fields/North_Field_map.svg",
+  "background_image_url": "/media/backgrounds/North_Field_background.jpg"
+}
+```
+
+---
+ 
+
+-
+ 
+
 ## **4. API Design**
 
 
@@ -771,6 +818,61 @@ curl -X POST "https://server.com/api/images/" \
 -F "raw_id=3" \
 -F "date=2024-03-14"
 ```
+
+### URL acess
+
+Split `DJANGO_API_URL` and `DJANGO_MEDIA_URL`
+
+#### Typical Production Setup
+| Purpose         | Example URL                        |
+|----------------|-------------------------------------|
+| Django API      | `https://api.pomolobee.com/`     |
+| Media (images)  | `https://media.pomolobee.com/` |
+
+
+
+ | Purpose         | Example URL                        |
+|----------------|-------------------------------------|
+| Django API      | `http://127.0.0.1:8000`     |
+| Media (images)  | `http://127.0.0.1:8000` |
+
+ 
+
+| Asset Type       | Field Key                | Fetch Timing        | Notes |
+|------------------|--------------------------|---------------------|-------|
+| **SVG Map**      | `svg_map_url`            | On field view open  | Required for interaction |
+| **Background**   | `background_image_url`   | Optional: toggle or lazy load | Can skip if bandwidth is a concern |
+| **image**         | `image_url`             | Optional: toggle  | Can skip if bandwidth is a concern |
+
+---
+ 
+#### Media access
+- Actual value from API:
+/media/svg/fields/C1_map.svg
+
+- App must convert to:
+{DJANGO_MEDIA_URL}/media/svg/fields/C1_map.svg
+ 
+#### Service access
+- ActuAcess to API:
+GET /api/images/{image_id}/details/
+
+- App must convert to:
+GET {DJANGO_API_URL}/api/images/{image_id}/details/   
+
+ 
+
+ 
+#### Error Cases
+
+| Case | Result |
+|------|--------|
+| `svg_map_url = null` | Field has no map. App should show fallback (e.g., "No layout available"). |
+| `background_image_url = null` | Background is optional. App should skip rendering it. |
+| 404 on fetch | App should log the issue and ignore that media. |
+
+
+
 
 ### **API Call Order**
 📌 `POST /api/images/` (Upload Image)  

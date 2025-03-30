@@ -45,7 +45,7 @@ The mocking tool is used to simulate ML behavior, depending on whether you're do
 
 Used for isolated testing without real image processing or Django being online.
 
-#### `flask_config.json`
+#### `config/mok_short.json`
 ```json
 {
     "DEBUG": true,
@@ -65,7 +65,7 @@ Used for isolated testing without real image processing or Django being online.
 # ML Mock Server
 cd pomoloBeeML
 source venv/bin/activate
-python app.py
+python app.py mok_short
 ```
 
 ```bash
@@ -93,7 +93,7 @@ python manage.py test core.tests.test_endpoint
 Used to simulate full background processing with delayed POST to Django.
             |
 
-#### `flask_config.json`
+#### `config/mok.json`
 ```json
 {
     "DEBUG": true,
@@ -121,7 +121,7 @@ note : for the test core.tests.ml_unavailable : we will NOT start app.py
 # ML Mock Server
 cd pomoloBeeML
 source venv/bin/activate
-python app.py
+python app.py mok
 ```
 
 ```bash
@@ -139,7 +139,7 @@ python manage.py runserver
 
 Used to run against the **real ML logic** — no mocking.
 
-#### `flask_config.json`
+#### `dev.json` or prod.json ...etc
 ```json
 {
     "DEBUG": true,
@@ -156,7 +156,7 @@ Used to run against the **real ML logic** — no mocking.
 # ML Engine real
 cd pomoloBeeML
 source venv/bin/activate
-python app.py
+python app.py dev
 ```
 
 ```bash
@@ -174,6 +174,9 @@ In production, you should use:
 
 - `MOK = false`
 - `DEBUG = false`
+config config/prod.json
+
+start app.py prod
 
 Use production servers like **Gunicorn** or **uWSGI** to launch.
 
@@ -250,7 +253,7 @@ The image must be reachable from the URL. You can use Django static server or ho
 Example URL:  
 `http://localhost:8000/media/images/image-125.jpg`
 
-#### `flask_config.json` for real test
+#### `config/dev.json` for real test
 
 ```json
 {
@@ -318,7 +321,7 @@ You should see a retry message, then successful result.
 #### Goal
 Use Flask mock server without running Django. Only mock result is returned — no processing, no POST.
 
-#### `flask_config.json`
+#### `config/mok_short.json`
 
 ```json
 {

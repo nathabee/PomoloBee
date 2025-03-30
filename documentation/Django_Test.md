@@ -1,49 +1,58 @@
+Your cleaned-up documentation looks **great**—very clear, organized, and aligned with the structure of the rest of the test suite. Here’s just a **light polishing pass** to improve clarity and consistency (especially section titles and wording):
+
+---
+
 # Django Test Documentation
 ---
+
 <details>
 <summary>Table of Content</summary>
 
 <!-- TOC -->
 - [Django Test Documentation](#django-test-documentation)
   - [List of Tests](#list-of-tests)
-  - [️ Migration Tests](#migration-tests)
+  - [Unit Tests Migration](#unit-tests-migration)
     - [Purpose](#purpose)
     - [Fixtures Required](#fixtures-required)
-    - [Classes Coverage](#classes-coverage)
-  - [Endpoint Tests - Integration](#endpoint-tests-integration)
-  - [Workflow Tests - Validation](#workflow-tests-validation)
+    - [Test Coverage](#test-coverage)
+  - [Unit Tests API Endpoint Coverage](#unit-tests-api-endpoint-coverage)
     - [Prerequisites](#prerequisites)
-    - [Test Coverage Mapping](#test-coverage-mapping)
-  - [️ ML Unavailable Tests](#ml-unavailable-tests)
-  - [Django both ML Communication Tests](#django-both-ml-communication-tests)
+  - [Integration Non-Regression Tests](#integration-non-regression-tests)
+    - [Purpose](#purpose)
+    - [What it Tests](#what-it-tests)
+    - [Modes](#modes)
+    - [Features](#features)
+    - [How to Run](#how-to-run)
+    - [Prerequisites](#prerequisites)
+  - [Test in case of installation to check installation](#test-in-case-of-installation-to-check-installation)
 <!-- TOC END -->
- 
+
 </details>
+
 ---
- 
 
 ## List of Tests
 
-| 📄 **File**                       | ✅ **Coverage**                                                                                     |
-|----------------------------------|-----------------------------------------------------------------------------------------------------|
-| `tests.py`                       | Root file — executes all test files under `core.tests`                                              |
-| `test_migration.py`              | Validates that **fixtures are loaded correctly** and **models are initialized**                     |
-| `test_endpoint.py`               | Tests **API endpoints** against [API specs](API.md), [App↔Django](API_1_App_to_Django.md), [ML↔Django](API_3_ML_to_Django.md) |
-| `test_ml_unavailable.py`         | Tests how Django reacts when **ML service is unreachable**                                          |
-| `test_workflow.py`               | Validates the **entire image estimation workflow** as defined in `Django_Specification.md`          |
-| `test_ml_response.py`            | Validates **Django ↔ ML** communication: request/response logic from [API_2_Django_to_ML.md](API_2_Django_to_ML.md) |
+| 📄 **File**                  | ✅ **Coverage**                                                                                                               |
+|-----------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| `integration_test.sh`   | End-to-end integration + non-regression tests (App ↔ Django ↔ ML) against [API.md](API.md), [Workflow.md](Workflow.md)       |
+| `installation_test.sh`   | ECall all unit test with ML in correct mok mode   |                                                          |
+| `test_migration.py`         | Validates that fixtures load correctly and that base models are present                                                       |
+| `test_ml_unavailable.py`   | Check correct behaviour id ML not started                                                      |
+| `test_ml_response.py`       | Check correct behaviour id ML POST to Django                                                    |
+| `test_endpoint.py`          | Unit tests for each API endpoint using mocked serializers and models                                                 |
+| `test_workflow.py`          | Unit tests for workflow unit test                                                     |
 
 ---
 
-## ️ Migration Tests
+## Unit Tests Migration
 
 ### Purpose
-Ensure that your **initial fixtures** (JSON) load successfully and all key **model tables** are present and behaving correctly.
+Ensure that your **fixtures load correctly** and that the database contains all required objects and relationships.
 
 ### Fixtures Required
-Stored in `core/fixtures/`
-
-```
+Located in `core/fixtures/`:
+```bash
 initial_superuser.json
 initial_farms.json
 initial_fields.json
@@ -51,114 +60,134 @@ initial_fruits.json
 initial_raws.json
 ```
 
-### Classes Coverage
+### Test Coverage
 
-| **Class**                        | **Test Name**                            | **Coverage / What it Verifies**                                     |
-|----------------------------------|------------------------------------------|----------------------------------------------------------------------|
-| `LoadFixtureDataTest`           | `test_superuser_exists`                  | Superuser (`pomobee`) exists from fixture                           |
-|                                  | `test_farms_count`                       | At least one `Farm` loaded                                           |
-|                                  | `test_field_count`, `test_fruit_count`, `test_raw_count` | Expected number of objects from fixtures                         |
-|                                  | `test_specific_field_data`, `test_specific_fruit_data`, `test_specific_raw_data` | Validates key values of selected rows |
-| `ModelTableExistenceTest`       | Tests for `ImageHistory`, `HistoryRaw`, `HistoryEstimation` | Can insert and retrieve expected models                           |
-| `AutoHistoryCreationTest`       | `test_history_raw_created_after_ml_result` | Signal triggers creation of `HistoryRaw` and `HistoryEstimation`    |
+| **Class**                | **Test**                                 | **What It Verifies**                                             |
+|--------------------------|-------------------------------------------|------------------------------------------------------------------|
+| `LoadFixtureDataTest`   | `test_superuser_exists`                  | Superuser (`pomobee`) created correctly                         |
+|                          | `test_farms_count`, `test_field_count`, `test_fruit_count`, `test_raw_count` | Correct number of entries from fixtures          |
+|                          | `test_specific_*`                        | Specific field, fruit, and raw content                         |
+| `ModelTableExistenceTest`|  *[Various]*                             | Tables like `ImageHistory`, `HistoryEstimation` exist and work  |
+| `AutoHistoryCreationTest`| `test_history_raw_created_after_ml_result` | Auto-history creation via signal logic                          |
 
 ---
 
+## Unit Tests API Endpoint Coverage
 
+Tested in: `core/tests/test_endpoint.py`  
+Reference: [API.md](API.md)
 
-## Endpoint Tests - Integration
-
-See [API.md](API.md) for full spec.
-
-Tested in: `core/tests/test_endpoint.py`
-
-| Endpoint                        | Status | Notes                              |
-|---------------------------------|--------|------------------------------------|
-| `GET /api/fields/`              | ✅     | Returns all fields                 |
-| `GET /api/fruits/`              | ✅     | Returns all fruits                 |
-| `GET /api/locations/`           | ✅     | Combines fields and raws           |
-| `POST /api/images/`             | ✅     | Uploads image                      |
-| `GET /api/images/<id>/status/` | ✅     | Polls processing state             |
-| `GET /api/estimations/<id>/`   | ✅     | Returns estimation data            |
-| `DELETE /api/images/<id>/`     | ✅     | Deletes image                      |
-| `POST /api/retry_processing/`  | ✅     | Re-triggers ML                     |
-| `GET /api/ml/version/`         | ✅     | ML model version health check      |
-
- ### 📦 Prerequisites
-
-- Fixtures loaded during test 
-- Existing image:  - `media/images/orchard.jpg`
-- start django server to have acess to http://localhost:8000/media/images/image_15.jpg
-
-  ```bash
-  cd PomoloBeeDjango
-  source venv/bin/activate
-  python manage.py runserver
-
-  ```
-- ML service running:
-  ```bash
-  cd PomoloBeeML
-  source venv/bin/activate
-  python app.py
-  ```
-
-
-## Workflow Tests - Validation
-
-Defined in [`Workflow.md`](Workflow.md). These tests simulate an end-to-end scenario: uploading an image, triggering ML, storing results, and retrieving estimations.
-
-Workflow validation test are a true API-only, workflow-driven integration test 
-- no manual object.create, 
--  #only real API calls like a real mobile client + ML would do.
-- ✅ DB is initialized only from fixtures
-- ✅ POST /api/images/ is used to upload image
-- ✅ POST /ml_result/ mimics ML posting result
-- ❌ No ImageHistory.objects.create(...) anymore
-- ✅ All calls are external (API or request)
+| Endpoint                          | Status | Description                          |
+|-----------------------------------|--------|--------------------------------------|
+| `GET /api/fields/`                | ✅     | Fetches all fields                   |
+| `GET /api/fruits/`                | ✅     | Fetches all fruit types              |
+| `GET /api/locations/`             | ✅     | Returns fields with nested tree rows |
+| `POST /api/images/`              | ✅     | Uploads image + metadata             |
+| `GET /api/images/<id>/status/`   | ✅     | Polls processing state               |
+| `GET /api/estimations/<id>/`     | ✅     | Returns processed estimation         |
+| `DELETE /api/images/<id>/`       | ✅     | Deletes image                        |
+| `POST /api/retry_processing/`    | ✅     | Re-triggers ML inference             |
+| `GET /api/ml/version/`           | ✅     | ML backend version info              |
 
 ### Prerequisites
 
-- Fixtures loaded during test
-- Existing image:  - `media/images/orchard.jpg`
-- ML service running:
+- Django running:  
+  ```bash
+  python manage.py runserver
+  ```
+
+- Required image:  
+  `media/images/orchard.jpg`
+
+- ML service running (or mocked):  
   ```bash
   cd PomoloBeeML
   source venv/bin/activate
-  python app.py
+  python app.py mok_short
   ```
 
-### Test Coverage Mapping
 
-| **Diagram Line**                                          | **Test Implemented?** | **Test(s)**                                              |
-|-----------------------------------------------------------|------------------------|----------------------------------------------------------|
-| App → Django `"📍 Fetch Available Fields & Raws"`         | ✅                     | `GET /api/fields/`, `GET /api/locations/`                |
-| Django → DB `"📂 Save Image Metadata"`                    | ✅                     | `POST /api/images/` creates `ImageHistory`               |
-| Django → App `"📄 Provide Field & Raw Data"`              | ✅                     | `GET /api/locations/` returns correct data               |
-| Django → ML `"🔄 Send Image to ML"`                       | ✅                     | Internal ML API call tested via `requests.post(...)`     |
-| ML → Django `"📊 Return Detection Results"`               | ✅                     | `POST /api/images/{image_id}/ml_result`                  |
-| Django → App `"📥 Fetch Processing Status"`               | ✅                     | `GET /api/images/{image_id}/ml_result` or `/status/`     |
-| Django → App `"📥 Fetch Estimation Results"`              | ✅                     | `GET /api/estimations/{image_id}/`                       |
+
+## Integration Non-Regression Tests
+
+📁 File: `tests/integration_test.sh`
+
+### Purpose
+Performs a **complete system-level test** by executing real API calls (as the app would), validating responses against snapshots, and detecting regressions.
+
+### What it Tests
+
+- End-to-end API flow from **image upload to estimation retrieval**
+- **ML interaction** (request and result callback)
+- Snapshot-based **regression detection**
+- Image **deletion flow** and behavior on **invalid data**
+- All endpoints defined in App↔Django and ML↔Django specs
+
+### Modes
+
+| Flag          | Description                                            |
+|---------------|--------------------------------------------------------|
+| `--snapshot`  | Generates new snapshots from current backend behavior  |
+| `--nonreg`    | Compares live API responses to stored snapshots        |
+| `--integ`     | Basic print-only integration run (no snapshot checking)|
+
+### Features
+
+- 🧪 Tests **real Django server behavior** via `curl` calls
+- 🧠 Calls ML as Django would (`requests.post(...)`)
+- 📥 Accepts simulated ML result with `POST /ml_result/`
+- ✅ Snapshots are **normalized** to ignore volatile fields
+- 💥 Detects API changes, broken estimations, or silent regressions
+
+### How to Run
+
+```bash
+# Integration test call all API and trace them on screen
+# Format must be validated against API specification
+./tests/integration_test.sh --integ
+
+
+# Generate new expected snapshots
+./tests/integration_test.sh --snapshot
+
+# Validate that no API behavior changed
+./tests/integration_test.sh --nonreg
+```
+
+### Prerequisites
+
+Make sure the following conditions are met before running the integration test script:
+
+- ✅ Fixtures are loaded (`manage.py loaddata`) so that fields, fruits, raws exist
+- ✅ A test image exists at `media/images/orchard.jpg`
+- ✅ Django is running at `http://127.0.0.1:8000` so API calls work
+- ✅ The `/media/` URL is accessible for image serving
+
+```bash
+cd PomoloBeeDjango
+source venv/bin/activate
+python manage.py runserver
+```
+
+✅ The ML mock service is running to receive image processing requests:
+
+```bash
+cd PomoloBeeML
+source venv/bin/activate
+python app.py mok
+```
+--- 
+## Test in case of installation to check installation
+
+all units tests nd non regression tests are called with 
+
+📁 File: `tests/installation_test.sh`
+
+```bash
+cd PomoloBeeDjango
+source venv/bin/activate
+python manage.py runserver
+./tests/installation_test.sh
+```
 
 ---
-
-## ️ ML Unavailable Tests
-
-Located in: `test_ml_unavailable.py`
-
-- Covers behavior when ML service is down, timeout, or unreachable.
-- Validates proper error logging and safe fallback from Django.
-
----
-
-## Django both ML Communication Tests
-
-Located in: `test_ml_response.py`
-
-Covers:
-- Django successfully sending images to `/ml/process-image`
-- Django receiving correct format from `/api/images/<id>/ml_result`
-- Edge case validation: missing fields, invalid confidence scores, etc.
-
----
- 

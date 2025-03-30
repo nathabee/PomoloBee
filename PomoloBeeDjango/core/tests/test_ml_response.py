@@ -2,30 +2,55 @@ from django.test import TestCase
 from django.urls import reverse
 import requests
 from rest_framework import status
-from core.models import ImageHistory
+from core.models import Image,Farm, Field, Fruit, Raw,User
 from django.conf import settings
 
 class MLIntegrationTest(TestCase):
     """Test interaction between Django and Flask ML API."""
 
-    def setUp(self):
-        """Set up test data."""
-        self.image = ImageHistory.objects.create(
-            image_path="test_image.jpg",
-            processed=False
+    def setUp(self): 
+
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+
+        self.farm = Farm.objects.create(name="Test Farm", owner=self.user)
+
+ 
+        self.field = Field.objects.create(
+            short_name="F1", name="Test Field", orientation="N", farm=self.farm
         )
+        self.fruit = Fruit.objects.create(
+            short_name="R", name="Red Fruit", description="",
+            yield_start_date="2024-01-01", yield_end_date="2024-12-01",
+            yield_avg_kg=2.5, fruit_avg_kg=0.3
+        )
+        self.raw = Raw.objects.create(
+            short_name="R1", name="Row 1", nb_plant=30,
+            field=self.field, fruit=self.fruit
+)
+
+
+        """Set up test data."""
+        self.image = Image.objects.create(
+            image_file="images/orchard.jpg",
+            processed=False,
+            raw=self.raw,
+            date="2024-03-14"
+        )
+
         self.ml_api_url = settings.ML_API_URL  # Ensure this is set in settings.py
 
     def test_django_sends_image_to_ml(self):
         """Test if Django correctly sends an image processing request to Flask."""
         payload = {
-            "image_url": f"{settings.MEDIA_URL}{self.image.image_path}",
+            "image_url": f"/media/{self.image.image_file}",
             "image_id": self.image.id
         }
         response = requests.post(f"{self.ml_api_url}/process-image", json=payload)
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("message", response.json())
+        self.assertIn("message", response.json().get("data", {}))
+
+
 
     def test_ml_sends_results_back_to_django(self):
         """Test if Flask successfully sends ML results back to Django."""
@@ -39,7 +64,7 @@ class MLIntegrationTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("message", response.json())
+        self.assertIn("message", response.json().get("data", {}))
 
         # Ensure image history is updated
         self.image.refresh_from_db()
@@ -56,6 +81,8 @@ class MLIntegrationTest(TestCase):
 
         response = self.client.get(reverse("ml-result", args=[self.image.id]))
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["nb_fruit"], 10)
-        self.assertEqual(response.json()["confidence_score"], 0.9)
+        self.assertEqual(response.status_code, 200) 
+
+        data = response.json()["data"]
+        self.assertEqual(data["nb_fruit"], 10)
+        self.assertEqual(data["confidence_score"], 0.9)
