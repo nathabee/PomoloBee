@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.conf import settings
 import requests
 from rest_framework import status
-from core.models import Image, Field, Farm,User, Fruit, Raw,Image,Estimation
+from core.models import Image, Field, Farm,User, Fruit, Row,Image,Estimation
 
 import logging
 logger = logging.getLogger(__name__) 
@@ -30,7 +30,7 @@ TEMP_MEDIA_ROOT = tempfile.mkdtemp()
 class DjangoWorkflowTest(TestCase):
     """Test full Django workflow including database initialization, API calls, and ML processing."""
 
-    fixtures = ["initial_superuser.json","initial_farms.json","initial_fields.json", "initial_fruits.json", "initial_raws.json"]
+    fixtures = ["initial_superuser.json","initial_farms.json","initial_fields.json", "initial_fruits.json", "initial_rows.json"]
 
     def setUp(self):
         """Set up URLs for API calls."""
@@ -45,21 +45,21 @@ class DjangoWorkflowTest(TestCase):
         self.assertEqual(Farm.objects.count(), 1, "Expected 1 farm in the database.")
         self.assertEqual(Field.objects.count(), 6, "Expected 6 fields in the database.")
         self.assertEqual(Fruit.objects.count(), 6, "Expected 6 fruits in the database.")
-        self.assertEqual(Raw.objects.count(), 28, "Expected 28 raws in the database.")
+        self.assertEqual(Row.objects.count(), 28, "Expected 28 rows in the database.")
 
     def test_002_check_example_data(self):
-        """Check that specific raw, fruit, and field exist with correct values."""
+        """Check that specific row, fruit, and field exist with correct values."""
         field = Field.objects.get(short_name="C1")
         self.assertEqual(field.name, "ChampMaison")
 
         fruit = Fruit.objects.get(short_name="Swing_CG1")
         self.assertEqual(fruit.name, "Cultivar Swing on CG1")
 
-        raw = Raw.objects.get(short_name="C1-R3")
-        self.assertEqual(raw.name, "Rang 3 cote maison Swing 3")
-        self.assertEqual(raw.nb_plant, 40)
-        self.assertEqual(raw.field.id, 1)  # Foreign key to Field
-        self.assertEqual(raw.fruit.id, 1)  # Foreign key to Fruit
+        row = Row.objects.get(short_name="C1-R3")
+        self.assertEqual(row.name, "Rang 3 cote maison Swing 3")
+        self.assertEqual(row.nb_plant, 40)
+        self.assertEqual(row.field.id, 1)  # Foreign key to Field
+        self.assertEqual(row.fruit.id, 1)  # Foreign key to Fruit
 
     ### 2️⃣ TEST INITIAL API ENDPOINTS ###
     def test_003_get_fields(self):
@@ -84,13 +84,13 @@ class DjangoWorkflowTest(TestCase):
         self.assertEqual(fruits[0]["short_name"], "Swing_CG1")
 
     def test_005_get_locations(self):
-        """Test GET /api/locations/ returns fields + associated raws."""
+        """Test GET /api/locations/ returns fields + associated rows."""
         response = self.client.get(reverse("locations"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("data", response.json())
         locations = response.json()["data"]["locations"]
         self.assertEqual(len(locations), 6) # Expecting 6 fields 
-        self.assertEqual(len(locations[0]["raws"]), 28)  # Example: Field 1 has 28 raws
+        self.assertEqual(len(locations[0]["rows"]), 28)  # Example: Field 1 has 28 rows
 
     ### 3️⃣ TEST IMAGE UPLOAD & PROCESSING ###
 
@@ -102,7 +102,7 @@ class DjangoWorkflowTest(TestCase):
         
         response = self.client.post(
             self.upload_url,
-            {"image": image, "raw_id": 1, "date": "2024-03-14"},
+            {"image": image, "row_id": 1, "date": "2024-03-14"},
             format="multipart"
         )
 
@@ -118,7 +118,7 @@ class DjangoWorkflowTest(TestCase):
         with open("media/images/orchard.jpg", "rb") as img:
             upload_response = self.client.post(
                 reverse("image-upload"),
-                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                {"image": img, "row_id": 1, "date": "2024-03-14"},
                 format="multipart"
             )
             logger.debug("LOG - Upload response: %s %s", upload_response.status_code, upload_response.json())
@@ -151,7 +151,7 @@ class DjangoWorkflowTest(TestCase):
         with open("media/images/orchard.jpg", "rb") as img:
             upload_response = self.client.post(
                 reverse("image-upload"),
-                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                {"image": img, "row_id": 1, "date": "2024-03-14"},
                 format="multipart"
             )
         self.assertEqual(upload_response.status_code, 201)
@@ -185,7 +185,7 @@ class DjangoWorkflowTest(TestCase):
         with open("media/images/orchard.jpg", "rb") as img:
             upload_response = self.client.post(
                 reverse("image-upload"),
-                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                {"image": img, "row_id": 1, "date": "2024-03-14"},
                 format="multipart"
             ) 
 
@@ -218,7 +218,7 @@ class DjangoWorkflowTest(TestCase):
         with open("media/images/orchard.jpg", "rb") as img:
             upload_response = self.client.post(
                 reverse("image-upload"),
-                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                {"image": img, "row_id": 1, "date": "2024-03-14"},
                 format="multipart"
             )
         image_id = upload_response.json()["data"]["image_id"]
@@ -244,7 +244,7 @@ class DjangoWorkflowTest(TestCase):
         with open("media/images/orchard.jpg", "rb") as img:
             response = self.client.post(
                 reverse("image-upload"),
-                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                {"image": img, "row_id": 1, "date": "2024-03-14"},
                 format="multipart"
             )
             logger.debug("LOG - Upload response: %s %s", response.status_code, response.json())
@@ -288,7 +288,7 @@ class DjangoWorkflowTest(TestCase):
         with open("media/images/orchard.jpg", "rb") as img:
             upload_response = self.client.post(
                 reverse("image-upload"),
-                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                {"image": img, "row_id": 1, "date": "2024-03-14"},
                 format="multipart"
             )
         image_id = upload_response.json()["data"]["image_id"]
@@ -309,7 +309,7 @@ class DjangoWorkflowTest(TestCase):
     def test_014_delete_uploaded_image(self):
         with open("media/images/orchard.jpg", "rb") as img:
             upload_response = self.client.post(
-                reverse("image-upload"), {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                reverse("image-upload"), {"image": img, "row_id": 1, "date": "2024-03-14"},
                 format="multipart"
             )
         if upload_response.status_code != 201:
@@ -333,7 +333,7 @@ class DjangoWorkflowTest(TestCase):
         with open("media/images/orchard.jpg", "rb") as img:
             upload_response = self.client.post(
                 reverse("image-upload"),
-                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                {"image": img, "row_id": 1, "date": "2024-03-14"},
                 format="multipart"
             )
         self.assertEqual(upload_response.status_code, 201)
@@ -364,7 +364,7 @@ class DjangoWorkflowTest(TestCase):
 class DjangoWorkflowRobustnessTest(TestCase):
     """Test full Django workflow including database initialization, API calls, and ML processing."""
 
-    fixtures = ["initial_superuser.json","initial_farms.json","initial_fields.json", "initial_fruits.json", "initial_raws.json"]
+    fixtures = ["initial_superuser.json","initial_farms.json","initial_fields.json", "initial_fruits.json", "initial_rows.json"]
 
     def setUp(self):
         """Set up URLs for API calls."""
@@ -379,7 +379,7 @@ class DjangoWorkflowRobustnessTest(TestCase):
         with open("media/images/orchard.jpg", "rb") as img:
             upload_response = self.client.post(
                 reverse("image-upload"),
-                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                {"image": img, "row_id": 1, "date": "2024-03-14"},
                 format="multipart"
             )
         if upload_response.status_code != 201:
@@ -401,7 +401,7 @@ class DjangoWorkflowRobustnessTest(TestCase):
         with open("media/images/orchard.jpg", "rb") as img:
             upload_response = self.client.post(
                 reverse("image-upload"),
-                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                {"image": img, "row_id": 1, "date": "2024-03-14"},
                 format="multipart"
             )
         if upload_response.status_code != 201:
@@ -431,7 +431,7 @@ class DjangoWorkflowRobustnessTest(TestCase):
         with open("media/images/orchard.jpg", "rb") as img:
             upload_response = self.client.post(
                 reverse("image-upload"),
-                {"image": img, "raw_id": 1, "date": "2024-03-14"},
+                {"image": img, "row_id": 1, "date": "2024-03-14"},
                 format="multipart"
             )
         if upload_response.status_code != 201:

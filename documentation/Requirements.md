@@ -42,7 +42,7 @@ The **PomoloBee** app will now focus **only on image-based fruit yield estimatio
 📱 **User Actions:**  
 ✅ **Take a Picture** – User captures images of fruit trees for yield estimation.  
 ✅ **Store Images Offline** – Images are **stored locally first** before uploading.  
-✅ **Select Orchard Location** – Farmers select field, raw, and tree count.  
+✅ **Select Orchard Location** – Farmers select field, row, and tree count.  
 ✅ **Analyze Image (Local or Cloud)** – Farmers can **choose between local analysis or backend processing**.  
 ✅ **Receive Harvest Estimate** – Displays **fruit count, confidence score, and estimated yield**.  
 
@@ -90,7 +90,7 @@ The **PomoloBee** app will now focus **only on image-based fruit yield estimatio
   
 ## **Updated Data Flow**
 1️⃣ **User captures an image** (offline storage enabled).  
-2️⃣ **User selects a field & raw** (manual input).  
+2️⃣ **User selects a field & row** (manual input).  
 3️⃣ **User uploads the image when online OR runs local AI analysis.**  
 4️⃣ **AI detects fruit & estimates yield.**  
 5️⃣ **Backend sends results back to the app.**  
@@ -129,14 +129,14 @@ The **PomoloBee** app will now focus **only on image-based fruit yield estimatio
   - Use **Django’s built-in authentication** system (Token or Session auth)
   - Each `User` is associated with **one or more Farms**
   - Each `Field` belongs to a **Farm**
-  - Users can **only view fields, raws, and data related to their farm(s)**
+  - Users can **only view fields, rows, and data related to their farm(s)**
 - 🌱 Enables secure **multi-user access** and **data separation per farm**
 
 
 🔹 **User Access Model**
 - Each user is tied to one or more **Farms**
 - Users can:
-  - View only their **fields**, **raws**, and **estimations**
+  - View only their **fields**, **rows**, and **estimations**
   - Upload images only to **authorized rows**
 - Auth method: **Token-based login**
 

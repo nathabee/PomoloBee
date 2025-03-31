@@ -57,7 +57,7 @@ initial_superuser.json
 initial_farms.json
 initial_fields.json
 initial_fruits.json
-initial_raws.json
+initial_rows.json
 ```
 
 ### Test Coverage
@@ -65,10 +65,10 @@ initial_raws.json
 | **Class**                | **Test**                                 | **What It Verifies**                                             |
 |--------------------------|-------------------------------------------|------------------------------------------------------------------|
 | `LoadFixtureDataTest`   | `test_superuser_exists`                  | Superuser (`pomobee`) created correctly                         |
-|                          | `test_farms_count`, `test_field_count`, `test_fruit_count`, `test_raw_count` | Correct number of entries from fixtures          |
-|                          | `test_specific_*`                        | Specific field, fruit, and raw content                         |
+|                          | `test_farms_count`, `test_field_count`, `test_fruit_count`, `test_row_count` | Correct number of entries from fixtures          |
+|                          | `test_specific_*`                        | Specific field, fruit, and row content                         |
 | `ModelTableExistenceTest`|  *[Various]*                             | Tables like `ImageHistory`, `HistoryEstimation` exist and work  |
-| `AutoHistoryCreationTest`| `test_history_raw_created_after_ml_result` | Auto-history creation via signal logic                          |
+| `AutoHistoryCreationTest`| `test_history_row_created_after_ml_result` | Auto-history creation via signal logic                          |
 
 ---
 
@@ -158,7 +158,7 @@ Performs a **complete system-level test** by executing real API calls (as the ap
 
 Make sure the following conditions are met before running the integration test script:
 
-- ✅ Fixtures are loaded (`manage.py loaddata`) so that fields, fruits, raws exist
+- ✅ Fixtures are loaded (`manage.py loaddata`) so that fields, fruits, rows exist
 - ✅ A test image exists at `media/images/orchard.jpg`
 - ✅ Django is running at `http://127.0.0.1:8000` so API calls work
 - ✅ The `/media/` URL is accessible for image serving

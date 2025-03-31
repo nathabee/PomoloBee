@@ -64,6 +64,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.play.services.awareness)
+    implementation(libs.protolite.well.known.types)
 
     // Testing
     testImplementation(libs.junit)
@@ -78,9 +80,16 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
+    // Coil for SVG support
+    implementation(libs.coil)
+    implementation(libs.coil.svg)
+
+    //interface json
+    implementation(libs.gson)
     // OpenCV
     implementation(libs.opencv)
 
@@ -91,6 +100,8 @@ dependencies {
     // Debugging
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+
 }
 
 

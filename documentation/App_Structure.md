@@ -13,7 +13,7 @@
     - [**3 `navigation/Screen.kt`**](#3-navigationscreenkt)
   - [**UI Manages UI Components Screens**](#ui-manages-ui-components-screens)
     - [**4 `ui/components/CameraView.kt`**](#4-uicomponentscameraviewkt)
-    - [**5 `ui/components/DrawerMenu.kt`**](#5-uicomponentsdrawermenukt)
+    - [**5 `ui/components/DrowerMenu.kt`**](#5-uicomponentsdrowermenukt)
   - [**UI Screens**](#ui-screens)
     - [**6 `ui/screens/HomeScreen.kt`**](#6-uiscreenshomescreenkt)
     - [**7 `ui/screens/CameraScreen.kt`**](#7-uiscreenscamerascreenkt)
@@ -55,7 +55,7 @@ Since **Jetpack Compose doesn't use Fragments**, we will replace the **"1 Activi
 - **1 Main Activity**
 - **1 NavHost (Handles screen navigation)**
 - **Multiple Composable Screens**
-- **A Drawer Menu (Navigation Drawer)**
+- **A Drower Menu (Navigation Drower)**
 
 ---
 
@@ -78,7 +78,7 @@ app/src/main/java
             ├── ui
             │   ├── components
             │   │   ├── CameraView.kt
-            │   │   ├── DrawerMenu.kt 
+            │   │   ├── DrowerMenu.kt 
             │   │   ├── ImageCard.kt               // reuse for preview + metadata
             │   │   ├── FolderPicker.kt            // used in SettingsScreen to change image path
             │   │   └── PermissionManager.kt
@@ -86,7 +86,7 @@ app/src/main/java
             │   │   ├── ProcessingScreen.kt        // for viewing & uploading images
             │   │   ├── ResultScreen.kt            // shows detection/yield after processing
             │   │   ├── OrchardScreen.kt           // read-only orchard visualisation
-            │   │   ├── LocationScreen.kt          // raw + field selection before save
+            │   │   ├── LocationScreen.kt          // row + field selection before save
             │   │   ├── AboutScreen.kt
             │   │   ├── CameraScreen.kt
             │   │   ├── ErrorLogScreen.kt
@@ -105,11 +105,11 @@ app/src/main/java
             ├── network
             │   ├── ApiClient.kt             // Retrofit builder
             │   ├── ImageApiService.kt       // For image-related endpoints
-            │   ├── OrchardApiService.kt     // For orchards, raws, fruits
+            │   ├── OrchardApiService.kt     // For orchards, rows, fruits
             │   └── ModelApiService.kt       // For ML model metadata: versioning, local/remote info
             ├── repository
             │   ├── ImageRepository.kt       // Handles all image-related data operations
-            │   ├── OrchardRepository.kt     // For fields, raws, fruits
+            │   ├── OrchardRepository.kt     // For fields, rows, fruits
             │   ├── SettingsRepository.kt    // Optional, for DataStore abstraction
             └── model/
                 ├── PendingImage.kt
@@ -137,7 +137,7 @@ app/src/main/java
 📌 **Key Responsibilities:**
 - Loads the main UI layout.
 - Initializes **Jetpack Compose Navigation** (`rememberNavController()`).
-- Handles the **drawer menu**.
+- Handles the **drower menu**.
 
 ---
 
@@ -200,9 +200,9 @@ CameraView(context = context, modifier = Modifier.fillMaxSize())
 
 ---
 
-### **5 `ui/components/DrawerMenu.kt`**
+### **5 `ui/components/DrowerMenu.kt`**
 📌 **Purpose:**  
-- **Creates the navigation drawer (sidebar menu)**.
+- **Creates the navigation drower (sidebar menu)**.
 
 📌 **Key Responsibilities:**
 - Displays a list of **navigation items (Home, Camera, Settings)**.
@@ -210,8 +210,8 @@ CameraView(context = context, modifier = Modifier.fillMaxSize())
 
 📌 **Example Usage in `MainActivity.kt`:**
 ```kotlin
-ModalNavigationDrawer(
-    drawerContent = { DrawerMenu(navController) }
+ModalNavigationDrower(
+    drowerContent = { DrowerMenu(navController) }
 )
 ```
 
@@ -270,11 +270,11 @@ scope.launch { UserPreferences.savePreference(context, "fruit_type", selectedfru
 ### **10 `ui/screens/PreviewScreen.kt`**
 📌 **Purpose:**  
 - Provides a UI for the user to preview the selected image **before saving** or **uploading**.
-- Allows re-selection or field/raw assignment before confirming.
+- Allows re-selection or field/row assignment before confirming.
 
 📌 **Key Responsibilities:**
 - Display full-screen preview of image.
-- Enable selection or change of field/raw if not yet set.
+- Enable selection or change of field/row if not yet set.
 - Buttons to "Save Locally" or "Discard Image".
 
 ---
@@ -296,7 +296,7 @@ scope.launch { UserPreferences.savePreference(context, "fruit_type", selectedfru
 📌 **Key Responsibilities:**
 - Fetch errors from `/logs/errors.json` stored in Jetpack DataStore.
 - Group logs by date or component.
-- Add a drawer entry if `DebugMode` is enabled.
+- Add a drower entry if `DebugMode` is enabled.
 
 ---
 
@@ -345,7 +345,7 @@ scope.launch { UserPreferences.savePreference(context, "fruit_type", selectedfru
 
 ### **17 `viewmodel/SharedViewModel.kt`**
 📌 **Purpose:**
-- Share image, field/raw selection, and temporary state across screens.
+- Share image, field/row selection, and temporary state across screens.
 
 📌 **Key Responsibilities:**
 - Store selected image URI and metadata before saving.
@@ -420,7 +420,7 @@ The models like ( PendingImage.kt or Orchard.kt) match the JSON models:
 data class PendingImage(
     val id: Int,
     val imagePath: String,
-    val rawId: Int,
+    val rowId: Int,
     val date: String
 )
 
@@ -452,7 +452,7 @@ Uses: `ImageApiService.kt` (Retrofit)
 ### **OrchardRepository.kt**
 Handles:
 - `getFields()`
-- `getRaws()`
+- `getRows()`
 - `getFruits()`
 
 Uses: `OrchardApiService.kt`
@@ -473,7 +473,7 @@ Wraps:
 |--------------|------------|
 | `MainActivity.kt` | **Entry point** of the app, initializes UI & navigation |
 | `navigation/` | **Manages screen navigation** with `NavGraph.kt` |
-| `ui/components/` | **Reusable UI elements (CameraView, Drawer Menu)** |
+| `ui/components/` | **Reusable UI elements (CameraView, Drower Menu)** |
 | `ui/screens/` | **Defines individual app screens** |
 | `ui/theme/` | **Defines UI styling (colors, typography, themes)** |
 | `data/` | **Stores user preferences (Jetpack DataStore)** |

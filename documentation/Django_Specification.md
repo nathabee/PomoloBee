@@ -29,8 +29,8 @@
 |------|--------------|--------|------|-----------|----------------------------|------------------|
 | 1️⃣ | `/api/images/` | POST | `ImageView.post()` | ✅ Creates `ImageHistory`<br>🖼️ Saves image to storage | 🔁 Sends image to ML (`/process-image/`) | ⏩ Step 2️⃣ |
 | 2️⃣ | `/api/images/<id>/ml_result/` | POST | `MLResultView.post()` | 🔄 Updates `ImageHistory`:<br>• `nb_fruit`, `confidence_score`, `processed = True` | 🧠 Triggers signal: `post_save(ImageHistory)` | ⏩ Step 3️⃣ |
-| 3️⃣ | *(Signal)* | — | `post_save` in `signals.py` | ✅ Creates:<br>• `HistoryRaw`<br>• `HistoryEstimation` | 💾 Saves estimation (calculated from raw & fruit) | ⏩ Step 4️⃣ |
-| 4️⃣ | `/api/estimations/<id>/` | GET | `EstimationView.get()` | ❌ No DB write | 📤 Returns `plant_fruit`, `plant_kg`, `raw_kg`, `confidence_score` | 🔚 Final user-visible result |
+| 3️⃣ | *(Signal)* | — | `post_save` in `signals.py` | ✅ Creates:<br>• `HistoryRow`<br>• `HistoryEstimation` | 💾 Saves estimation (calculated from row & fruit) | ⏩ Step 4️⃣ |
+| 4️⃣ | `/api/estimations/<id>/` | GET | `EstimationView.get()` | ❌ No DB write | 📤 Returns `plant_fruit`, `plant_kg`, `row_kg`, `confidence_score` | 🔚 Final user-visible result |
 | 5️⃣ | `/api/retry_processing/` | POST | `RetryProcessingView` | ❌ No DB write | 🔁 Re-sends existing image to ML | ⏩ Step 2️⃣ again |
 | 6️⃣ | `/api/images/<id>/` | DELETE | `ImageDeleteView` | 🗑 Deletes `ImageHistory`<br>🖼 Deletes file from storage | ⚠️ History data not deleted | 🔚 Clean-up |
 | 7️⃣ | `/api/images/<id>/status/` | GET | `ImageStatusView` | ❌ No DB write | 📤 Returns `processed: true/false` | 🔚 Polling mechanism |
@@ -48,7 +48,7 @@
 App POST /api/images/ 
 → Django creates ImageHistory & sends to ML 
 → ML POST /ml_result/ 
-→ Django updates ImageHistory & creates HistoryRaw/Estimation 
+→ Django updates ImageHistory & creates HistoryRow/Estimation 
 → App GET /estimations/<id> 
 → Displays results
 ```
@@ -77,13 +77,13 @@ def image_processed_handler(sender, instance, created, **kwargs):
 
 python manage.py shell
 ```python 
-from core.models import ImageHistory, Raw
-raw = Raw.objects.first()
-img = ImageHistory.objects.create(image_path="demo.jpg", raw=raw, processed=True)
+from core.models import ImageHistory, Row
+row = Row.objects.first()
+img = ImageHistory.objects.create(image_path="demo.jpg", row=row, processed=True)
 ```
 
 ### list of trigger
-post_save signal for ImageHistory| This will auto-trigger the creation of HistoryRaw and HistoryEstimation when ML results (processed=True) are saved.
+post_save signal for ImageHistory| This will auto-trigger the creation of HistoryRow and HistoryEstimation when ML results (processed=True) are saved.
 
 
 
@@ -100,10 +100,10 @@ post_save signal for ImageHistory| This will auto-trigger the creation of Histor
 | Description                                  | Django Model                  |
 |----------------------------------------------|-------------------------------|
 | Agricultural field                           | `Field(models.Model)`         |
-| Tree row (within a field)                    | `Raw(models.Model)`           |
-| Fruit type (linked to raw)                   | `Fruit(models.Model)`         |
+| Tree row (within a field)                    | `Row(models.Model)`           |
+| Fruit type (linked to row)                   | `Fruit(models.Model)`         |
 | Image storage for estimation analysis        | `ImageHistory(models.Model)`  |
-| History of raw analysis (processed results)  | `HistoryRaw(models.Model)`    |
+| History of row analysis (processed results)  | `HistoryRow(models.Model)`    |
 | Yield estimation summary                     | `HistoryEstimation(models.Model)` |
 | Farm owned by user                           | `Farm(models.Model)`       |
 
@@ -126,7 +126,7 @@ Although a `Farm` concept exists, the access by farm ID **is not implemented** o
 
 - Each **User** owns one or multiple **Farms**
 - Each **Farm** contains multiple **Fields**
-- Each **Field** contains multiple **Raws (tree rows)**
+- Each **Field** contains multiple **Rows (tree rows)**
 
 ---
 
@@ -134,8 +134,8 @@ Although a `Farm` concept exists, the access by farm ID **is not implemented** o
 
 | Operation                             | Permitted if...                                    |
 |---------------------------------------|----------------------------------------------------|
-| View fields / raws                    | Field belongs to a farm owned by the user          |
-| Upload image for raw                  | Raw belongs to user's farm                         |
-| View image or yield estimation result | Image is tied to a raw in one of the user’s farms  |
+| View fields / rows                    | Field belongs to a farm owned by the user          |
+| Upload image for row                  | Row belongs to user's farm                         |
+| View image or yield estimation result | Image is tied to a row in one of the user’s farms  |
 
 ---

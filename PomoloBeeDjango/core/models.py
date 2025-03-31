@@ -27,10 +27,10 @@ class Farm(models.Model):
 
 def svg_upload_path(instance, filename):
     # Save SVGs to media/svg/fields/<field_short_name>.svg
-    return f"svg/fields/{instance.short_name}_{filename}"
+    return f"fields/svg/{instance.short_name}_{filename}"
 
 def background_image_upload_path(instance, filename):
-    return f"images/backgrounds/{instance.short_name}_{filename}"
+    return f"fields/background/{instance.short_name}_{filename}"
 
 class Field(models.Model):
     farm = models.ForeignKey('Farm', on_delete=models.CASCADE, related_name='fields', default=1)
@@ -43,7 +43,7 @@ class Field(models.Model):
         upload_to=svg_upload_path,
         blank=True,
         null=True,
-        default='svg/fields/default_map.svg',
+        default='fields/svg/default_map.svg',
         help_text="Upload SVG map of the field layout."
     )
 
@@ -56,18 +56,18 @@ class Field(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.svg_map:
-            self.svg_map.name = 'svg/fields/default_map.svg'
+            self.svg_map.name = 'fields/svg/default_map.svg'
         super().save(*args, **kwargs)
 
 
 
-# Defines a Raw (a section in a field)
-class Raw(models.Model):
+# Defines a Row (a section in a field)
+class Row(models.Model):
     short_name = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=255)
-    nb_plant = models.IntegerField()  # Number of plants in the raw
-    fruit = models.ForeignKey('Fruit', on_delete=models.CASCADE, related_name='raws')
-    field = models.ForeignKey('Field', on_delete=models.CASCADE, related_name='raws')
+    nb_plant = models.IntegerField()  # Number of plants in the row
+    fruit = models.ForeignKey('Fruit', on_delete=models.CASCADE, related_name='rows')
+    field = models.ForeignKey('Field', on_delete=models.CASCADE, related_name='rows')
 
     def __str__(self):
         return self.name
@@ -81,7 +81,7 @@ class Image(models.Model):
         ("failed", "Failed"),
         ("badjpg", "Invalid Image"),
     ]
-    raw = models.ForeignKey('Raw', on_delete=models.CASCADE, related_name='images')
+    row = models.ForeignKey('Row', on_delete=models.CASCADE, related_name='images')
     date = models.DateField(null=True, blank=True)  # Date of capture (from app) (no time)
     upload_date =  models.DateField(null=True, blank=True)  # Date of upload in django (no time)
     image_file = models.ImageField(upload_to='images/')  # Stores uploaded image
@@ -99,18 +99,18 @@ class Image(models.Model):
     processed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"Image {self.id} - {self.raw.name if self.raw else 'No Raw'}"
+        return f"Image {self.id} - {self.row.name if self.row else 'No Row'}"
 
 
 # Estimation (Processed Data)
 class Estimation(models.Model):
     image = models.ForeignKey(Image, on_delete=models.SET_NULL, null=True, related_name='estimations')
-    raw = models.ForeignKey('Raw', on_delete=models.CASCADE, related_name='estimations')
+    row = models.ForeignKey('Row', on_delete=models.CASCADE, related_name='estimations')
     date = models.DateField()  # From user/app
     timestamp = models.DateTimeField(auto_now_add=True)
     plant_fruit = models.FloatField()
     plant_kg = models.FloatField()
-    raw_kg = models.FloatField()
+    row_kg = models.FloatField()
     estimated_yield_kg = models.FloatField()
     maturation_grade = models.FloatField(default=0)
     confidence_score = models.FloatField(null=True, blank=True)
@@ -127,10 +127,10 @@ class Estimation(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        if self.raw and self.raw.fruit:
-            self.plant_kg = self.plant_fruit * self.raw.fruit.fruit_avg_kg
-            self.raw_kg = self.plant_kg * self.raw.nb_plant
+        if self.row and self.row.fruit:
+            self.plant_kg = self.plant_fruit * self.row.fruit.fruit_avg_kg
+            self.row_kg = self.plant_kg * self.row.nb_plant
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Estimation {self.id} - {self.raw.name} on {self.date}"
+        return f"Estimation {self.id} - {self.row.name} on {self.date}"

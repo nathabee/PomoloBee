@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 import requests
 from rest_framework import status
-from core.models import Image,Farm, Field, Fruit, Raw,User
+from core.models import Image,Farm, Field, Fruit, Row,User
 from django.conf import settings
 
 class MLIntegrationTest(TestCase):
@@ -23,7 +23,7 @@ class MLIntegrationTest(TestCase):
             yield_start_date="2024-01-01", yield_end_date="2024-12-01",
             yield_avg_kg=2.5, fruit_avg_kg=0.3
         )
-        self.raw = Raw.objects.create(
+        self.row = Row.objects.create(
             short_name="R1", name="Row 1", nb_plant=30,
             field=self.field, fruit=self.fruit
 )
@@ -33,7 +33,7 @@ class MLIntegrationTest(TestCase):
         self.image = Image.objects.create(
             image_file="images/orchard.jpg",
             processed=False,
-            raw=self.raw,
+            row=self.row,
             date="2024-03-14"
         )
 

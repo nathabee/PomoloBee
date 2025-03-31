@@ -8,8 +8,8 @@
         "name": "ChampMaison",
         "description": "Champ situé sur la parcelle de la maison",
         "orientation": "NW",
-        "svg_map_url": "/media/svg/fields/C1_map.svg",
-        "background_image_url": null
+        "svg_map_url": "/media/fields/svg/C1_map.svg",
+        "background_image_url": "/media/fields/background/C1.jpeg"
       },
       {
         "field_id": 2,
@@ -17,7 +17,7 @@
         "name": "ChampSud",
         "description": "Champ situé au sud de la propriété, très ensoleillé.",
         "orientation": "S",
-        "svg_map_url": "/media/svg/fields/default_map.svg",
+        "svg_map_url": "/media/fields/svg/default_map.svg",
         "background_image_url": null
       },
       {
@@ -26,7 +26,7 @@
         "name": "VergerHaut",
         "description": "Verger en hauteur avec terre calcaire.",
         "orientation": "E",
-        "svg_map_url": "/media/svg/fields/default_map.svg",
+        "svg_map_url": "/media/fields/svg/default_map.svg",
         "background_image_url": null
       },
       {
@@ -35,7 +35,7 @@
         "name": "VergerBas",
         "description": "Verger en contrebas, plus humide.",
         "orientation": "W",
-        "svg_map_url": "/media/svg/fields/default_map.svg",
+        "svg_map_url": "/media/fields/svg/default_map.svg",
         "background_image_url": null
       },
       {
@@ -44,7 +44,7 @@
         "name": "PlaineOuest",
         "description": "Grande plaine à l'ouest, sol fertile.",
         "orientation": "W",
-        "svg_map_url": "/media/svg/fields/default_map.svg",
+        "svg_map_url": "/media/fields/svg/default_map.svg",
         "background_image_url": null
       },
       {
@@ -53,7 +53,7 @@
         "name": "TestZone",
         "description": "Petite parcelle expérimentale.",
         "orientation": "N",
-        "svg_map_url": "/media/svg/fields/default_map.svg",
+        "svg_map_url": "/media/fields/svg/default_map.svg",
         "background_image_url": null
       }
     ]

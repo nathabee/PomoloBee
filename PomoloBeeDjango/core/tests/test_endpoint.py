@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from django.contrib.auth.models import User
-from core.models import Field, Fruit, Raw, Farm, Image, Estimation
+from core.models import Field, Fruit, Row, Farm, Image, Estimation
 from django.core.files.uploadedfile import SimpleUploadedFile
 from io import BytesIO
 from PIL import Image as PILImage
@@ -24,7 +24,7 @@ class APITest(TestCase):
             yield_start_date="2024-08-01", yield_end_date="2024-09-01",
             yield_avg_kg=2.5, fruit_avg_kg=0.3
         )
-        self.raw = Raw.objects.create(
+        self.row = Row.objects.create(
             short_name="Row_A", name="Row A", nb_plant=50,
             fruit=self.fruit, field=self.field
         )
@@ -52,7 +52,7 @@ class APITest(TestCase):
 
         response = self.client.post(reverse("image-upload"), {
             "image": uploaded_file,
-            "raw_id": self.raw.id,
+            "row_id": self.row.id,
             "date": "2024-03-25"
         })
 
@@ -60,12 +60,12 @@ class APITest(TestCase):
         self.assertIn("image_id", response.json()["data"])
 
     def test_get_image_details(self):
-        image = Image.objects.create(raw=self.raw, date="2024-03-25")
+        image = Image.objects.create(row=self.row, date="2024-03-25")
         response = self.client.get(reverse("image-detail", args=[image.id]))
         self.assertEqual(response.status_code, 200)
 
     def test_delete_image(self):
-        image = Image.objects.create(raw=self.raw, date="2024-03-25")
+        image = Image.objects.create(row=self.row, date="2024-03-25")
         response = self.client.delete(reverse("image-delete", args=[image.id]))
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Image.objects.filter(id=image.id).exists())
@@ -80,7 +80,7 @@ class APITest(TestCase):
         # Upload via the API to simulate the real flow
         upload_response = self.client.post(reverse("image-upload"), {
             "image": uploaded_file,
-            "raw_id": self.raw.id,
+            "row_id": self.row.id,
             "date": "2024-03-25"
         })
 
@@ -96,27 +96,27 @@ class APITest(TestCase):
 
 
     def test_get_image_estimation(self):
-        image = Image.objects.create(raw=self.raw, date="2024-03-25", processed=True)
+        image = Image.objects.create(row=self.row, date="2024-03-25", processed=True)
         Estimation.objects.create(
-            image=image, raw=self.raw, date="2024-03-25",
-            plant_fruit=10, estimated_yield_kg=50, plant_kg=3.0, raw_kg=150.0,
+            image=image, row=self.row, date="2024-03-25",
+            plant_fruit=10, estimated_yield_kg=50, plant_kg=3.0, row_kg=150.0,
             confidence_score=0.9, source="MLI"
         )
         response = self.client.get(reverse("image-estimations", args=[image.id]))
         self.assertEqual(response.status_code, 200)
 
     def test_get_field_estimations(self):
-        image = Image.objects.create(raw=self.raw, date="2024-03-25", processed=True)
+        image = Image.objects.create(row=self.row, date="2024-03-25", processed=True)
         Estimation.objects.create(
-            image=image, raw=self.raw, date="2024-03-25",
-            plant_fruit=10, estimated_yield_kg=50, plant_kg=3.0, raw_kg=150.0,
+            image=image, row=self.row, date="2024-03-25",
+            plant_fruit=10, estimated_yield_kg=50, plant_kg=3.0, row_kg=150.0,
             confidence_score=0.9, source="MLI"
         )
         response = self.client.get(reverse("field-estimations", args=[self.field.id]))
         self.assertEqual(response.status_code, 200)
 
     def test_post_ml_result(self):
-        image = Image.objects.create(raw=self.raw, date="2024-03-25")
+        image = Image.objects.create(row=self.row, date="2024-03-25")
         response = self.client.post(
             reverse("ml-result", args=[image.id]),
             {
@@ -147,10 +147,10 @@ class RobustnessTest(TestCase):
             yield_start_date="2024-01-01", yield_end_date="2024-12-01",
             yield_avg_kg=3.0, fruit_avg_kg=0.4
         )
-        self.raw = Raw.objects.create(short_name="R1-A", name="R1-A", field=self.field, fruit=self.fruit, nb_plant=30)
+        self.row = Row.objects.create(short_name="R1-A", name="R1-A", field=self.field, fruit=self.fruit, nb_plant=30)
 
     def test_get_estimation_result_not_found(self):
-        image = Image.objects.create(raw=self.raw, date="2024-03-25", processed=False)
+        image = Image.objects.create(row=self.row, date="2024-03-25", processed=False)
         response = self.client.get(reverse("image-estimations", args=[image.id]))
         self.assertEqual(response.status_code, 404)
         error = response.json()["error"]

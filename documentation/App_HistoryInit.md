@@ -46,7 +46,7 @@ Since **Jetpack Compose replaces Fragments**, the project follows a **modern Com
 - **1 Main Activity (`MainActivity.kt`)**
 - **1 Navigation Host (`NavGraph.kt`)**
 - **Multiple Screens (`HomeScreen.kt`, `CameraScreen.kt`, `SettingsScreen.kt`)**
-- **Drawer Menu (`DrawerMenu.kt`) for easy navigation**  
+- **Drower Menu (`DrowerMenu.kt`) for easy navigation**  
 
 🔹 **Implement Jetpack Compose Navigation**  
 🔹 **Define `Screen.kt` (Sealed Class) to manage routes**  

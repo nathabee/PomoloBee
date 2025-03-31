@@ -55,10 +55,10 @@ graph TD
     FileSystem["🖼️ Image Storage"]
   end
  
-  MobileApp -- "📍 Fetch Available Fields & Raws" --> DjangoServer
-  DjangoServer -- "📄 Provide Field & Raw Data" --> MobileApp
+  MobileApp -- "📍 Fetch Available Fields & Rows" --> DjangoServer
+  DjangoServer -- "📄 Provide Field & Row Data" --> MobileApp
  
-  MobileApp -- "📤 Upload Image & Raw ID" --> DjangoServer
+  MobileApp -- "📤 Upload Image & Row ID" --> DjangoServer
   DjangoServer -- "📂 Save Image Metadata" --> Database
   DjangoServer -- "🖼️ Store Image" --> FileSystem
  
@@ -150,7 +150,7 @@ App retrieves ML version (get from ML by Django).
 |--------|----------|-------------|
 | `GET` | `/api/fields/` | List all fields |
 | `GET` | `/api/fruits/` | List all fruits |
-| `GET` | `/api/locations/` | All fields with raw rows |
+| `GET` | `/api/locations/` | All fields with row rows |
 
 ---
 
@@ -176,7 +176,7 @@ App retrieves ML version (get from ML by Django).
 
 ### App Requirements
 - Store image locally
-- Upload image and raw_id
+- Upload image and row_id
 - Poll and fetch estimation
 
 ### ML Model Requirements
@@ -185,7 +185,7 @@ App retrieves ML version (get from ML by Django).
 
 ### Django Requirements
 - Store and track image
-- Compute `plant_kg` and `raw_kg`
+- Compute `plant_kg` and `row_kg`
 - Serve estimation & orchard data
 
 ---
@@ -194,7 +194,7 @@ App retrieves ML version (get from ML by Django).
 
 - `plant_fruit = nb_fruit`
 - `plant_kg = plant_fruit * fruit_avg_kg`
-- `raw_kg = plant_kg * raw.nb_plant`
+- `row_kg = plant_kg * row.nb_plant`
 
 ---
 
@@ -204,7 +204,7 @@ App retrieves ML version (get from ML by Django).
 |------|----------|---------|
 | `GET` | `/api/fields/` | All fields |
 | `GET` | `/api/fruits/` | All fruits |
-| `GET` | `/api/locations/` | Fields + raws |
+| `GET` | `/api/locations/` | Fields + rows |
 | `GET` | `/api/fields/{field_id}/estimations/` | Estimations for a field ✅ |
 | `GET` | `/api/images/{image_id}/details` | Image metadata/status ✅ |
 | `DELETE` | `/api/images/{image_id}` | Delete Image from storage |
@@ -222,7 +222,7 @@ Let me know if you want this in **Markdown**, **OpenAPI**, or **Postman Collecti
 
 ### **App Requirements**
 ✅ Store static data locally for offline mode.  
-✅ Send an image and raw_id to Django for estimation.  
+✅ Send an image and row_id to Django for estimation.  
 
 ✅ Fetch results for past estimations.  
 ✅ Sync with Django when online.  
@@ -235,7 +235,7 @@ Let me know if you want this in **Markdown**, **OpenAPI**, or **Postman Collecti
 ### **Django Backend Requirements**
 ✅ Store the image on the server file system.  
 ✅ Create `Image` with image path + ML results.  
-✅ Calculate `plant_kg` and `raw_kg` before saving to `Estimation`.  
+✅ Calculate `plant_kg` and `row_kg` before saving to `Estimation`.  
 ✅ Provide API endpoints for the app to fetch data. 
 ✅ Store the image **on the local file system or a cloud storage solution (e.g., AWS S3, Google Cloud Storage)**.  
 
@@ -246,14 +246,14 @@ Let me know if you want this in **Markdown**, **OpenAPI**, or **Postman Collecti
 
 ### **How Yield is Estimated**
 1. **ML Model detects fruit in the image**  
-   - Frontend sends `image + raw ID + date` to Django.  
+   - Frontend sends `image + row ID + date` to Django.  
    - Django stores the image path in `Image`.  
    - ML analyzes the image and returns `nb_fruit` (number of fruit detected).  
 
 2. **Django calculates expected yield**  
    - **`plant_fruit = nb_fruit`** (ML-detected fruit per plant).  
    - **`plant_kg = plant_fruit * fruit_avg_kg`** (expected weight per plant).  
-   - **`raw_kg = plant_kg * raw.nb_plant`** (expected total weight for the raw).  
+   - **`row_kg = plant_kg * row.nb_plant`** (expected total weight for the row).  
 
 ---
  

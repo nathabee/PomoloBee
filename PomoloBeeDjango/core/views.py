@@ -36,9 +36,9 @@ class FruitViewSet(BaseReadOnlyViewSet):
 # ---------- LOCATION ----------
 class LocationListView(BaseAPIView):
     def get(self, request):
-        fields = Field.objects.prefetch_related('raws__fruit').all()
+        fields = Field.objects.prefetch_related('rows__fruit').all()
         if not fields.exists():
-            raise APIError("NO_DATA", "No field and raw data available.", status.HTTP_404_NOT_FOUND)
+            raise APIError("NO_DATA", "No field and row data available.", status.HTTP_404_NOT_FOUND)
         serializer = FieldLocationSerializer(fields, many=True, context={'request': request})
         return self.success({"locations": serializer.data})
 
@@ -81,14 +81,14 @@ class ImageView(BaseAPIView):
         serializer = ImageUploadSerializer(data=request.data)
         if serializer.is_valid():
             image_file = serializer.validated_data['image']
-            raw_id = serializer.validated_data['raw_id']
+            row_id = serializer.validated_data['row_id']
             date = serializer.validated_data['date']
             # Save original name (optional, for dedup or trace)
             original_filename = image_file.name
 
             existing = Image.objects.filter(
                 original_filename=original_filename,
-                raw_id=raw_id,
+                row_id=row_id,
                 date=date
             ).first()
 
@@ -104,7 +104,7 @@ class ImageView(BaseAPIView):
             # Create the Image record
             image = Image.objects.create(
                 image_file=file_path,
-                raw_id=raw_id,
+                row_id=row_id,
                 date=date,
                 upload_date=timezone.now().date(),
                 processed=False,
@@ -189,7 +189,7 @@ class MLVersionView(BaseAPIView):
 # ---------- ESTIMATION ----------
 class FieldEstimationListView(BaseAPIView):
     def get(self, request, field_id):
-        estimations = Estimation.objects.filter(raw__field_id=field_id).order_by('-timestamp')
+        estimations = Estimation.objects.filter(row__field_id=field_id).order_by('-timestamp')
         if not estimations.exists():
             raise APIError("404_NOT_FOUND", "No estimation found.", status.HTTP_404_NOT_FOUND)
         serializer = EstimationSerializer(estimations, many=True)
@@ -234,19 +234,19 @@ class MLResultView(BaseAPIView):
         logger.info(f"Triggering yield estimation for Image {image.id}")
 
         if not Estimation.objects.filter(image=image).exists():
-            raw = image.raw
-            fruit = raw.fruit
+            row = image.row
+            fruit = row.fruit
             plant_kg = nb_fruit * fruit.fruit_avg_kg
-            raw_kg = plant_kg * raw.nb_plant
+            row_kg = plant_kg * row.nb_plant
 
             Estimation.objects.create(
                 image=image,
                 date=image.date or timezone.now().date(),
-                raw=raw,
+                row=row,
                 plant_fruit=nb_fruit,
                 plant_kg=plant_kg,
-                raw_kg=raw_kg,
-                estimated_yield_kg=raw_kg,
+                row_kg=row_kg,
+                estimated_yield_kg=row_kg,
                 confidence_score=confidence_score or 0,
                 source='MLI'
             )

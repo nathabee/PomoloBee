@@ -7,6 +7,11 @@ This document defines the API interface for the Pomolobee project, specifying:
 
 🔗 All media asset paths (e.g., image_url, svg_map_url) are returned as relative paths. 
 The app or ML service must prepend its configured Django base URL.
+
+Example of Django json response (snapshots made during Django integration or non regression Test) :
+ 
+-  **API Example** [JSON example](/PomoloBeeDjango/tests/snapshots)
+
 ---
 
 <details>
@@ -16,9 +21,9 @@ The app or ML service must prepend its configured Django base URL.
 - [**App -> Django API Interface Definition**](#app-django-api-interface-definition)
   - [**Overview**](#overview)
   - [Section A Orchard Tree Data Fields Fruits Locations](#section-a-orchard-tree-data-fields-fruits-locations)
-    - [**Fetch All Fields Orchards**](#fetch-all-fields-orchards)
+    - [**Fetch All Fields Orchards** **OBSOLETE**](#fetch-all-fields-orchards-obsolete)
     - [**Fetch All Available Fruit Types**](#fetch-all-available-fruit-types)
-    - [**Fetch All Fields Their Raw Data Location Selection**](#fetch-all-fields-their-raw-data-location-selection)
+    - [**Fetch All Fields Their Row Data Location Selection**](#fetch-all-fields-their-row-data-location-selection)
   - [Section B Image Upload ML Processing](#section-b-image-upload-ml-processing)
     - [**Upload an Image for Processing**](#upload-an-image-for-processing)
     - [**Request Retry for ML Processing**](#request-retry-for-ml-processing)
@@ -52,7 +57,7 @@ The app or ML service must prepend its configured Django base URL.
 📌 **Purpose:** Sync orchard and tree data used for mapping & selection in the app.
  
 
-### **Fetch All Fields Orchards**
+### **Fetch All Fields Orchards** **OBSOLETE**
 📌 **Purpose:** Retrieve a list of all available agricultural fields.
 
 ✅ **Endpoint:**  
@@ -138,8 +143,8 @@ GET /api/fruits/
  
 --- 
 
-### **Fetch All Fields Their Raw Data Location Selection**
-📌 **Purpose:** Retrieve **all fields** and their respective **tree rows (Raws)** in a single request.
+### **Fetch All Fields Their Row Data Location Selection**
+📌 **Purpose:** Retrieve **all fields** and their respective **tree rows (Rows)** in a single request.
 
 ✅ **Endpoint:**  
 ```
@@ -155,47 +160,46 @@ GET /api/locations/
   "data": {
     "locations": [
       {
-        "field_id": 1,
-        "field_name": "North Orchard",
-        "orientation": "N",
-        "svg_map_url": "/media/svg/fields/C1_map.svg",
-        "background_image_url": "/media/images/C1_background.jpg",
-        "raws": [
+        "field": {
+          "field_id": 1,
+          "short_name": "C1",
+          "name": "ChampMaison",
+          "description": "Champ situé sur la parcelle de la maison",
+          "orientation": "NW",
+          "svg_map_url": "/media/fields/svg/C1_map.svg",
+          "background_image_url": "/media/fields/background/C1.jpeg"
+        },
+        "rows": [
           {
-            "raw_id": 101,
-            "short_name": "Row_A",
-            "name": "Row A",
-            "nb_plant": 50,
-            "fruit_id": 5,
-            "fruit_type": "Golden fruit"
+            "row_id": 1,
+            "short_name": "C1-R1",
+            "name": "Rang 1 cote maison Swing 1",
+            "nb_plant": 38,
+            "fruit_id": 1,
+            "fruit_type": "Cultivar Swing on CG1"
           },
           {
-            "raw_id": 102,
-            "short_name": "Row_B",
-            "name": "Row B",
+            "row_id": 2,
+            "short_name": "C1-R2",
+            "name": "Rang 2 cote maison Swing 2",
             "nb_plant": 40,
-            "fruit_id": 6,
-            "fruit_type": "Red fruit"
+            "fruit_id": 1,
+            "fruit_type": "Cultivar Swing on CG1"
           }
         ]
       },
       {
-        "field_id": 2,
-        "field_name": "South Orchard",
-        "orientation": "S",
-        "svg_map_url": "/media/svg/fields/default_map.svg",
-        "background_image_url": null,
-        "raws": [
-          {
-            "raw_id": 201,
-            "short_name": "Row_C",
-            "name": "Row C",
-            "nb_plant": 45,
-            "fruit_id": 7,
-            "fruit_type": "Green fruit"
-          }
-        ]
-      }
+        "field": {
+          "field_id": 2,
+          "short_name": "C2",
+          "name": "ChampSud",
+          "description": "Champ situé au sud de la propriété, très ensoleillé.",
+          "orientation": "S",
+          "svg_map_url": "/media/fields/svg/default_map.svg",
+          "background_image_url": null
+        },
+        "rows": []
+      } 
     ]
   }
 }
@@ -207,7 +211,7 @@ GET /api/locations/
  {
   "error": {
     "code": "404_NOT_FOUND",
-    "message": "No field and raw data available."
+    "message": "No field and row data available."
   }
 }
 ```
@@ -220,7 +224,7 @@ GET /api/locations/
 
 
 ### **Upload an Image for Processing**
-📌 **Purpose:** Upload an **image** and associate it with a **specific raw (tree row)** for fruit detection.
+📌 **Purpose:** Upload an **image** and associate it with a **specific row (tree row)** for fruit detection.
 
 ✅ **Endpoint:**  
 ```
@@ -233,7 +237,7 @@ POST /api/images/
 | **Parameter** | **Type** | **Required?** | **Description** |
 |--------------|---------|-------------|---------------|
 | `image` | `file` | ✅ Yes | The image file to be uploaded (JPEG/PNG). |
-| `raw_id` | `integer` | ✅ Yes | The **raw (tree row) ID** where the image was taken. |
+| `row_id` | `integer` | ✅ Yes | The **row (tree row) ID** where the image was taken. |
 | `date` | `string (YYYY-MM-DD)` | ✅ Yes | The date when the image was taken. |
 
 ✅ **Example Request:**
@@ -241,7 +245,7 @@ POST /api/images/
 curl -X POST "https://server.com/api/images/" \
 -H "Content-Type: multipart/form-data" \
 -F "image=@fruit_photo.jpg" \
--F "raw_id=3" \
+-F "row_id=3" \
 -F "date=2024-03-14"
 ```
 
@@ -262,7 +266,7 @@ curl -X POST "https://server.com/api/images/" \
 {
   "error": {
     "code": "MISSING_PARAMETER",
-    "message": "Image and raw_id are required."
+    "message": "Image and row_id are required."
   }
 }
 
@@ -396,7 +400,7 @@ GET /api/images/{image_id}/details
   "status": "success",
   "data": {
     "image_id": 24,
-    "raw_id": 3,
+    "row_id": 3,
     "date":  "2024-03-05",    
     "field_id": 1,
     "fruit_type": "Golden fruit",
@@ -421,7 +425,7 @@ GET /api/images/{image_id}/details
   "status": "success",
   "data": {
     "image_id": 24,
-    "raw_id": 3,
+    "row_id": 3,
     "date":  "2024-03-05",    
     "field_id": 1,
     "fruit_type": "Golden fruit",
@@ -441,7 +445,7 @@ GET /api/images/{image_id}/details
   "status": "success",
   "data": {
     "image_id": 24,
-    "raw_id": 3,
+    "row_id": 3,
     "date":  "2024-03-05",    
     "field_id": 1,
     "fruit_type": "Golden fruit",
@@ -495,13 +499,13 @@ GET /api/images/{image_id}/estimations/
     "image_id": 24,
     "field_id": 1,
     "field_name": "ChampMaison",
-    "raw_id": 3,
-    "raw_name": "C1-R3",
+    "row_id": 3,
+    "row_name": "C1-R3",
     "fruit_type": "Swing on CG1",
     "date": "2024-03-01",
     "plant_fruit": 12,
     "plant_kg": 2.4,
-    "raw_kg": 48.0,
+    "row_kg": 48.0,
     "estimated_yield_kg": 4000,
     "confidence_score": 0.85,
     "maturation_grade": 0.4,
@@ -546,13 +550,13 @@ GET /api/fields/{field_id}/estimations/
             "image_id": 24,
             "field_id": 1,
             "field_name": "ChampMaison",
-            "raw_id": 3,
-            "raw_name": "C1-R3",
+            "row_id": 3,
+            "row_name": "C1-R3",
             "fruit_type": "Swing on CG1",
             "date": "2024-03-01",
             "plant_fruit": 12,
             "plant_kg": 2.4,
-            "raw_kg": 48.0,
+            "row_kg": 48.0,
             "estimated_yield_kg": 4000,
             "confidence_score": 0.85,
             "maturation_grade": 0.4,
@@ -564,13 +568,13 @@ GET /api/fields/{field_id}/estimations/
             "image_id": 25,
             "field_id": 1,
             "field_name": "ChampMaison",
-            "raw_id": 4,
-            "raw_name": "C1-R4",
+            "row_id": 4,
+            "row_name": "C1-R4",
             "fruit_type": "Swing on CG1",
             "date": "2024-03-01",
             "plant_fruit": 10,
             "plant_kg": 2.0,
-            "raw_kg": 40.0, 
+            "row_kg": 40.0, 
             "estimated_yield_kg": 4000,
             "confidence_score": 0.85,
             "maturation_grade": 0.4,
@@ -666,13 +670,13 @@ GET /api/fields/{field_id}/estimations/
             "image_id": 24,
             "field_id": 1,
             "field_name": "ChampMaison",
-            "raw_id": 3,
-            "raw_name": "C1-R3",
+            "row_id": 3,
+            "row_name": "C1-R3",
             "fruit_type": "Swing on CG1",
             "date": "2024-03-01",
             "plant_fruit": 12,
             "plant_kg": 2.4,
-            "raw_kg": 48.0,
+            "row_kg": 48.0,
             "estimated_yield_kg": 4000,
             "confidence_score": 0.85,
             "maturation_grade": 0.4,
@@ -684,13 +688,13 @@ GET /api/fields/{field_id}/estimations/
             "image_id": 25,
             "field_id": 1,
             "field_name": "ChampMaison",
-            "raw_id": 4,
-            "raw_name": "C1-R4",
+            "row_id": 4,
+            "row_name": "C1-R4",
             "fruit_type": "Swing on CG1",
             "date": "2024-03-01",
             "plant_fruit": 10,
             "plant_kg": 2.0,
-            "raw_kg": 40.0, 
+            "row_kg": 40.0, 
             "estimated_yield_kg": 4000,
             "confidence_score": 0.85,
             "maturation_grade": 0.4,
@@ -740,13 +744,13 @@ GET /api/images/{image_id}/estimations
             "image_id": 25,
             "field_id": 1,
             "field_name": "ChampMaison",
-            "raw_id": 4,
-            "raw_name": "C1-R4",
+            "row_id": 4,
+            "row_name": "C1-R4",
             "fruit_type": "Swing on CG1",
             "date": "2024-03-01",
             "plant_fruit": 10,
             "plant_kg": 2.0,
-            "raw_kg": 40.0, 
+            "row_kg": 40.0, 
             "estimated_yield_kg": 4000,
             "confidence_score": 0.85,
             "maturation_grade": 0.4,
@@ -815,7 +819,7 @@ curl -X GET "https://server.com/api/images/24/details/"
 curl -X POST "https://server.com/api/images/" \
 -H "Content-Type: multipart/form-data" \
 -F "image=@fruit_photo.jpg" \
--F "raw_id=3" \
+-F "row_id=3" \
 -F "date=2024-03-14"
 ```
 

@@ -184,7 +184,7 @@ esac
 # 📸 STEP 1 — Upload Image
 echo ""
 echo "🖼️ Step 1: Uploading image"
-UPLOAD_RESPONSE=$(curl -s -F "image=@$IMAGE_PATH" -F "raw_id=1" -F "date=2024-03-14" "$API_URL/images/")
+UPLOAD_RESPONSE=$(curl -s -F "image=@$IMAGE_PATH" -F "row_id=1" -F "date=2024-03-14" "$API_URL/images/")
 
 # Try to parse JSON
 if echo "$UPLOAD_RESPONSE" | jq -e . >/dev/null 2>&1; then

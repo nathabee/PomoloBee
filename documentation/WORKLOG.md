@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _86 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _94 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -26,6 +26,8 @@
     - [Mars 28 2025](#mars-28-2025)
     - [Mars 29 2025](#mars-29-2025)
     - [Mars 30 2025](#mars-30-2025)
+  - [Week 4 Dates from Mars 31 to Avril 6 2025](#week-4-dates-from-mars-31-to-avril-6-2025)
+    - [Mars 24 2025](#mars-24-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -73,8 +75,8 @@ This document tracks the number of hours worked each day and provides a brief de
   - STEP 5: UI/UX Improvements [History App](App_HistoryInit.md)
   - STEP 6: include a App Theme and a special Font [History App](App_HistoryInit.md)
   - definition of UI and Screen in specification  [specification App](App_Specification.md)
-  - modification modele add raw in image  [specification API](API.md)
-  - correction django modele to support raw for image and foreign kew to field from raw  [Data model](Django_Specification.md)
+  - modification modele add row in image  [specification API](API.md)
+  - correction django modele to support row for image and foreign kew to field from row  [Data model](Django_Specification.md)
   - synchronised API with Workflow and DataModel   [specification API](API.md) 
 - **Theme**:  App Initialization 
 - **Progress**: Code compile need to be tested- UI not coded. Empty App
@@ -95,7 +97,7 @@ This document tracks the number of hours worked each day and provides a brief de
   - initialise empty PomoloBeeDjango with python venv, dotenv [Django HistoryInit](Django_HistoryInit.md)
   - creation postgreSQL database  [Django PostgresSQL](Django_PostgresSQL.md)
   - creation PomoloBeeDjango/core/models.py and admin.py
-  - initialisation raws fields fruits table  core/fixtures/initial_TABLEs.json and  python manage.py loaddata core/fixtures/initial_TABLE.json
+  - initialisation rows fields fruits table  core/fixtures/initial_TABLEs.json and  python manage.py loaddata core/fixtures/initial_TABLE.json
   - keep updating documentation to explain table creation and initialisation [Django HistoryInit](Django_HistoryInit.md)
 - **Theme**: Project Initialization 
 
@@ -184,7 +186,7 @@ This document tracks the number of hours worked each day and provides a brief de
 - **Tasks**:
   -  init Django_Specification.md base on Workflow. (merge Data Model inside)
   -  the Specification [Django](Django_Specification.md) show impact on database clearly to check endpoint test and validate implementation url and views 
-  - Auto-populate HistoryRaw after ML updates ImageHistory Needs post_save 
+  - Auto-populate HistoryRow after ML updates ImageHistory Needs post_save 
   -  pomoloBeeDjango/core/test/test_migration.py: added farm, superuser and empty tables. add test trigger save on history_image tested OK
   - ML flask add debug mode and config file 
   - ML flask add mok ML engine (detect fruit bypass,  guided return payload and code, still communicating with API and answering django)
@@ -211,7 +213,7 @@ This document tracks the number of hours worked each day and provides a brief de
 - **Hours Worked**: 6 hours
 - **Tasks**:
  - Renamed ImageHistory ➝ Image to centralize upload + ML results.
- - Merged HistoryRaw + HistoryEstimation ➝ single Estimation model.
+ - Merged HistoryRow + HistoryEstimation ➝ single Estimation model.
  - Removed signals, handled Estimation creation directly in view logic.
  - Cleaned API endpoints, renamed /images/ ➝ image-upload, etc.
  - Applied consistent API response format using BaseSuccessMixin.
@@ -261,6 +263,24 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
 
 
 
+---
+
+##  Week 4 Dates from Mars 31 to Avril 6 2025
+
+###  Mars 24 2025
+- **Hours Worked**: 8 hours
+- **Tasks**:
+  - some modification in App specification [specification API](API.md) and start deveoppement App
+  - Refactored and structured `MainActivity.kt` to handle permission and asset installation  
+  - Implemented `OrchardScreen` to visualize fields and rows from cached JSON  
+  - Created `SvgMapScreen` with dynamic field SVG loading from storage  
+  - Added dropdown logic and layout for `LocationScreen` with row selection  
+  - Integrated `UserPreferences` with DataStore for persistent settings  
+  - Started `SettingsScreen` with editable sync mode and API endpoints  
+  - Initialized `ConnectionRepository` for testing endpoint and syncing orchard data  
+- **Theme**: App developpement
+
+
 - **PENDING**
 
 rqiase error to fix in views.py:
@@ -283,13 +303,13 @@ Risk areas:
 
 Doesn't validate the type of nb_fruit, confidence_score, processed (could be string, not int/bool)
 
-Assumes image has a raw and raw.fruit → might be None if DB is misconfigured
+Assumes image has a row and row.fruit → might be None if DB is misconfigured
 
 📌 Fix:
 
 Add type checks (isinstance(nb_fruit, int) etc.)
 
-Validate image.raw and raw.fruit before accessing
+Validate image.row and row.fruit before accessing
 
 finish workflow test 
 - need to django startserver to acess media

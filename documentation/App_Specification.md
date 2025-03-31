@@ -40,7 +40,7 @@ Since **video processing is not in scope right now**, we will focus only on **im
     - [**Updated Wireframe**](#updated-wireframe)
   - [**`SettingsScreen`**](#settingsscreen)
     - [**Purpose**](#purpose)
-    - [**New Feature Test Connection**](#new-feature-test-connection)
+    - [**Test Connection**](#test-connection)
     - [**Wireframe**](#wireframe)
     - [API Calls](#api-calls)
   - [**`OrchardScreen`**](#orchardscreen)
@@ -49,19 +49,40 @@ Since **video processing is not in scope right now**, we will focus only on **im
   - [**ℹ️ `AboutScreen`**](#i-aboutscreen)
     - [**Purpose**](#purpose)
     - [**Updated Wireframe**](#updated-wireframe)
-- [Extra Storage navigation error management...](#extra-storage-navigation-error-management)
-  - [Architecture](#architecture)
-  - [**Offline Storage Data Handling**](#offline-storage-data-handling)
-    - [**simple storage model**](#simple-storage-model)
-  - [**Syncing Behavior**](#syncing-behavior)
-  - [**Navigation Fragment Flow in Android Studio**](#navigation-fragment-flow-in-android-studio)
-    - [**Navigation Diagram**](#navigation-diagram)
+- [️ App Architecture Storage Navigation Behavior](#app-architecture-storage-navigation-behavior)
+  - [️ **Architecture Overview**](#architecture-overview)
+  - [️ App File Tree in Android Storage](#app-file-tree-in-android-storage)
+    - [initilisation with example files](#initilisation-with-example-files)
+  - [On first launch to Copy assets to `/sdcard/PomoloBee/`](#on-first-launch-to-copy-assets-to-sdcardpomolobee)
+    - [Recommended structure to copy to](#recommended-structure-to-copy-to)
+  - [**Data Storage Strategy**](#data-storage-strategy)
+    - [Jetpack DataStore](#jetpack-datastore)
+    - [️ **Image Storage**](#image-storage)
+    - [**SVG Config File Handling**](#svg-config-file-handling)
+  - [Image Sync Behavior](#image-sync-behavior)
+  - [Navigation Events Edge Cases](#navigation-events-edge-cases)
+    - [Back Button Rules](#back-button-rules)
+  - [️ Expected Device Behavior](#expected-device-behavior)
+    - [Image Handling Strategy](#image-handling-strategy)
+    - [Required Permissions](#required-permissions)
+    - [Error Management](#error-management)
+  - [Debug Mode Stage 2](#debug-mode-stage-2)
+  - [Sample Data Model](#sample-data-model)
+  - [Orchard Config Sync Modes](#orchard-config-sync-modes)
+    - [Sync Modes](#sync-modes)
+    - [Config File Format](#config-file-format)
+    - [Config Storage Path](#config-storage-path)
+    - [Runtime Behavior](#runtime-behavior)
+    - [Sync Button Behavior](#sync-button-behavior)
+    - [️ Validation](#validation)
+  - [image sync](#image-sync)
+  - [**Navigation Events Edge Cases**](#navigation-events-edge-cases)
     - [**Expected Behavior for the Back Button**](#expected-behavior-for-the-back-button)
   - [**Expected Device Behavior**](#expected-device-behavior)
     - [**large images strategie**](#large-images-strategie)
     - [**permissions** needed for camera gallery and storage](#permissions-needed-for-camera-gallery-and-storage)
     - [Error management](#error-management)
-  - [Debug Mode Features](#debug-mode-features)
+  - [Debug Mode Features STADE 2](#debug-mode-features-stade-2)
   - [API Response Handling](#api-response-handling)
   - [What If...?](#what-if)
 <!-- TOC END -->
@@ -76,11 +97,11 @@ Since **video processing is not in scope right now**, we will focus only on **im
 ```mermaid
 graph TD  
   A[📷 CameraScreen] -->|User selects image| B[🖼️ Image Preview]
-  B -->|Select Field & Raw| L[📍 LocationScreen]
+  B -->|Select Field & Row| L[📍 LocationScreen]
   L -->|Select Field| L1[Field Selected]
-  L1 -->|Dropdown Raw| L2[Raw Selected from Dropdown]
-  L1 -->|Select from Image| M[🗺️ SvgMapScreen]
-  M -->|Tap Row & Confirm| L3[Raw Selected from SVG]
+  L1 -->|Dropdown Row| L2[Row Selected from Dropdown]
+  L1 -->|Select from Map| M[🗺️ SvgMapScreen]
+  M -->|Tap Row & Confirm| L3[Row Selected from SVG]
   L2 -->|Confirm| B1[✅ Location Confirmed]
   L3 -->|Confirm| B1
 
@@ -105,7 +126,7 @@ graph TD
 ---
 
 ## **Menu**
-- **CameraScreen** (Default)
+- **CameraScreen**
 - **ProcessingScreen**
 - **SettingsScreen**
 - **OrchardScreen**
@@ -114,7 +135,7 @@ graph TD
 ---
 
 ## **Explanation of Flow**
-once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fruits** manually.
+once :  **Users access `SettingsScreen`** to synchronize **fields, rows, and fruits** manually.
 
 1️⃣ **User starts in `CameraScreen`** and captures an image or selects from the gallery.  
 2️⃣ User taps **"Select Location"**, which opens `LocationScreen`.
@@ -122,15 +143,15 @@ once :  **Users access `SettingsScreen`** to synchronize **fields, raws, and fru
 3️⃣ In `LocationScreen`, the user:
 - Selects a **field** from a dropdown.
 - Then **either**:
-  - Selects a **raw from a dropdown**, or  
-  - Taps **"Select from Image"**, which opens `SvgMapScreen` to pick a raw visually.
+  - Selects a **row from a dropdown**, or  
+  - Taps **"Select from Image"**, which opens `SvgMapScreen` to pick a row visually.
 
 4️⃣ In `SvgMapScreen`, the field’s SVG layout is shown.  
-The user taps on a raw and confirms the selection, which returns to `LocationScreen`.  
-(Only one raw can be selected.)
+The user taps on a row and confirms the selection, which returns to `LocationScreen`.  
+(Only one row can be selected.)
 
-5️⃣ After selecting both field and raw, the user taps **"Confirm & Continue"**, returning to `CameraScreen`.  
-The app now shows the selected field and raw.
+5️⃣ After selecting both field and row, the user taps **"Confirm & Continue"**, returning to `CameraScreen`.  
+The app now shows the selected field and row.
 
 6️⃣ The image is saved **locally**, not uploaded immediately.
 
@@ -169,8 +190,8 @@ The app now shows the selected field and raw.
 | **📸 Take Picture Button** | `Button` | Opens camera to take a new picture. |
 | **🖼️ Upload from Gallery Button** | `Button` | Opens the gallery to select an existing image. |
 | **🖼️ Selected Image Preview** | `Image` | Displays the selected image. |
-| **📍 Select Location Button** | `Button` | Opens `LocationScreen` to select a **field & raw**. |
-| **📌 Selected Field & Raw Label** | `Text` | Displays the **selected field & raw name**. |
+| **📍 Select Location Button** | `Button` | Opens `LocationScreen` to select a **field & row**. |
+| **📌 Selected Field & Row Label** | `Text` | Displays the **selected field & row name**. |
 | **💾 Save Image Locally Button** | `Button` | Saves image & metadata in local storage instead of uploading. |
 | **📂 Storage Path Display** | `Text` | Shows where images are saved. (Configurable in Settings) |
 | **➡ Navigate to ProcessingScreen** | `Navigation` | Moves to `ProcessingScreen` to manage uploads. |
@@ -182,7 +203,7 @@ The app now shows the selected field and raw.
 |--------------------------------|
 |  🖼️ [Selected Image Preview]  |
 |--------------------------------|
-|  📍 Select Location: [🌱 Field] [🌿 Raw] |
+|  📍 Select Location: [🌱 Field] [🌿 Row] |
 |  Status: [❌ No Location Selected] |
 |--------------------------------|
 |  [💾 Save Image Locally]       |
@@ -193,6 +214,7 @@ The app now shows the selected field and raw.
 - **Triggered API Calls:**
   - **None**
 
+📌 After saving, image is listed in ProcessingScreen > Unsent Images.
 
 ---
 
@@ -200,31 +222,31 @@ The app now shows the selected field and raw.
 
 
 ### **Purpose**
-- Enable to select a location of the picture (raw) based on field and fruit description
+- Enable to select a location of the picture (row) based on field and fruit description
 
  
 ### **Main UI Elements**
 | **Element** | **Type** | **Description** |
 |------------|---------|----------------|
 | **🌱 Field Dropdown** | `Dropdown` | Lists fields are retrieved from storage. | 
-| **🌿 Raw Dropdown** | `Dropdown` | Lists all raws within the selected field retrieved from storage . |
-| **✅ select from image** | `Button` | open a sren that shows the selected field to select a raw instead of selecting from cmbobox `SvgMapScreen`. |
+| **🌿 Row Dropdown** | `Dropdown` | Lists all rows within the selected field retrieved from storage . |
+| **✅ select from map** | `Button` | open a sren that shows the selected field to select a row instead of selecting from cmbobox `SvgMapScreen`. |
 | **✅ Confirm Button** | `Button` | Saves selection & navigates back to `CameraScreen`. |
 
 ### **Updated Wireframe**
 ```
 +--------------------------------+
 |  🌱 Select Field: [Dropdown ▼] |
-|  🌿 Select Raw:   [Dropdown ▼] [select from image]|
+|  🌿 Select Row:   [Dropdown ▼] [select from map]|
 |--------------------------------|
 |  [✅ Confirm & Continue]       |
 +--------------------------------+
 ```
-🔹 **`select from image Button`**  
+🔹 **`select from map Button`**  
 - Ensures the user has **selected a field* before opening SvgMapScreen.
 
 🔹 **`Confirm & Continue Button`**  
-- Ensures the user has **selected both a field and a raw** before proceeding.
+- Ensures the user has **selected both a field and a row** before proceeding.
 
  
 
@@ -232,6 +254,8 @@ The app now shows the selected field and raw.
 **none**
 
  
+    
+- All field/row data shown in this screen is retrieved from `OrchardCache`.
 
 
 
@@ -243,7 +267,7 @@ The app now shows the selected field and raw.
 
 
 ### **Purpose**
-- Enable to select a location of the (raw) by selecting a Raw on a SVG field representation (field shown is the one selected before )
+- Enable to select a location of the (row) by selecting a Row on a SVG field representation (field shown is the one selected before )
 
  
 ### **Main UI Elements**
@@ -257,7 +281,7 @@ The app now shows the selected field and raw.
 +--------------------------------+
 +--------------------------------+
 |  🖼️ [SVG Field View]           |
-|  📍 Selected Raw: raw_4        |
+|  📍 Selected Row: row_4        |
 |--------------------------------|
 |  [✅ Confirm & Continue]       |
 +--------------------------------+
@@ -265,14 +289,24 @@ The app now shows the selected field and raw.
 ``` 
 
 🔹 **`Confirm & Continue Button`**  
-- Ensures the user has **selected a raw** before proceeding.
+- Ensures the user has **selected a row** before proceeding.
 
  
+🔹 ** `SvgMapScreen` logic**
+- When loading the field’s map, it gets the field’s `.svg_map_url` (e.g. `/media/svg/fields/C1_map.svg`)
+- You map that to:
+  ```kotlin
+  File("/sdcard/PomoloBee/media/svg/fields/C1_map.svg")
+  ```
+- If this file contains an `<image xlink:href="/media/svg/backgrounds/C1.jpeg" ... />`, you **do not change the href** — because the app will also look up:
+  ```kotlin
+  File("/sdcard/PomoloBee/media/svg/backgrounds/C1.jpeg")
+  ```
+
 
 - **Triggered API Calls:**
-**none**
-
- 
+**none**    
+- All field/row data shown in this screen is retrieved from `OrchardCache`.
 
 
 
@@ -306,8 +340,8 @@ The app now shows the selected field and raw.
 |  🔄 [Refresh Status]          |
 |--------------------------------|
 |  🚀 Unsent Images (Local)     |
-|  🖼️ Image 1   📌 [Raw]  📅 [Date]  🔍 Preview  📤 Analyze |
-|  🖼️ Image 2   📌 [Raw]  📅 [Date]  🔍 Preview  📤 Analyze |
+|  🖼️ Image 1   📌 [Row]  📅 [Date]  🔍 Preview  📤 Analyze |
+|  🖼️ Image 2   📌 [Row]  📅 [Date]  🔍 Preview  📤 Analyze |
 |--------------------------------|
 |  ✅ Uploaded Images (Backend) |
 |  🖼️ Image 3   📅 [Date]  ✅ Done |
@@ -392,7 +426,8 @@ The app now shows the selected field and raw.
 
 ### **Purpose**
 
-This screen must be used **at least once during the first app launch** to synchronize orchard data (fields, raws, fruits). Without this step, the app cannot assign location metadata to photos or perform yield estimations.
+This screen must be used at least once during the first app launch to initialize orchard data (fields, rows, fruits), either from the local configuration files or via the cloud API, depending on the selected mode. Without this step, the app cannot assign location metadata to photos or perform yield estimations.
+If config already exists from previous sync, this screen can be skipped on startup.
 
 This screen enables users to:
 
@@ -417,7 +452,7 @@ This screen enables users to:
 
 ---
 
-### **New Feature Test Connection**
+### **Test Connection**
 
 📌 The **Test Connection** button verifies both endpoints:
 
@@ -438,9 +473,15 @@ This screen enables users to:
 ### **Wireframe**
 ```
 +--------------------------------+
-|  🌱 Tree Count:     [______]   |
-|  📏 Row Length:     [______] m |
-|  🍏 Avg. Fruit Size: [______] g |
+|  🌱 Field Count:     [______]   |
+|  📏 Row Count :     [______]  |
+|  🍏 Fruit Type Count : [______]  |
+|--------------------------------|
+|  🌐  Sync Mode: [Cloud ⬇ / Local 📁]   |
+|  📂 Image Storage Path:        |
+|  /sdcard/PomoloBee/            |
+|  📂 Configuration Path:        |
+|  /sdcard/PomoloBee/config            |
 |--------------------------------|
 |  📂 API Endpoint:              |
 |  https://api.pomolobee.com     |
@@ -448,16 +489,13 @@ This screen enables users to:
 |  https://media.pomolobee.com   |
 |  [🔌 Test Connection] ✅        |
 |--------------------------------|
-|  📂 Image Storage Path:        |
-|  /sdcard/PomoloBee/            |
-|--------------------------------|
-|  [💾 Save Settings]            |
-|--------------------------------|
-|  🔄 Sync Orchard Data Now      |
-|  Pending Uploads: 3 Images     |
+|  [📥 Sync Orchard Data]         |
+|  Pending Uploads: 3 Images     | 
 |--------------------------------|
 |  Last Sync: 2025-03-30 10:00   |
 |  [🔄 Sync Now]                 |
+|--------------------------------| 
+|  [💾 Save Settings]            |
 +--------------------------------+
 
 ```
@@ -468,13 +506,18 @@ This screen enables users to:
 
 | Trigger | Endpoint | Purpose |
 |--------|----------|---------|
-| `🔄 Sync Orchard Data` | `GET /api/locations/` | Combined field + raw |
-|                        | `GET /api/fields/`    | Orchard details |
-|                        | `GET /api/fruits/`    | Fruit types |
+| `🔄 Sync Orchard Data` | `GET /api/locations/` or local | Combined field + row |
+|                        | `GET /api/fields/`  or local   | Orchard details |
+|                        | `GET /api/fruits/`  or local  | Fruit types |
+| `Sync Mode = Local` | _none_ | Load from local config JSON files |
+| `Sync Mode = Cloud` | `GET /api/fields/`, `GET /api/fruits/`, `GET /api/locations/` | Save JSONs locally |
 | `🔌 Test Connection` | `GET /api/ml/version/` | Verifies API endpoint |
 |                      | `HEAD /media/svg/fields/default_map.svg` | Verifies media access |
 | `🛠 Debug Mode`      | `GET /api/ml/version/` | Show model version |
 | `💾 Save`            | _none_ | Locally stores settings in DataStore |
+
+
+ 
 
 ---
  
@@ -483,9 +526,9 @@ This screen enables users to:
 ## **`OrchardScreen`**
 
 ### **Purpose**
-✔ Display all **fields (orchards)** and their respective **tree rows (raws)**  
+✔ Display all **fields (orchards)** and their respective **tree rows (rows)**  
 ✔ Allow users to **view structure, orientation, and fruit types**  
-✔ Acts as a **read-only orchard overview**, paving the way for future field/raw editing  
+✔ Acts as a **read-only orchard overview**, paving the way for future field/row editing  
  
 
 ---
@@ -508,17 +551,14 @@ This screen enables users to:
 +----------------------------------------+
 ```
  
-The "Visualize" button allows users to preview the layout of a field. Unlike the `LocationScreen`, raw selection is **optional** and no changes are applied.
+The "Visualize" button allows users to preview the layout of a field. Unlike the `LocationScreen`, row selection is **optional** and no changes are applied.
 ---
 
 - ✅ **API Calls (Read-Only):**
-  - `GET /api/locations/` (used to fetch fields and raws in a single request)
+  - in cloud the synchronisation is made in the settings from `GET /api/locations/` (used to fetch fields and rows in a single request)
 
-- ❌ **No Edit Capability Yet:**
-  - Future support for:
-    - `PATCH /api/fields/{field_id}/`
-    - `PATCH /api/raws/{raw_id}/`
 
+- All field/row data shown in this screen is retrieved from `OrchardCache`.
 ---
 
 ## **ℹ️ `AboutScreen`**
@@ -539,64 +579,352 @@ The "Visualize" button allows users to preview the layout of a field. Unlike the
 ```
 
 ---
- 
-# Extra Storage navigation error management...
- 
-## Architecture
-Android Studio
-Language : Kotlin
-Jetpack architecture with newest tipp (until end year 2024 minimum)
-composable, no XML
-theme.kt, system 
-policy : Gentium 
-KPS, (do not use kapt)
-display : Glide
-computing vision : openCV
+Here’s a fully updated and **streamlined version** of the **"Storage, Navigation & Error Handling"** section. It incorporates:
 
-
-
-## **Offline Storage Data Handling**
-  - we use **Jetpack DataStore** for offline image storage   
-  - Do not download an image in backend automatically with the backend when online. Allways wait for explicit synchronisation  
-  - add a buton in the setting to prevent using backend (setting data will be imported from file, and analyse will just be local)
+- Your current architecture decisions
+- Unified storage model
+- JSON + SVG caching
+- Local/Cloud logic
+- Proper renaming of `raw → row`
+- No redundancy
 
 ---
 
-### **simple storage model**
-```json
-{
-    "pending_images": [
-        {
-            "id": 1,
-            "image_path": "/sdcard/PomoloBee/image1.jpg",
-            "raw_id": 3,
-            "date": "2024-03-15"
-        }
-    ]
-}
+# ️ App Architecture Storage Navigation Behavior
+
+## ️ **Architecture Overview**
+
+| Aspect               | Technology                         |
+|----------------------|-------------------------------------|
+| Language             | Kotlin                              |
+| UI                   | Jetpack Compose (no XML)            |
+| State Management     | Jetpack ViewModel + DataStore       |
+| Theme                | Custom Material3 + Gentium font     |
+| Networking           | Retrofit                            |
+| Storage              | File I/O + Jetpack DataStore        |
+| Media Display        | Glide (for image), Coil (for SVG)   |
+| Computer Vision      | OpenCV (local ML inference)         |
+| Build System         | KSP (not KAPT)                      |
+| Target               | Android 12+ (minSdk 24, target 35)  |
+
+---
+
+## ️ App File Tree in Android Storage
+
+```
+/sdcard/PomoloBee/
+├── config/
+│   ├── fruits.json
+│   └── locations.json
+├── fields/
+│   ├── svg/
+│   │   ├── C1_map.svg
+│   │   └── default_map.svg
+│   └── background/
+│       └── C1.jpeg
+├── images/
+│   ├── pomolobee_001.jpg
+│   └── ...
+├── logs/
+│   └── errors.json
+└── results/
+    └── image_result_001.json
+
 ```
 
-  - images are stored :
-* as file paths in local storage
-* in the path of the settings (the path is changed using a picker, to be able to pick a folder on extern disk if necessary)
+These paths can be selected or changed in `SettingsScreen` via folder picker.
 
-  - After saving the image locally, use **MediaStore API** to add it to the gallery:
+### initilisation with example files
+
+## On first launch to Copy assets to `/sdcard/PomoloBee/`
+
+During initialization, you can check whether files exist in `/sdcard/PomoloBee/...`, and if not, copy from assets.
+
+### Recommended structure to copy to
+```plaintext
+/sdcard/PomoloBee/
+├── config/
+│   ├── fruits.json
+│   └── locations.json
+├── fields/
+│   ├── svg/
+│   │   ├── C1_map.svg
+│   │   └── default_map.svg
+│   └── background/
+│       └── C1.jpeg
+├── images/  
+├── logs/ 
+└── results/
+```
+
+| Step | What to do | Path / Code |
+|------|------------|-------------|
+| 📁 Package default files | Place in `assets/config/` and `assets/fields/` | `src/main/assets/...` |
+| 🧠 On app init | Check if `/sdcard/PomoloBee/` exists | Use `File.exists()` |
+| ✨ If missing | Copy from assets → SD card | See `copyAssetsIfNotExists()` above |
+| 🔄 Later sync | Cloud sync will replace/update local config files | Use your existing logic |
+
+---
+
+## **Data Storage Strategy**
+
+### Jetpack DataStore
+
+Used for **lightweight persistent key-value storage**:
+
+| Key                    | Type     | Description                             |
+|------------------------|----------|-----------------------------------------|
+| `sync_mode`            | String   | `"cloud"` or `"local"`                  |
+| `last_sync_date`       | Long     | Timestamp                               |
+| `nb_fields`            | Int      | Summary count from config               |
+| `nb_rows`              | Int      | Summary count from config               |
+| `nb_fruit_types`       | Int      | Summary count from config               |
+| `DJANGO_API_URL`       | String   | Custom backend endpoint (cloud mode)    |
+| `DJANGO_MEDIA_URL`     | String   | Custom media endpoint                   |
+| `image_storage_path`   | String   | Path to save photos                     |
+| `config_storage_path`  | String   | Path to JSON files                      |
+| `debug_mode_enabled`   | Boolean  | Enables mock/dummy/dev tools            |
+
+---
+
+### ️ **Image Storage**
+
+Saved in `/sdcard/PomoloBee/images/`, images are:
+
+- Compressed to max **1080p** resolution
+- Stored with unique filename (e.g., `pomolobee_1693080000000.jpg`)
+- Indexed via Jetpack DataStore for sync tracking
+
+After saving, they are also added to Android's media gallery via:
+
 ```kotlin
 val values = ContentValues().apply {
-    put(MediaStore.Images.Media.DISPLAY_NAME, "pomolobee_${System.currentTimeMillis()}.jpg")
+    put(MediaStore.Images.Media.DISPLAY_NAME, "pomolobee_${timestamp}.jpg")
     put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
     put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/PomoloBee")
 }
-
 val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
 ```
-- This ensures images are **immediately visible** in the gallery.
 
 ---
 
-   
-  
-## **Syncing Behavior**
+### **SVG Config File Handling**
+
+- SVGs linked to fields are downloaded (or manually placed) under `/config/svg/`
+- Config files (`fields.json`, `locations.json`, `fruits.json`) follow API structure
+- All config files are loaded into memory on startup (`OrchardCache`) for fast access
+
+---
+
+## Image Sync Behavior
+
+| Condition | Action |
+|----------|--------|
+| New image saved | Added to local list, shown in `ProcessingScreen` |
+| User taps “Analyze” | Image uploaded to backend |
+| Upload fails | Mark as **"Sync Failed"**, allow manual retry |
+| User deletes an image | If uploaded, delete via API too |
+| Sync only happens manually | No background or automatic sync |
+
+---
+
+## Navigation Events Edge Cases
+
+### Back Button Rules
+- From `LocationScreen` → go back to `CameraScreen` and restore previous field/row
+- From `ProcessingScreen` with unsent images → show confirmation:  
+  “⚠️ You have unsent images. Exit anyway?”
+- From `CameraScreen` without image saved → allow navigation freely
+
+---
+
+## ️ Expected Device Behavior
+
+### Image Handling Strategy
+
+| Strategy              | Value           |
+|-----------------------|-----------------|
+| Max Resolution        | 1920x1080 (1080p) |
+| Compression Format    | JPEG            |
+| Compression Quality   | ~80–90%         |
+
+### Required Permissions
+```xml
+<uses-permission android:name="android.permission.CAMERA"/>
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+But starting Android 10+ (API 29), you should also declare:
+ 
+<application
+    android:requestLegacyExternalStorage="true" ... >
+
+```
+---
+
+### Error Management
+
+- All API, file, and UI exceptions logged to `/logs/errors.json`
+- Show toast/snackbar or popup with details
+- Retry logic:
+  - 3 attempts
+  - Exponential backoff: 1s → 3s → 7s
+  - On final failure, mark sync as failed
+
+#### ️ Low Storage Check
+
+Before saving image:
+
+```kotlin
+val stat = StatFs(Environment.getExternalStorageDirectory().path)
+val bytesAvailable = stat.availableBytes
+if (bytesAvailable < 50 * 1024 * 1024) {
+    showStorageFullPopup()
+}
+```
+
+If storage is low, show a popup with:
+1. Free up space
+2. Change storage location
+3. Continue anyway (not recommended)
+
+---
+
+## Debug Mode Stage 2
+
+| Feature                       | Description |
+|-------------------------------|-------------|
+| Disable Backend Calls         | Run app entirely offline |
+| Use Local AI Model            | Bypass cloud ML |
+| Manually Enter ML Results     | Developer input for test |
+| View API Response Log         | Show last 10 network responses |
+
+---
+
+## Sample Data Model
+
+```json
+{
+  "pending_images": [
+    {
+      "id": 1,
+      "image_path": "/sdcard/PomoloBee/images/pomolobee_001.jpg",
+      "row_id": 3,
+      "date": "2024-03-15"
+    }
+  ]
+}
+```
+
+This reflects the indexed list of unsynced images. Results and metadata will be mirrored in `/results/` once processed.
+
+---   
+ 
+
+## Orchard Config Sync Modes
+
+This section consolidates all repeated explanations regarding orchard configuration, offline storage, and sync behavior. All other references should simply link to this section (e.g., “See *Orchard Config & Sync Modes*”).
+
+---
+
+### Sync Modes
+
+| Mode     | Description |
+|----------|-------------|
+| **Cloud** | Data is retrieved from the backend (`/api/fields`, `/api/locations`, `/api/fruits`) and saved as local JSON files. |
+| **Local** | Data is loaded from existing JSON config files located on the device (e.g., `/sdcard/PomoloBee/config/`). |
+
+Users select the sync mode in the **Settings screen**. Both modes generate or rely on the same local files, ensuring consistent internal logic.
+
+---
+
+### Config File Format
+
+Regardless of mode, the app uses the same local files (JSON) to cache orchard structure:
+
+| File              | Description                       |
+|-------------------|-----------------------------------|
+| `fields.json`     | List of orchard fields            |
+| `locations.json`  | Combined field + row structure    |
+| `fruits.json`     | List of available fruit types     |
+
+These files follow the exact same format as responses from the Django API.
+
+---
+
+### Config Storage Path
+
+All config files (local or downloaded) are stored in config, the svg that is repreenting the mal of the fields is stored in svg/fields and its associated background image if need is stored in media/svg/backgrounds.
+New Image of the rows will be stored in media images after being resized
+
+```
+/sdcard/PomoloBee/
+├── config/                      # all JSON config data
+│   ├── fruits.json
+│   ├── locations.json
+│   └── version.json             # optional - from `/api/ml/version/`
+├── media/                       # mimic Django’s media URLs
+│   ├── svg/
+│   │   ├── fields/
+│   │   │   ├── C1_map.svg
+│   │   │   └── default_map.svg
+│   │   └── backgrounds/
+│   │       ├── C1.jpeg
+│   │       └── ...
+│   └── images/                  # user-captured photos
+│       ├── pomolobee_001.jpg
+│       └── ...
+├── logs/
+│   └── errors.json
+└── results/
+    └── image_result_001.json
+
+```
+
+This path is selectable by the user in `SettingsScreen`. It should remain consistent across both sync modes.
+
+---
+### Runtime Behavior
+
+- On app startup, the app **loads the three config files** (`fields.json`, `locations.json`, `fruits.json`) into memory.
+- These are parsed into structured models and stored in a singleton memory-only object: `OrchardCache` (see below).
+- This in-memory cache enables **fast offline access** without repeated disk reads.
+- If files are **missing or unreadable**, the app prompts the user to **sync from the cloud** or **provide local config files** (based on sync mode).
+- If sync mode is **cloud but no internet**, the app **falls back to the last saved local config** (if available).
+- 🔁 **The cache is reloaded on every cold start. It is _not_ stored in Jetpack DataStore.**
+
+#### `OrchardCache` Runtime-Only
+
+```kotlin
+object OrchardCache {
+    var fields: List<Field> = emptyList()
+    var fruits: List<FruitType> = emptyList()
+    var locations: List<FieldWithRows> = emptyList()
+}
+```
+
+Used by `LocationScreen`, `OrchardScreen`, `SvgMapScreen`, and any logic needing fast access to field/row/fruit data.
+
+---
+
+### Sync Button Behavior
+
+| Mode    | Action triggered by `Sync Now` |
+|---------|--------------------------------|
+| **Cloud** | Fetches API data → writes to config directory |
+| **Local** | Prompts user to copy config files into the directory manually |
+
+---
+
+### ️ Validation
+
+After syncing (in either mode), the app:
+- Counts number of fields, rows, and fruit types.
+- Updates display in the `SettingsScreen` accordingly.
+- Saves summary data to Jetpack `DataStore`.
+ ---
+
+## image sync
 - the app attempt to sync unsent images Manually only  
 
 - If a user deletes an image :
@@ -610,33 +938,15 @@ if the image was sent, the delete image is forcing also delete in backend
 
 ---
 
-## **Navigation Fragment Flow in Android Studio**
+## **Navigation Events Edge Cases**
 
-
-### **Navigation Diagram**
-
-```mermaid 
-graph TD
-  A[CameraScreen] -->|Take Picture| B[Preview Image]
-  B -->|Select Location| C[LocationScreen]
-  C -->|Confirm| B
-  B -->|Save Locally| D[ProcessingScreen]
-  D -->|View Processed Images| E[ResultScreen]
-  D -->|Go Back| A
-
-- If `ProcessingScreen` contains unsent images, show:  
-  ❗ "_You have unsent images. Are you sure you want to exit?_"  
-  → "Yes, Exit"  
-  → "No, Stay on ProcessingScreen"
-
-
-```
+  
 
 ### **Expected Behavior for the Back Button**
 - If the user **hasn’t saved an image yet**, :  the back button is not cancelling the selection  
 - If the user **has pending unsent images**, there should be a **warning message** in the topbar
 - If the user **started but didn’t finish location selection**, pressing **Back** should:  
-  - Return to **CameraScreen** with the **last confirmed field & raw**.  
+  - Return to **CameraScreen** with the **last confirmed field & row**.  
   - **Show a toast message:** _"Location selection canceled. Using previous location."_  
 
 -
@@ -685,7 +995,7 @@ if (bytesAvailable < 50 * 1024 * 1024) { // Less than 50MB left
 
 
 ---
-## Debug Mode Features
+## Debug Mode Features STADE 2
 - ✅ **Enable/Disable Backend Calls** → Prevents all API calls.
 - ✅ **Use Local AI Model** → Bypasses backend ML model.
 - ✅ **Manually Enter Results** → User can input fake ML detection results for testing.

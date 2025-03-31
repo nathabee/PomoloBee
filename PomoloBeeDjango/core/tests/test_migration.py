@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from core.models import Image,  Estimation, Raw, Fruit, Field, Farm
+from core.models import Image,  Estimation, Row, Fruit, Field, Farm
 from datetime import date
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
@@ -13,7 +13,7 @@ class LoadFixtureDataTest(TestCase):
         "initial_farms.json",
         "initial_fields.json",
         "initial_fruits.json",
-        "initial_raws.json"
+        "initial_rows.json"
     ]
 
     def test_superuser_exists(self):
@@ -36,10 +36,10 @@ class LoadFixtureDataTest(TestCase):
         fruit_count = Fruit.objects.count()
         self.assertEqual(fruit_count, 6, "Expected 6 fruits in the database.")
 
-    def test_raw_count(self):
-        """Check if 28 raws are correctly loaded."""
-        raw_count = Raw.objects.count()
-        self.assertEqual(raw_count, 28, "Expected 28 raws in the database.")
+    def test_row_count(self):
+        """Check if 28 rows are correctly loaded."""
+        row_count = Row.objects.count()
+        self.assertEqual(row_count, 28, "Expected 28 rows in the database.")
 
     def test_specific_field_data(self):
         """Verify specific field data (ChampMaison - C1)."""
@@ -58,13 +58,13 @@ class LoadFixtureDataTest(TestCase):
         self.assertEqual(fruit.yield_avg_kg, 40.0)
         self.assertEqual(fruit.fruit_avg_kg, 0.2)
 
-    def test_specific_raw_data(self):
-        """Verify specific raw data (C1-R3)."""
-        raw = Raw.objects.get(short_name="C1-R3")
-        self.assertEqual(raw.name, "Rang 3 cote maison Swing 3")
-        self.assertEqual(raw.nb_plant, 40)
-        self.assertEqual(raw.field.id, 1)  # Foreign key to Field
-        self.assertEqual(raw.fruit.id, 1)  # Foreign key to Fruit
+    def test_specific_row_data(self):
+        """Verify specific row data (C1-R3)."""
+        row = Row.objects.get(short_name="C1-R3")
+        self.assertEqual(row.name, "Rang 3 cote maison Swing 3")
+        self.assertEqual(row.nb_plant, 40)
+        self.assertEqual(row.field.id, 1)  # Foreign key to Field
+        self.assertEqual(row.fruit.id, 1)  # Foreign key to Fruit
 
     def test_default_svg_map_applied_on_save(self):
         """Test that default SVG map path is applied when not set."""
@@ -106,8 +106,8 @@ class ModelTableExistenceTest(TestCase):
             fruit_avg_kg=0.3
         )
         
-        # Create Raw for test
-        self.raw = Raw.objects.create(
+        # Create Row for test
+        self.row = Row.objects.create(
             field=self.field,
             fruit=self.fruit,
             name="Row A",
@@ -126,20 +126,20 @@ class ModelTableExistenceTest(TestCase):
 
         img = Image.objects.create(
             image_file=fake_image,
-            raw=self.raw,
+            row=self.row,
             date=date.today()
         )
 
         self.assertEqual(Image.objects.count(), 1)
  
-    def test_estimation_computes_plant_and_raw_kg_on_save(self):
+    def test_estimation_computes_plant_and_row_kg_on_save(self):
         # Create a test image for linkage (optional, but model allows null)
-        image = Image.objects.create(image_file="test.jpg", raw=self.raw, date=date.today())
+        image = Image.objects.create(image_file="test.jpg", row=self.row, date=date.today())
 
-        # Create estimation with only raw, image, plant_fruit — the rest should be auto-calculated
+        # Create estimation with only row, image, plant_fruit — the rest should be auto-calculated
         estimation = Estimation.objects.create(
             image=image,
-            raw=self.raw,
+            row=self.row,
             date=date.today(),
             plant_fruit=12,  # 👈 Set fruit count per plant
             estimated_yield_kg=0,  # will override in save()
@@ -148,18 +148,18 @@ class ModelTableExistenceTest(TestCase):
             source=Estimation.EstimationSource.IMAGE
         )
 
-        fruit_avg_kg = self.raw.fruit.fruit_avg_kg
-        nb_plant = self.raw.nb_plant
+        fruit_avg_kg = self.row.fruit.fruit_avg_kg
+        nb_plant = self.row.nb_plant
 
         expected_plant_kg = 12 * fruit_avg_kg
-        expected_raw_kg = expected_plant_kg * nb_plant
+        expected_row_kg = expected_plant_kg * nb_plant
 
         self.assertAlmostEqual(estimation.plant_kg, expected_plant_kg, places=4)
-        self.assertAlmostEqual(estimation.raw_kg, expected_raw_kg, places=4)
+        self.assertAlmostEqual(estimation.row_kg, expected_row_kg, places=4)
         self.assertEqual(estimation.image, image)
-        self.assertEqual(estimation.raw, self.raw)
+        self.assertEqual(estimation.row, self.row)
         self.assertEqual(estimation.source, "MLI")
-        self.assertEqual(str(estimation), f"Estimation {estimation.id} - {self.raw.name} on {estimation.date}")
+        self.assertEqual(str(estimation), f"Estimation {estimation.id} - {self.row.name} on {estimation.date}")
 
 
 
@@ -189,19 +189,19 @@ class SchemaColumnCheckTest(TestCase):
             "yield_start_date", "yield_end_date", "yield_avg_kg", "fruit_avg_kg"
         })
 
-    def test_raw_model_columns(self):
-        self.assertColumnsExactly(Raw, {
+    def test_row_model_columns(self):
+        self.assertColumnsExactly(Row, {
             "id", "short_name", "name", "nb_plant", "fruit_id", "field_id"
         })
 
     def test_image_model_columns(self):
         self.assertColumnsExactly(Image, {
-            "id", "raw_id", "date", "upload_date", "image_file", "original_filename",
+            "id", "row_id", "date", "upload_date", "image_file", "original_filename",
             "nb_fruit", "confidence_score", "processed", "status", "processed_at"
         })
 
     def test_estimation_model_columns(self):
         self.assertColumnsExactly(Estimation, {
-            "id", "image_id", "raw_id", "date", "timestamp", "plant_fruit", "plant_kg",
-            "raw_kg", "estimated_yield_kg", "maturation_grade", "confidence_score", "source"
+            "id", "image_id", "row_id", "date", "timestamp", "plant_fruit", "plant_kg",
+            "row_kg", "estimated_yield_kg", "maturation_grade", "confidence_score", "source"
         })

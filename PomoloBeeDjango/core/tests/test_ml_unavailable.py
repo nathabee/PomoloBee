@@ -13,13 +13,13 @@ logger = logging.getLogger(__name__)
 class MLUnavailableIntegrationTest(TestCase):
     """Test fallback behavior when ML service is unavailable."""
     
-    # Load raw, field, farm, fruit, superuser data
+    # Load row, field, farm, fruit, superuser data
     fixtures = [
         "initial_superuser.json",
         "initial_farms.json",
         "initial_fields.json",
         "initial_fruits.json",
-        "initial_raws.json"
+        "initial_rows.json"
     ]
 
     #def setUp(self):
@@ -39,7 +39,7 @@ class MLUnavailableIntegrationTest(TestCase):
         self.assertEqual(data["error"]["code"], "ML_UNAVAILABLE")
 
     def test_retry_processing_when_ml_unavailable(self): 
-        img = Image.objects.create(image_file="test.jpg", raw_id=3, date="2024-03-14", processed=False)
+        img = Image.objects.create(image_file="test.jpg", row_id=3, date="2024-03-14", processed=False)
 
         response = self.client.post("/api/retry_processing/", {"image_id": img.id}, format="json")
         logger.debug("LOG - Upload response: %s %s", response.status_code, response.json())
@@ -50,7 +50,7 @@ class MLUnavailableIntegrationTest(TestCase):
         self.assertEqual(data["error"]["code"], "ML_UNAVAILABLE")
 
     def test_upload_image_when_ml_unavailable(self):
-        # This assumes raw_id=3 exists via fixtures
+        # This assumes row_id=3 exists via fixtures
         image_file = BytesIO()
         PILImage.new("RGB", (100, 100)).save(image_file, format="JPEG")
         image_file.seek(0)
@@ -64,7 +64,7 @@ class MLUnavailableIntegrationTest(TestCase):
             "/api/images/",
             data={
                 "image": image_file,
-                "raw_id": 3,
+                "row_id": 3,
                 "date": "2024-03-14"
             }
         )

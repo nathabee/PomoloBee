@@ -35,8 +35,8 @@ This document defines the API interface for the PomoloBee project, specifying:
 |-------------|---------------|-------------|------------------------|---------------------|
 | **Fetching Orchard Data** | `GET /api/fields/` | Fetch all available fields | App → Django | SettingsScreen (🔄 Sync) |
 |  | `GET /api/fruits/` | Fetch all fruit types | App → Django | SettingsScreen |
-|  | `GET /api/locations/` | Fetch fields + tree rows (raws) for offline storage | App → Django | SettingsScreen |
-| **Image Upload & Polling** | `POST /api/images/` | Upload image + metadata (`raw_id`, `date`) | App → Django | ProcessingScreen (📤 Analyze) |
+|  | `GET /api/locations/` | Fetch fields + tree rows (rows) for offline storage | App → Django | SettingsScreen |
+| **Image Upload & Polling** | `POST /api/images/` | Upload image + metadata (`row_id`, `date`) | App → Django | ProcessingScreen (📤 Analyze) |
 |  | `GET /api/images/{image_id}/details` | Retrieve image metadata + processing status | App → Django | ProcessingScreen (polling) |
 |  | `POST /api/retry_processing/` | Retry ML if previous attempt failed | App → Django | ProcessingScreen (🔁 Retry) |
 |  | `DELETE /api/images/{image_id}` | Remove an image from storage | App → Django | ProcessingScreen (delete) |
@@ -112,14 +112,14 @@ To ensure clarity, consistency, and compatibility across the **PomoloBee ecosyst
 |------|------------|
 | Encoding | UTF-8 |
 | Key Naming | `snake_case` |
-| Identifiers | `image_id`, `field_id`, `raw_id` |
+| Identifiers | `image_id`, `field_id`, `row_id` |
 | Booleans | `true` / `false` |
 | Dates | ISO 8601: `YYYY-MM-DD` |
 | Timestamps | ISO 8601: `YYYY-MM-DDTHH:MM:SS` |
 | Reserved Keys | Avoid `id`, `type`, `object`, `meta`, `links` unless defined |
 
 
-**Never expose raw `id` fields** — always use explicit identifiers like `image_id`.
+**Never expose row `id` fields** — always use explicit identifiers like `image_id`.
 ---
 
 ### Response Structure Success

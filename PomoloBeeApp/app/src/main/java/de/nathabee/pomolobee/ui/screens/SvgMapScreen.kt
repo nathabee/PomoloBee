@@ -1,34 +1,54 @@
-/**
- * SVG MAP SCREEN  
- *
- * Description:
- * Displays an SVG field map for the selected field. Users can tap a row to auto-select it.
- *
- * Inputs:
- * - Field ID
- * - Path to the SVG asset for this field
- *
- * Outputs:
- * - Raw ID selected by the user, sent back to OrchardSelectionScreen
- *
- * Tech Considerations:
- * - Use a library like AndroidSVG or Coil for SVG rendering
- * - Support touch/tap interaction to identify selected element (use 'id' or 'title' tags in SVG)
- *
- * UX Considerations:
- * - Back button to return to selection screen
- * - Highlight selected row visually
- */
+package de.nathabee.pomolobee.ui.screens
+
+import android.widget.ImageView
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import coil.load
+import de.nathabee.pomolobee.model.Location
+import java.io.File
+
+
+fun getSvgFileFromUrl(svgMapUrl: String?): File {
+    val filename = svgMapUrl?.substringAfterLast("/") ?: "default_map.svg"
+    return File("/sdcard/PomoloBee/fields/svg", filename)
+}
+
+
+fun getBackgroundFileFromUrl(backgroundUrl: String?): File? {
+    if (backgroundUrl == null) return null
+    val filename = backgroundUrl.substringAfterLast("/")
+    return File("/sdcard/PomoloBee/fields/background", filename)
+}
 
 
 @Composable
 fun SvgMapScreen(
-    svgResId: Int,
+    location: Location,
     onRawSelected: (String) -> Unit,
     onBack: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Tap on the row to select it", style = MaterialTheme.typography.titleMedium)
+    val svgFile = getSvgFileFromUrl(location.field.svgMapUrl)
+    if (!svgFile.exists()) {
+        // fallback to default
+        File("/sdcard/PomoloBee/fields/svg/default_map.svg")
+    }
+
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Tap on a row in: ${location.field.name}",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         AndroidView(
             modifier = Modifier
@@ -37,16 +57,16 @@ fun SvgMapScreen(
             factory = { context ->
                 val svgView = ImageView(context)
 
-                // Load SVG using Coil
-                svgView.load(svgResId) {
+                svgView.load(svgFile) {
                     crossfade(true)
                     placeholder(android.R.drawable.ic_menu_gallery)
+                    error(android.R.drawable.ic_delete)
                 }
 
-                // TODO: Add actual hit detection on SVG regions (e.g., with AndroidSVG)
+                // TODO: Real row detection logic with touch on SVG paths
                 svgView.setOnClickListener {
-                    // For demo: assume "raw_4" was clicked
-                    onRawSelected("raw_4")
+                    // Simulated for now
+                    onRawSelected("row_4")
                 }
 
                 svgView
@@ -54,7 +74,8 @@ fun SvgMapScreen(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { onBack() }) {
+
+        Button(onClick = onBack) {
             Text("Back")
         }
     }

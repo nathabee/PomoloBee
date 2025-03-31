@@ -1,14 +1,31 @@
 from rest_framework import serializers
-from .models import Field, Fruit, Raw, Image, Estimation
+from .models import Field, Fruit, Row, Image, Estimation
 
 
-# FIELD
-#class FieldSerializer(serializers.ModelSerializer):
-#    field_id = serializers.IntegerField(source='id', read_only=True)
+ 
+# FRUIT
+class FruitSerializer(serializers.ModelSerializer):
+    fruit_id = serializers.IntegerField(source='id', read_only=True)
 
-#    class Meta:
-#        model = Field
-#        fields = ['field_id', 'short_name', 'name', 'description', 'orientation']
+    class Meta:
+        model = Fruit
+        fields = [
+            'fruit_id', 'short_name', 'name', 'description',
+            'yield_start_date', 'yield_end_date',
+            'yield_avg_kg', 'fruit_avg_kg'
+        ]
+
+
+# RAW
+class RowSerializer(serializers.ModelSerializer):
+    row_id = serializers.IntegerField(source='id', read_only=True)
+    fruit_id = serializers.IntegerField(source='fruit.id', read_only=True)
+    fruit_type = serializers.CharField(source='fruit.name', read_only=True)
+
+    class Meta:
+        model = Row
+        fields = ['row_id', 'short_name', 'name', 'nb_plant', 'fruit_id', 'fruit_type']
+
 
 
 class FieldSerializer(serializers.ModelSerializer):
@@ -32,61 +49,17 @@ class FieldSerializer(serializers.ModelSerializer):
         fields = ['field_id', 'short_name','name',  'description', 'orientation', 'svg_map_url', 'background_image_url']
 
 
-# FRUIT
-class FruitSerializer(serializers.ModelSerializer):
-    fruit_id = serializers.IntegerField(source='id', read_only=True)
-
-    class Meta:
-        model = Fruit
-        fields = [
-            'fruit_id', 'short_name', 'name', 'description',
-            'yield_start_date', 'yield_end_date',
-            'yield_avg_kg', 'fruit_avg_kg'
-        ]
-
-
-# RAW
-class RawSerializer(serializers.ModelSerializer):
-    raw_id = serializers.IntegerField(source='id', read_only=True)
-    fruit_id = serializers.IntegerField(source='fruit.id', read_only=True)
-    fruit_type = serializers.CharField(source='fruit.name', read_only=True)
-
-    class Meta:
-        model = Raw
-        fields = ['raw_id', 'short_name', 'name', 'nb_plant', 'fruit_id', 'fruit_type']
-
-
 # FIELD + NESTED RAWS
 class FieldLocationSerializer(serializers.ModelSerializer):
-    field_id = serializers.IntegerField(source='id', read_only=True)
-    field_name = serializers.CharField(source='name', read_only=True)
-    svg_map_url = serializers.SerializerMethodField()
-    background_image_url = serializers.SerializerMethodField()
-    raws = RawSerializer(many=True, read_only=True)
+    field = serializers.SerializerMethodField()
+    rows = RowSerializer(many=True, read_only=True)
 
+    def get_field(self, obj):
+        return FieldSerializer(obj).data
 
-    def get_svg_map_url(self, obj):
-        if obj.svg_map:
-            return obj.svg_map.url  # ✅ Always relative
-        return None
-
-    def get_background_image_url(self, obj):
-        if hasattr(obj, 'background_image') and obj.background_image:
-            return obj.background_image.url  # ✅ Always relative
-        return None
-
-
-    
     class Meta:
         model = Field
-        fields = [
-            'field_id',
-            'field_name',
-            'orientation',
-            'svg_map_url',
-            'background_image_url',
-            'raws'
-        ]
+        fields = ['field', 'rows']
 
  
 
@@ -94,9 +67,9 @@ class FieldLocationSerializer(serializers.ModelSerializer):
 
 class ImageSerializer(serializers.ModelSerializer):
     image_id = serializers.IntegerField(source='id', read_only=True)
-    raw_id = serializers.IntegerField(source='raw.id', read_only=True)
-    field_id = serializers.IntegerField(source='raw.field.id', read_only=True)
-    fruit_type = serializers.CharField(source='raw.fruit.name', read_only=True)
+    row_id = serializers.IntegerField(source='row.id', read_only=True)
+    field_id = serializers.IntegerField(source='row.field.id', read_only=True)
+    fruit_type = serializers.CharField(source='row.fruit.name', read_only=True)
     image_url = serializers.SerializerMethodField()
     status = serializers.CharField(source='get_status_display', read_only=True)  # 🧠 This is the key line
 
@@ -116,7 +89,7 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = [
-            'image_id', 'raw_id', 'field_id', 'fruit_type',
+            'image_id', 'row_id', 'field_id', 'fruit_type',
             'upload_date', 'date', 'image_url', 'original_filename',
             'processed', 'processed_at', 'nb_fruit', 'confidence_score', 'status'
         ]
@@ -127,18 +100,18 @@ class ImageSerializer(serializers.ModelSerializer):
 # UPLOAD IMAGE
 class ImageUploadSerializer(serializers.Serializer):
     image = serializers.ImageField()
-    raw_id = serializers.IntegerField()
+    row_id = serializers.IntegerField()
     date = serializers.DateField()
 
 
 # ESTIMATION (History)
 class EstimationSerializer(serializers.ModelSerializer):
     estimation_id = serializers.IntegerField(source='id', read_only=True)
-    raw_id = serializers.IntegerField(source='raw.id', read_only=True)
-    raw_name = serializers.CharField(source='raw.name', read_only=True)
-    field_id = serializers.IntegerField(source='raw.field.id', read_only=True)
-    field_name = serializers.CharField(source='raw.field.name', read_only=True)
-    fruit_type = serializers.CharField(source='raw.fruit.name', read_only=True)
+    row_id = serializers.IntegerField(source='row.id', read_only=True)
+    row_name = serializers.CharField(source='row.name', read_only=True)
+    field_id = serializers.IntegerField(source='row.field.id', read_only=True)
+    field_name = serializers.CharField(source='row.field.name', read_only=True)
+    fruit_type = serializers.CharField(source='row.fruit.name', read_only=True)
     image_id = serializers.IntegerField(source='image.id', read_only=True)
     confidence_score = serializers.FloatField()
     source = serializers.CharField(source='get_source_display', read_only=True)
@@ -155,8 +128,8 @@ class EstimationSerializer(serializers.ModelSerializer):
         model = Estimation
         fields = [
             'estimation_id', 'image_id', 'date', 'timestamp',
-            'raw_id', 'raw_name', 'field_id', 'field_name', 'fruit_type',
-            'plant_fruit', 'plant_kg', 'raw_kg', 'estimated_yield_kg',
+            'row_id', 'row_name', 'field_id', 'field_name', 'fruit_type',
+            'plant_fruit', 'plant_kg', 'row_kg', 'estimated_yield_kg',
             'maturation_grade', 'confidence_score', 'source', 'status'
         ]
 

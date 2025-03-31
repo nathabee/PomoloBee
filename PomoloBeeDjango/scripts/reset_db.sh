@@ -49,6 +49,6 @@ echo "🌱 Loading initial data..."
 python manage.py loaddata core/fixtures/initial_farms.json
 python manage.py loaddata core/fixtures/initial_fields.json
 python manage.py loaddata core/fixtures/initial_fruits.json
-python manage.py loaddata core/fixtures/initial_raws.json
+python manage.py loaddata core/fixtures/initial_rows.json
 
 echo "✅ PomoloBee DB fully reset & initialized."
