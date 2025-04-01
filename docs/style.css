@@ -231,6 +231,17 @@ label {
   line-height: 1.5;
 }
 
+
+.checklist h2::after,
+.checklist h3::after {
+  background-color: #ffe500;
+  color: #000;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  margin-top: 2rem;
+}
+
+
 .checklist-item {
   margin-bottom: 1.5rem;
   border-bottom: 1px dashed #ddd;
