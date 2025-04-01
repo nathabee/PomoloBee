@@ -16,12 +16,12 @@
         <img src="PomoloBee.svg" alt="PomoloBee Logo" class="logo">
         <h1>PomoloBee Project</h1>
       </div>
-    
+
       <div class="translate-box">
         🌐 Translate: <span id="google_translate_element"></span>
       </div>
     </div>
-    
+
     <script type="text/javascript">
       function googleTranslateElementInit() {
         new google.translate.TranslateElement(
@@ -30,8 +30,9 @@
         );
       }
     </script>
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    
+    <script type="text/javascript"
+      src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 
 
 
@@ -39,43 +40,70 @@
       🔗 View the full source code and documentation on
       <a href="https://github.com/nathabee/PomoloBee" target="_blank">GitHub Repository</a>
     </p>
- 
+
     <h2>📚 Project Documentation</h2>
-    <ul class="doc-list">
-      <li><strong>🧭 Overview</strong></li>
-      <li><a href="Requirements.md">Requirements.md</a></li>
-      <li><a href="Workflow.md">Workflow.md</a></li>
+    <div class="doc-list">
     
-      <li><strong>🔌 API Overviews</strong></li>
-      <li><a href="API.md">API.md</a></li>
-      <li><a href="API_1_App_to_Django.md">API_1_App_to_Django.md</a></li>
-      <li><a href="API_2_Django_to_ML.md">API_2_Django_to_ML.md</a></li>
-      <li><a href="API_3_ML_to_Django.md">API_3_ML_to_Django.md</a></li>
+      <details open>
+        <summary><strong>🧭 Overview</strong></summary>
+        <ul>
+          <li><a href="Presentation.md">Project Presentation</a></li>
+          <li><a href="Requirements.md">Requirements</a></li>
+          <li><a href="Workflow.md">Workflow</a></li>
+        </ul>
+      </details>
     
-      <li><strong>📱 App Specification</strong></li>
-      <li><a href="App_Specification.md">App_Specification.md</a></li>
-      <li><a href="App_Structure.md">App_Structure.md</a></li>
-      <li><a href="App_Test.md">App_Test.md</a></li>
-      <li><a href="App_Test_ReportTemplate.md">App_Test_ReportTemplate.md</a></li>
+      <details>
+        <summary><strong>🔌 API Overviews</strong></summary>
+        <ul>
+          <li><a href="API.md">List of all APIs</a></li>
+          <li><a href="API_1_App_to_Django.md">API App to Django</a></li>
+          <li><a href="API_2_Django_to_ML.md">API Django to ML</a></li>
+          <li><a href="API_3_ML_to_Django.md">API ML to Django</a></li>
+        </ul>
+      </details>
     
-      <li><strong>🌐 Django</strong></li>
-      <li><a href="Django_PostgreSQL.md">Django_PostgreSQL.md</a></li>
-      <li><a href="Django_Specification.md">Django_Specification.md</a></li>
-      <li><a href="Django_Test.md">Django_Test.md</a></li>
+      <details>
+        <summary><strong>📱 App Specification</strong></summary>
+        <ul>
+          <li><a href="App_Specification.md">Specification</a></li>
+          <li><a href="App_Structure.md">Structure</a></li>
+          <li><a href="App_Test.md">Test</a></li>
+          <li><a href="App_Test_ReportTemplate.md">Report Template</a></li>
+        </ul>
+      </details>
     
-      <li><strong>🧠 Machine Learning</strong></li>
-      <li><a href="ML_Specification.md">ML_Specification.md</a></li>
-      <li><a href="ML_Test.md">ML_Test.md</a></li>
-      <li><a href="ML_Training_Notebook.md">ML_Training_Notebook.md</a></li>
+      <details>
+        <summary><strong>🌐 Django Backend</strong></summary>
+        <ul>
+          <li><a href="Django_Specification.md">Specification</a></li>
+          <li><a href="Django_Test.md">Test</a></li>
+          <li><a href="Django_PostgreSQL.md">PostgreSQL</a></li>
+        </ul>
+      </details>
     
-      <li><strong>📓 Work Diary</strong></li>
-      <li><a href="WORKLOG.md">WORKLOG.md</a></li>
-    </ul>
+      <details>
+        <summary><strong>🧠 Machine Learning</strong></summary>
+        <ul>
+          <li><a href="ML_Specification.md">Specification</a></li>
+          <li><a href="ML_Test.md">Test</a></li>
+          <li><a href="ML_Training_Notebook.md">Training Notebook</a></li>
+        </ul>
+      </details>
     
+      <details>
+        <summary><strong>📓 Work Diary</strong></summary>
+        <ul>
+          <li><a href="WORKLOG.md">WORKLOG</a></li>
+        </ul>
+      </details>
+    
+    </div>
+    
+
     <p>Select a section below:</p>
 
     <div class="menu">
-      <button onclick="loadPresentation()">🌍 Project Presentation</button>
       <button onclick="loadChecklist()">✅ App Test Checklist</button>
     </div>
 

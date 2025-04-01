@@ -105,8 +105,10 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const file = link.getAttribute("href");
         loadMarkdown(file).then(md => {
-          document.getElementById("content").innerHTML =
-            `<div class="markdown">${marked.parse(md)}</div>`;
+          const contentDiv = document.getElementById("content");
+          contentDiv.innerHTML = `<div class="markdown">${marked.parse(md)}</div>`;
+          contentDiv.scrollIntoView({ behavior: "smooth" });
+
         });
       });
     }

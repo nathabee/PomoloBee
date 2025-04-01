@@ -291,6 +291,7 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - look for a solution to run the check list from github page
   - create docs for the github page (renamed documentation folder in docs and changed github hooks), add index.html. main.js, style.cs and multilanguage presentation.md
   - add .nojekill in the github page, list of all docs, link to github, google translate, styles  
+  - create a json with a checklist of app install
 - **Theme**: App developpement
  
 

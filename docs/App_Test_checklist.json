@@ -1,15 +1,10 @@
 [
   {
-    "section": "Installation Behavior",
+    "section": "## Installation Behavior",
     "items": [
       {
         "test": "Test",
         "expected": "Expected Outcome",
-        "state": ""
-      },
-      {
-        "test": "------",
-        "expected": "------------------",
         "state": ""
       },
       {
@@ -19,7 +14,42 @@
       },
       {
         "test": "App copies initial assets to `/sdcard/PomoloBee/` on first run",
-        "expected": "Files exist after install: `config/fruits.json` etc.",
+        "expected": "Files exist after install: <br> `config/fruits.json`, `fields/svg/C1_map.svg`, etc.",
+        "state": ""
+      },
+      {
+        "test": "`OrchardRepository.loadAllConfig()` loads local JSON into cache",
+        "expected": "No crash, log success",
+        "state": ""
+      }
+    ]
+  },
+  {
+    "section": "Start Navigation",
+    "items": [
+      {
+        "test": "Test",
+        "expected": "Expected Outcome",
+        "state": ""
+      },
+      {
+        "test": "App launches without crash",
+        "expected": "MainActivity starts and UI visible",
+        "state": ""
+      },
+      {
+        "test": "First screen is **CameraScreen**",
+        "expected": "As per `startDestination = Screen.Camera.route` in `NavGraph`",
+        "state": ""
+      },
+      {
+        "test": "Top bar + drawer icon are visible",
+        "expected": "Drawer opens on click",
+        "state": ""
+      },
+      {
+        "test": "Menu shows correct options (see spec)",
+        "expected": "`Camera`, `Settings`, `Orchard`, `Location`, `About`, etc.",
         "state": ""
       }
     ]
@@ -33,13 +63,168 @@
         "state": ""
       },
       {
-        "test": "------",
-        "expected": "-------------",
+        "test": "Tap `Camera`",
+        "expected": "CameraScreen",
         "state": ""
       },
       {
-        "test": "Tap `Camera`",
-        "expected": "CameraScreen",
+        "test": "Tap `Orchard`",
+        "expected": "OrchardScreen",
+        "state": ""
+      },
+      {
+        "test": "Tap `Location`",
+        "expected": "LocationScreen",
+        "state": ""
+      },
+      {
+        "test": "Tap `SvgMap` via Location \u2192 Select from map",
+        "expected": "SvgMapScreen",
+        "state": ""
+      },
+      {
+        "test": "Tap `Settings`",
+        "expected": "SettingsScreen",
+        "state": ""
+      },
+      {
+        "test": "Tap `About`",
+        "expected": "AboutScreen",
+        "state": ""
+      },
+      {
+        "test": "Back button works between screens",
+        "expected": "Navigates or exits correctly",
+        "state": ""
+      }
+    ]
+  },
+  {
+    "section": "Orchard SVG Map Interaction",
+    "items": [
+      {
+        "test": "Test",
+        "expected": "Expected Outcome",
+        "state": ""
+      },
+      {
+        "test": "Orchard screen lists fields (from `OrchardCache`)",
+        "expected": "Fields from `locations.json` shown",
+        "state": ""
+      },
+      {
+        "test": "Selecting field C1 \u2192 opens SvgMap with C1_map.svg",
+        "expected": "Map renders correctly",
+        "state": ""
+      },
+      {
+        "test": "Selecting field C2 (not in map) \u2192 default_map.svg shown",
+        "expected": "Graceful fallback",
+        "state": ""
+      }
+    ]
+  },
+  {
+    "section": "Camera to Location Flow",
+    "items": [
+      {
+        "test": "Test",
+        "expected": "Expected Outcome",
+        "state": ""
+      },
+      {
+        "test": "From Camera screen, tap to go to Location screen",
+        "expected": "Navigation works",
+        "state": ""
+      },
+      {
+        "test": "Field dropdown shows available fields",
+        "expected": "From cache",
+        "state": ""
+      },
+      {
+        "test": "Tap \u201cSelect from map\u201d \u2192 opens SvgMapScreen",
+        "expected": "Field\u2019s SVG shown",
+        "state": ""
+      },
+      {
+        "test": "Tap a row in SVG \u2192 returns to Location screen",
+        "expected": "Combo updates with selected row",
+        "state": ""
+      },
+      {
+        "test": "Tap \"Validate\" in Location \u2192 returns to Camera",
+        "expected": "Selected field & row shown",
+        "state": ""
+      }
+    ]
+  },
+  {
+    "section": "\ufe0fSettings Persistence",
+    "items": [
+      {
+        "test": "Test",
+        "expected": "Expected Outcome",
+        "state": ""
+      },
+      {
+        "test": "Go to Settings and update values (e.g., API URL, sync mode)",
+        "expected": "Inputs accept changes",
+        "state": ""
+      },
+      {
+        "test": "Tap \"Validate\" \u2192 changes saved",
+        "expected": "No crash or loss",
+        "state": ""
+      },
+      {
+        "test": "Close app, restart",
+        "expected": "Settings are persisted (loaded from `UserPreferences`)",
+        "state": ""
+      }
+    ]
+  },
+  {
+    "section": "\u2139\ufe0f About Screen",
+    "items": [
+      {
+        "test": "Test",
+        "expected": "Expected Outcome",
+        "state": ""
+      },
+      {
+        "test": "About screen accessible from menu",
+        "expected": "Opens normally",
+        "state": ""
+      },
+      {
+        "test": "App version (e.g., v0.1.0) displayed",
+        "expected": "Static or from `BuildConfig.VERSION_NAME`",
+        "state": ""
+      }
+    ]
+  },
+  {
+    "section": "Advanced / Bonus Tests",
+    "items": [
+      {
+        "test": "Test",
+        "expected": "Outcome",
+        "state": ""
+      },
+      {
+        "test": "Run `ConnectionRepository.syncOrchard()` manually (or via UI)",
+        "expected": "Log success, cache updated",
+        "state": ""
+      },
+      {
+        "test": "Logs show OpenCV library loaded",
+        "expected": "No native lib error",
+        "state": ""
+      },
+      {
+        "test": "Unknown field ID in SvgMap \u2192 Shows \"Field not found\" text",
+        "expected": "Graceful error",
         "state": ""
       }
     ]
