@@ -68,6 +68,7 @@ h2, h3 {
   padding-bottom: 0.2rem;
 }
 
+/*
 h2::after, h3::after {
   content: "";
   position: absolute;
@@ -79,6 +80,7 @@ h2::after, h3::after {
   opacity: 0.5;
   border-radius: 2px;
 }
+*/
 
 hr {
   border: none;
@@ -155,12 +157,11 @@ label {
 }
 .markdown h2::after,
 .markdown h3::after {
-  content: "";
-  display: block;
-  height: 3px;
-  background: #ffe500;
-  margin-top: 0.2rem;
-  border-radius: 2px;
+  background-color: #ffe500;
+  color: #000;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  margin-top: 2rem;
 }
 
 
@@ -225,4 +226,19 @@ label {
 .checklist li {
   margin: 0.4rem 0;
   line-height: 1.5;
+}
+
+.checklist-item label {
+  display: inline-block;
+  margin-right: 1.2rem;
+}
+
+.checklist-item p {
+  margin-bottom: 0.4rem;
+}
+
+.checklist-item {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px dashed #ddd;
+  padding-bottom: 0.8rem;
 }

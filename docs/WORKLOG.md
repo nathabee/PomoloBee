@@ -280,7 +280,7 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - Started `SettingsScreen` with editable sync mode and API endpoints  
   - Initialized `ConnectionRepository` for testing endpoint and syncing orchard data  
 - **Theme**: App developpement
-
+ 
 
  
 ###  Avril 01 2025
