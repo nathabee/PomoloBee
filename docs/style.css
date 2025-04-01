@@ -115,6 +115,25 @@ button:hover {
   background-color: #ffff00;
 }
 
+.button-like {
+  background-color: #ffe500;
+  color: black;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-block;
+  transition: background-color 0.2s ease;
+}
+
+.button-like:hover {
+  background-color: #ffff00;
+}
+
+.button-like input[type="file"] {
+  display: none;
+}
+
 
 #content {
   background-color: white;

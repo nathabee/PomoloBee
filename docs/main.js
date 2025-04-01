@@ -1,13 +1,33 @@
 // Load and render structured checklist JSON
+// Load and render structured checklist JSON
 async function loadStructuredChecklist(file = "App_Test_checklist.json") {
   const res = await fetch(file);
   const data = await res.json();
 
   const container = document.getElementById("content");
+  container.innerHTML = `<h2>✅ Interactive App Test Checklist</h2>`;
+
+  // Add button row at the top
+  const buttonRow = document.createElement("div");
+  buttonRow.style.display = "flex";
+  buttonRow.style.gap = "1rem";
+  buttonRow.style.marginBottom = "1.5rem";
+  buttonRow.style.alignItems = "center";
+  buttonRow.style.flexWrap = "wrap";
+
+  const newChecklistBtn = document.createElement("button");
+  newChecklistBtn.textContent = "🆕 New App Test Checklist";
+  newChecklistBtn.onclick = () => loadStructuredChecklist("App_Test_checklist.json");
+  buttonRow.appendChild(newChecklistBtn);
+
+  const openLabel = document.createElement("label");
+  openLabel.textContent = "📂 Open App JSON Checklist";
+  openLabel.classList.add("button-like");
+
   const loadJsonInput = document.createElement("input");
   loadJsonInput.type = "file";
   loadJsonInput.accept = ".json";
-  loadJsonInput.style.marginLeft = "1rem";
+  loadJsonInput.style.display = "none";
   loadJsonInput.onchange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -19,9 +39,11 @@ async function loadStructuredChecklist(file = "App_Test_checklist.json") {
       reader.readAsText(file);
     }
   };
-  container.appendChild(loadJsonInput);
-  
-  container.innerHTML = `<h2>✅ Interactive App Test Checklist</h2>`;
+
+  openLabel.appendChild(loadJsonInput);
+  buttonRow.appendChild(openLabel);
+
+  container.appendChild(buttonRow);
 
   data.forEach((section, secIndex) => {
     const sectionDiv = document.createElement("div");
@@ -77,9 +99,8 @@ async function loadStructuredChecklist(file = "App_Test_checklist.json") {
   saveJsonBtn.textContent = "🗄 Save Checklist as JSON";
   saveJsonBtn.onclick = saveChecklistAsJSON;
   container.appendChild(saveJsonBtn);
-
-
 }
+
 
 function saveStructuredChecklist() {
   const sections = document.querySelectorAll(".checklist-section");
