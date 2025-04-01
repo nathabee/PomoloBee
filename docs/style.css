@@ -17,6 +17,9 @@ body {
   padding: 1.5rem;
   box-shadow: 0 0 10px rgba(0,0,0,0.05);
   border-radius: 8px;
+  min-height: 100vh; /* 🔥 force full screen height */
+  display: flex;
+  flex-direction: column;
 }
 
 
@@ -228,17 +231,25 @@ label {
   line-height: 1.5;
 }
 
-.checklist-item label {
-  display: inline-block;
-  margin-right: 1.2rem;
-}
+.checklist-item {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px dashed #ddd;
+  padding-bottom: 0.8rem;
+} 
 
 .checklist-item p {
   margin-bottom: 0.4rem;
 }
 
-.checklist-item {
-  margin-bottom: 1.5rem;
-  border-bottom: 1px dashed #ddd;
-  padding-bottom: 0.8rem;
+
+.checklist-item label {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 1rem;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.checklist-item input[type="radio"] {
+  margin-right: 0.4rem;
 }
