@@ -1,10 +1,10 @@
 {
   "meta": {
     "date": "2025-04-01",
-    "tester": "Jane Dev",
-    "device": "Pixel 5",
-    "androidVersion": "13.0",
-    "appVersion": "v0.1.0 - debug",
+    "tester": "Tester Name",
+    "device": "Device",
+    "androidVersion": "13",
+    "appVersion": "v0.1.0",
     "buildVariant": "debug"
   },
   "sections": [

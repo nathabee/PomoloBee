@@ -2,8 +2,13 @@
 async function loadStructuredChecklist(file = "App_Test_checklist.json") {
   const res = await fetch(file);
   const json = await res.json();
+
+  console.log("Loaded JSON:", json);
+  
   const meta = json.meta || {};
   const data = json.sections || json; // fallback if no meta wrapper
+
+  console.log("Using data:", data);
 
   const container = document.getElementById("content");
   container.innerHTML = `<h2>✅ Interactive App Test Checklist</h2>`;
