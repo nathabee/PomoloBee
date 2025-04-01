@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,17 +8,41 @@
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
+
 <body>
   <div class="container">
     <div class="header">
-      <img src="PomoloBee.svg" alt="PomoloBee Logo" class="logo">
-      <h1>🐝 PomoloBee Project</h1>
+
+      <h1>
+        <img src="PomoloBee.svg" alt="PomoloBee Logo" class="logo">
+        PomoloBee Project
+      </h1>
+      
+      <!-- Single Google Translate block -->
+      <div style="text-align: right; font-size: 0.9rem; margin-bottom: 0.5rem;">
+        🌐 Translate:
+        <span id="google_translate_element"></span>
+      </div>
+      
+      <script type="text/javascript">
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement(
+            { pageLanguage: 'en' },
+            'google_translate_element'
+          );
+        }
+      </script>
+      
+      <script type="text/javascript"
+        src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+      
+
     </div>
 
     <p>Select a section below:</p>
 
     <div class="menu">
-      <button onclick="loadPresentation()">🌍 Project Presentation (EN/FR)</button>
+      <button onclick="loadPresentation()">🌍 Project Presentation</button>
       <button onclick="loadChecklist()">✅ App Test Checklist</button>
     </div>
 
@@ -56,4 +81,5 @@
 
   <script src="main.js"></script>
 </body>
+
 </html>
