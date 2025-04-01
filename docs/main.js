@@ -1,10 +1,10 @@
-// Load and parse Markdown files for GitHub Pages
-
+// Load and render Markdown using marked.js
 async function loadMarkdown(file) {
   const res = await fetch(file);
   return await res.text();
 }
 
+// Render checklist interactively
 function parseChecklist(md) {
   return md.replace(/^- \[( |x)] (.+)$/gm, (match, checked, item) => {
     const isChecked = checked === "x";
@@ -12,23 +12,27 @@ function parseChecklist(md) {
   });
 }
 
+// Load Project Presentation
 function loadPresentation() {
   loadMarkdown("presentation.md").then(text => {
-    document.getElementById("content").innerHTML = `<div class='markdown'>${marked.parse(text)}</div>`;
+    document.getElementById("content").innerHTML =
+      `<div class='markdown'>${marked.parse(text)}</div>`;
   });
 }
 
+// Load Interactive Checklist
 function loadChecklist() {
   loadMarkdown("App_Test_ChecklistTemplate.md").then(md => {
     const checklistHtml = parseChecklist(md);
     document.getElementById("content").innerHTML = `
       <h2>✅ Interactive App Test Checklist</h2>
-      <div id='checklist'>${checklistHtml}</div>
+      <div id='checklist' class='markdown'>${checklistHtml}</div>
       <button onclick="saveChecklist()">💾 Save Checklist Report</button>
     `;
   });
 }
 
+// Save checklist to file
 function saveChecklist() {
   const checkboxes = document.querySelectorAll('#checklist input[type="checkbox"]');
   const lines = Array.from(checkboxes).map(cb => {
@@ -46,3 +50,20 @@ function saveChecklist() {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+// 📌 New: Handle all .md links as markdown-rendered pages
+document.addEventListener("DOMContentLoaded", () => {
+  const docLinks = document.querySelectorAll(".doc-list a");
+  docLinks.forEach(link => {
+    if (link.href.endsWith(".md")) {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const file = link.getAttribute("href");
+        loadMarkdown(file).then(md => {
+          document.getElementById("content").innerHTML =
+            `<div class="markdown">${marked.parse(md)}</div>`;
+        });
+      });
+    }
+  });
+});

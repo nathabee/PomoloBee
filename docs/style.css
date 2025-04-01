@@ -11,6 +11,14 @@ body {
     margin: auto;
     padding: 2rem;
   }
+
+  .logo {
+    height: 80px;
+    width: auto;
+    display: block;
+    margin: 0 auto 1rem auto;
+  }
+  
   
   h1 {
     text-align: center;
@@ -50,3 +58,64 @@ body {
     margin: 0.4rem 0;
   }
   
+/* Markdown content styling */
+.markdown {
+  font-family: Georgia, serif;
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 10px;
+  line-height: 1.6;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.markdown h1, .markdown h2, .markdown h3 {
+  margin-top: 1.5em;
+  color: #333;
+}
+
+.markdown ul, .markdown ol {
+  padding-left: 2rem;
+  margin-bottom: 1rem;
+}
+
+.markdown code {
+  background: #f4f4f4;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.markdown pre code {
+  display: block;
+  background: #f4f4f4;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.markdown th, .markdown td {
+  border: 1px solid #ddd;
+  padding: 0.6rem;
+  text-align: left;
+}
+
+.markdown th {
+  background-color: #f0f0f0;
+}
+
+.markdown a {
+  color: #0055cc;
+  text-decoration: none;
+}
+
+.markdown a:hover {
+  text-decoration: underline;
+}
