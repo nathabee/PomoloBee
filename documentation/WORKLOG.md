@@ -286,8 +286,9 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
 ###  Avril 01 2025
 - **Hours Worked**: 2 hours
 - **Tasks**:
-  - test plan for App . create checklist  [checklist](App_Test_Checklist.md) and report template  [Template](App_Test_ReportTemplate.md)
-  - started a android unit test phase on 20250401 after partial dev [checklist](App_Test_Checklist.md) and report template  [Template](App_Test_ReportTemplate.md)
+  - test plan for App . create checklist  [checklist](./Report/App_Test_ChecklistTemplate.md) and report template  [Template](./Report/App_Test_ReportTemplate.md)
+  - started a android unit test phase on 2025-04-01  
+  - look for a solution to run the check list from github page
 - **Theme**: App developpement
 
 
