@@ -3,11 +3,6 @@
     "section": "## Installation Behavior",
     "items": [
       {
-        "test": "Test",
-        "expected": "Expected Outcome",
-        "state": ""
-      },
-      {
         "test": "App requests permissions (CAMERA, READ/WRITE)",
         "expected": "System permission dialog shown",
         "state": ""
@@ -27,11 +22,6 @@
   {
     "section": "Start Navigation",
     "items": [
-      {
-        "test": "Test",
-        "expected": "Expected Outcome",
-        "state": ""
-      },
       {
         "test": "App launches without crash",
         "expected": "MainActivity starts and UI visible",
@@ -56,40 +46,35 @@
   },
   {
     "section": "Drawer Menu Navigation",
-    "items": [
-      {
-        "test": "Test",
-        "expected": "Navigate To",
-        "state": ""
-      },
+    "items": [ 
       {
         "test": "Tap `Camera`",
-        "expected": "CameraScreen",
+        "expected": "Navigate To CameraScreen",
         "state": ""
       },
       {
         "test": "Tap `Orchard`",
-        "expected": "OrchardScreen",
+        "expected": "Navigate To OrchardScreen",
         "state": ""
       },
       {
         "test": "Tap `Location`",
-        "expected": "LocationScreen",
+        "expected": "Navigate To LocationScreen",
         "state": ""
       },
       {
         "test": "Tap `SvgMap` via Location \u2192 Select from map",
-        "expected": "SvgMapScreen",
+        "expected": "Navigate To SvgMapScreen",
         "state": ""
       },
       {
         "test": "Tap `Settings`",
-        "expected": "SettingsScreen",
+        "expected": "Navigate To SettingsScreen",
         "state": ""
       },
       {
         "test": "Tap `About`",
-        "expected": "AboutScreen",
+        "expected": "Navigate To AboutScreen",
         "state": ""
       },
       {
@@ -102,11 +87,6 @@
   {
     "section": "Orchard SVG Map Interaction",
     "items": [
-      {
-        "test": "Test",
-        "expected": "Expected Outcome",
-        "state": ""
-      },
       {
         "test": "Orchard screen lists fields (from `OrchardCache`)",
         "expected": "Fields from `locations.json` shown",
@@ -127,11 +107,6 @@
   {
     "section": "Camera to Location Flow",
     "items": [
-      {
-        "test": "Test",
-        "expected": "Expected Outcome",
-        "state": ""
-      },
       {
         "test": "From Camera screen, tap to go to Location screen",
         "expected": "Navigation works",
@@ -163,11 +138,6 @@
     "section": "\ufe0fSettings Persistence",
     "items": [
       {
-        "test": "Test",
-        "expected": "Expected Outcome",
-        "state": ""
-      },
-      {
         "test": "Go to Settings and update values (e.g., API URL, sync mode)",
         "expected": "Inputs accept changes",
         "state": ""
@@ -188,11 +158,6 @@
     "section": "\u2139\ufe0f About Screen",
     "items": [
       {
-        "test": "Test",
-        "expected": "Expected Outcome",
-        "state": ""
-      },
-      {
         "test": "About screen accessible from menu",
         "expected": "Opens normally",
         "state": ""
@@ -207,11 +172,6 @@
   {
     "section": "Advanced / Bonus Tests",
     "items": [
-      {
-        "test": "Test",
-        "expected": "Outcome",
-        "state": ""
-      },
       {
         "test": "Run `ConnectionRepository.syncOrchard()` manually (or via UI)",
         "expected": "Log success, cache updated",

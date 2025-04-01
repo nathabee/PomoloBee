@@ -282,7 +282,7 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
 - **Theme**: App developpement
 
 
-
+ 
 ###  Avril 01 2025
 - **Hours Worked**: 2 hours
 - **Tasks**:
@@ -290,8 +290,9 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - started a android unit test phase on 2025-04-01  
   - look for a solution to run the check list from github page
   - create docs for the github page (renamed documentation folder in docs and changed github hooks), add index.html. main.js, style.cs and multilanguage presentation.md
-  - add .nojekill in the github page, list of all docs, link to github, google translate, styles  
+  - add .nojekill in the github page, list of all docs, link to github, google translate  
   - create a json with a checklist of app install
+  - styles of github page in harmony with svg
 - **Theme**: App developpement
  
 
