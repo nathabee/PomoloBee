@@ -1,7 +1,3 @@
-Your cleaned-up documentation looks **great**—very clear, organized, and aligned with the structure of the rest of the test suite. Here’s just a **light polishing pass** to improve clarity and consistency (especially section titles and wording):
-
----
-
 # Django Test Documentation
 ---
 

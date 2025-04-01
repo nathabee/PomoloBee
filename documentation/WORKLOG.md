@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _94 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _97 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -27,7 +27,8 @@
     - [Mars 29 2025](#mars-29-2025)
     - [Mars 30 2025](#mars-30-2025)
   - [Week 4 Dates from Mars 31 to Avril 6 2025](#week-4-dates-from-mars-31-to-avril-6-2025)
-    - [Mars 24 2025](#mars-24-2025)
+    - [Mars 31 2025](#mars-31-2025)
+    - [Avril 01 2025](#avril-01-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -267,8 +268,8 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
 
 ##  Week 4 Dates from Mars 31 to Avril 6 2025
 
-###  Mars 24 2025
-- **Hours Worked**: 8 hours
+###  Mars 31 2025
+- **Hours Worked**: 9 hours
 - **Tasks**:
   - some modification in App specification [specification API](API.md) and start deveoppement App
   - Refactored and structured `MainActivity.kt` to handle permission and asset installation  
@@ -279,6 +280,17 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - Started `SettingsScreen` with editable sync mode and API endpoints  
   - Initialized `ConnectionRepository` for testing endpoint and syncing orchard data  
 - **Theme**: App developpement
+
+
+
+###  Avril 01 2025
+- **Hours Worked**: 2 hours
+- **Tasks**:
+  - test plan for App . create checklist  [checklist](App_Test_Checklist.md) and report template  [Template](App_Test_ReportTemplate.md)
+  - started a android unit test phase on 20250401 after partial dev [checklist](App_Test_Checklist.md) and report template  [Template](App_Test_ReportTemplate.md)
+- **Theme**: App developpement
+
+
 
 
 - **PENDING**
