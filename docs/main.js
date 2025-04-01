@@ -6,11 +6,28 @@ async function loadMarkdown(file) {
 
 // Render checklist interactively
 function parseChecklist(md) {
-  return md.replace(/^- \[( |x)] (.+)$/gm, (match, checked, item) => {
-    const isChecked = checked === "x";
-    return `<label><input type="checkbox" ${isChecked ? "checked" : ""}> ${item}</label>`;
-  });
+  const lines = md.split("\n");
+  let output = "<ul class='checklist'>";
+  for (let line of lines) {
+    const match = line.match(/^- \[( |x)] (.+)/);
+    if (match) {
+      const checked = match[1] === "x";
+      const label = match[2];
+      output += `<li><label><input type="checkbox" ${checked ? "checked" : ""}> ${label}</label></li>`;
+    } else if (line.trim() === "") {
+      output += "";
+    } else if (line.startsWith("##")) {
+      const heading = line.replace(/^##+/, "").trim();
+      output += `</ul><h3>${heading}</h3><ul class='checklist'>`;
+    } else if (line.startsWith("#")) {
+      const heading = line.replace(/^#+/, "").trim();
+      output += `</ul><h2>${heading}</h2><ul class='checklist'>`;
+    }
+  }
+  output += "</ul>";
+  return output;
 }
+
 
 // Load Project Presentation
 function loadPresentation() {
