@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.io.File
 
 // Global property delegate for accessing the DataStore
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_prefs")
@@ -25,6 +27,13 @@ class UserPreferences(private val context: Context) {
 
 
     }
+    private fun defaultConfigPath(): String {
+        return context.getExternalFilesDir(null)?.absolutePath + "/PomoloBee/config"
+    }
+
+    private fun defaultImagePath(): String {
+        return context.getExternalFilesDir(null)?.absolutePath + "/PomoloBee/images"
+    }
 
 
     // 🔁 Generic String Prefs
@@ -34,6 +43,7 @@ class UserPreferences(private val context: Context) {
     suspend fun savePreference(key: String, value: String) {
         context.dataStore.edit { it[stringPreferencesKey(key)] = value }
     }
+
 
     // 🕒 Last Sync
     val lastSyncDate: Flow<Long?> = context.dataStore.data
@@ -60,20 +70,38 @@ class UserPreferences(private val context: Context) {
     }
 
     // 📂 Image Path
-    fun getImagePath(): Flow<String?> =
-        context.dataStore.data.map { it[IMAGE_PATH_KEY] }
+    fun getImagePath(): Flow<String> =
+        context.dataStore.data.map { prefs ->
+            prefs[IMAGE_PATH_KEY] ?: defaultImagePath()
+        }
 
     suspend fun setImagePath(value: String) {
         context.dataStore.edit { it[IMAGE_PATH_KEY] = value }
     }
 
     // ⚙ Config Path
-    fun getConfigPath(): Flow<String?> =
-        context.dataStore.data.map { it[CONFIG_PATH_KEY] }
+    fun getConfigPath(): Flow<String> =
+        context.dataStore.data.map { prefs ->
+            prefs[CONFIG_PATH_KEY] ?: defaultConfigPath()
+        }
 
     suspend fun setConfigPath(value: String) {
         context.dataStore.edit { it[CONFIG_PATH_KEY] = value }
     }
+
+    // pre-fill an editable field without defaulting.
+    fun getRawConfigPath(): Flow<String?> =
+        context.dataStore.data.map { it[CONFIG_PATH_KEY] }
+
+    fun getRawImagePath(): Flow<String?> =
+        context.dataStore.data.map { it[IMAGE_PATH_KEY] }
+
+    fun getRootPath(): Flow<String> =
+        getConfigPath().map { configPath ->
+            File(configPath).parentFile?.parentFile?.absolutePath ?: ""
+        }
+
+
 
     // 🌍 API Endpoint
     fun getApiEndpoint(): Flow<String?> =

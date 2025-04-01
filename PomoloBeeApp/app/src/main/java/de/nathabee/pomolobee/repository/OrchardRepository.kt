@@ -1,23 +1,37 @@
 package de.nathabee.pomolobee.repository
 
+import android.content.Context
 import android.util.Log
-
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import de.nathabee.pomolobee.cache.OrchardCache
 import de.nathabee.pomolobee.model.*
+
 import java.io.File
+import de.nathabee.pomolobee.data.UserPreferences
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
+
+
 
 object OrchardRepository {
-    private const val CONFIG_PATH = "/sdcard/PomoloBee/config"
 
-    fun loadAllConfig(): Boolean {
+    fun loadAllConfig(context: Context): Boolean {
         return try {
-            val locationsJson = File("$CONFIG_PATH/locations.json").readText()
+            val userPrefs = UserPreferences(context)
+
+            val configDir = runBlocking {
+                userPrefs.getConfigPath().first()
+            }
+
+
+
+
+
+            val locationsJson = File(configDir, "locations.json").readText()
             val locationResponse = Gson().fromJson(locationsJson, LocationResponse::class.java)
 
             val validLocations = locationResponse.data.locations.filter {
-                it.field.fieldId != null // ensure fieldId is there
+                it.field.fieldId != null
             }
 
             if (validLocations.isEmpty()) {
@@ -27,9 +41,8 @@ object OrchardRepository {
 
             OrchardCache.locations = validLocations
 
-            val fruitsJson = File("$CONFIG_PATH/fruits.json").readText()
+            val fruitsJson = File(configDir, "fruits.json").readText()
             val fruitResponse = Gson().fromJson(fruitsJson, FruitResponse::class.java)
-
             OrchardCache.fruits = fruitResponse.data.fruits
 
             true
@@ -38,5 +51,4 @@ object OrchardRepository {
             false
         }
     }
-
 }

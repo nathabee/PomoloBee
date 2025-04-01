@@ -12,6 +12,7 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 
 
@@ -54,7 +55,8 @@ object ConnectionRepository {
 
         return@withContext if (mode == "local") {
             try {
-                val configDir = "/sdcard/PomoloBee/config/"
+                val configDir = prefs.getConfigPath().first()
+
                 val fruitsJson = File(configDir, "fruits.json").readText()
                 val locationsJson = File(configDir, "locations.json").readText()
 

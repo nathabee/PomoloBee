@@ -23,6 +23,12 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 import android.Manifest
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import de.nathabee.pomolobee.data.UserPreferences
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
 
 private val REQUIRED_PERMISSIONS = arrayOf(
     Manifest.permission.CAMERA,
@@ -36,49 +42,66 @@ private const val REQUEST_CODE_PERMISSIONS = 123
 class MainActivity : ComponentActivity() {
 
     //###########################################################################
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
-        // Ask permissions
-        if (!allPermissionsGranted()) {
-            ActivityCompat.requestPermissions(
-                this,
-                REQUIRED_PERMISSIONS,
-                REQUEST_CODE_PERMISSIONS
-            )
+        private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+
+            permissionLauncher = registerForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions()
+            ) { permissions ->
+                val granted = permissions.all { it.value }
+                if (granted) {
+                    onPermissionsGranted()
+                } else {
+                    Toast.makeText(this, "Permissions not granted", Toast.LENGTH_LONG).show()
+                    finish()
+                }
+            }
+
+            if (allPermissionsGranted()) {
+                onPermissionsGranted()
+            } else {
+                permissionLauncher.launch(REQUIRED_PERMISSIONS)
+            }
         }
 
+        private fun onPermissionsGranted() {
+            copyAssetsIfNotExists(this)
+            OrchardRepository.loadAllConfig(this)
 
-        copyAssetsIfNotExists(this) // copy assets if not exists first install
+            System.loadLibrary("opencv_java4")
 
-        OrchardRepository.loadAllConfig() // 👈 parse & cache JSON files in OrchardCache
+            setContent {
+                PomoloBeeTheme {
+                    PomoloBeeApp()
+                }
+            }
+        }
 
-        // Load native OpenCV library
-        System.loadLibrary("opencv_java4")
-
-        setContent {
-            PomoloBeeTheme {
-                PomoloBeeApp()
+        private fun allPermissionsGranted(): Boolean {
+            return REQUIRED_PERMISSIONS.all {
+                ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
             }
         }
     }
 
 
-    //###########################################################################
-// ✅ Now inside MainActivity
-    private fun allPermissionsGranted(): Boolean {
-        return REQUIRED_PERMISSIONS.all {
-            ContextCompat.checkSelfPermission(
-                this,
-                it
-            ) == PackageManager.PERMISSION_GRANTED
-        }
-    }
-}
+
+
 
 //###########################################################################
 fun copyAssetsIfNotExists(context: Context) {
-    val rootPath = "/sdcard/PomoloBee/"
+    val prefs = UserPreferences(context)
+
+    // ⏳ Block to get config path synchronously (since first() is suspend)
+    val configPath = runBlocking {
+        prefs.getConfigPath().first()
+    }
+
+    val rootPath = File(configPath).parentFile?.parentFile?.absolutePath ?: return
+
     val assetManager = context.assets
 
     val assetStructure = listOf(

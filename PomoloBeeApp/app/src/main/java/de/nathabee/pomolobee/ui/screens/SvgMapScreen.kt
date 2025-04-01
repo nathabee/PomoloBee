@@ -1,27 +1,52 @@
 package de.nathabee.pomolobee.ui.screens
 
+import android.content.Context
 import android.widget.ImageView
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.load
 import de.nathabee.pomolobee.model.Location
+
+import de.nathabee.pomolobee.data.UserPreferences
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+
 import java.io.File
 
 
-fun getSvgFileFromUrl(svgMapUrl: String?): File {
+
+fun getSvgFileFromUrl(svgMapUrl: String?, context: Context): File {
     val filename = svgMapUrl?.substringAfterLast("/") ?: "default_map.svg"
-    return File("/sdcard/PomoloBee/fields/svg", filename)
+    val userPrefs = UserPreferences(context)
+
+    val configDir = runBlocking {
+        userPrefs.getConfigPath().first()
+    }
+    return File(File(configDir).parentFile?.parentFile, "fields/svg/$filename")
+
 }
 
 
-fun getBackgroundFileFromUrl(backgroundUrl: String?): File? {
+fun getBackgroundFileFromUrl(backgroundUrl: String?, context: Context): File? {
     if (backgroundUrl == null) return null
     val filename = backgroundUrl.substringAfterLast("/")
-    return File("/sdcard/PomoloBee/fields/background", filename)
+    val userPrefs = UserPreferences(context)
+
+    val configDir = runBlocking {
+        userPrefs.getConfigPath().first()
+    }
+    return File(File(configDir).parentFile?.parentFile, "fields/background/$filename")
+
 }
 
 
@@ -31,12 +56,24 @@ fun SvgMapScreen(
     onRawSelected: (String) -> Unit,
     onBack: () -> Unit
 ) {
-    val svgFile = getSvgFileFromUrl(location.field.svgMapUrl)
-    if (!svgFile.exists()) {
-        // fallback to default
-        File("/sdcard/PomoloBee/fields/svg/default_map.svg")
-    }
+    val context = LocalContext.current
+    val svgFileState = remember { mutableStateOf<File?>(null) }
 
+    // Load the correct file path asynchronously
+    LaunchedEffect(location.field.svgMapUrl) {
+        val prefs = UserPreferences(context)
+        val configDir = prefs.getConfigPath().first()
+        val rootDir = File(configDir).parentFile?.parentFile
+
+        val filename = location.field.svgMapUrl?.substringAfterLast("/") ?: "default_map.svg"
+        val svgPath = File(rootDir, "fields/svg/$filename")
+
+        svgFileState.value = if (svgPath.exists()) {
+            svgPath
+        } else {
+            File(rootDir, "fields/svg/default_map.svg")
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -50,28 +87,30 @@ fun SvgMapScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AndroidView(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            factory = { context ->
-                val svgView = ImageView(context)
+        svgFileState.value?.let { svgFile ->
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                factory = { context ->
+                    val svgView = ImageView(context)
 
-                svgView.load(svgFile) {
-                    crossfade(true)
-                    placeholder(android.R.drawable.ic_menu_gallery)
-                    error(android.R.drawable.ic_delete)
+                    svgView.load(svgFile) {
+                        crossfade(true)
+                        placeholder(android.R.drawable.ic_menu_gallery)
+                        error(android.R.drawable.ic_delete)
+                    }
+
+                    svgView.setOnClickListener {
+                        onRawSelected("row_4")
+                    }
+
+                    svgView
                 }
-
-                // TODO: Real row detection logic with touch on SVG paths
-                svgView.setOnClickListener {
-                    // Simulated for now
-                    onRawSelected("row_4")
-                }
-
-                svgView
-            }
-        )
+            )
+        } ?: run {
+            Text("Loading map...")
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

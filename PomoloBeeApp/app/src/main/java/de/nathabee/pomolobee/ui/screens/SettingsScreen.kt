@@ -10,6 +10,7 @@ import de.nathabee.pomolobee.cache.OrchardCache
 import de.nathabee.pomolobee.repository.ConnectionRepository.syncOrchard
 import de.nathabee.pomolobee.repository.ConnectionRepository.testConnection
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
+import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 import java.util.*
@@ -17,12 +18,19 @@ import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun SettingsScreen(
-    navController: NavController? = null,
-    viewModel: SettingsViewModel = viewModel()
+    navController: NavController? = null
 ) {
-    val scope = rememberCoroutineScope()
+    // Get context
     val context = LocalContext.current
 
+    // Get SettingsViewModel using factory
+    val viewModel: SettingsViewModel = viewModel(
+        factory = SettingsViewModelFactory(context) // Pass context to factory
+    )
+
+    val scope = rememberCoroutineScope()
+
+    // Collecting state values
     val lastSyncDate by viewModel.lastSyncDate.collectAsState()
     val apiEndpoint by viewModel.apiEndpoint.collectAsState()
     val syncMode by viewModel.syncMode.collectAsState()
@@ -32,6 +40,7 @@ fun SettingsScreen(
     val isDebug by viewModel.isDebug.collectAsState()
     val apiVersion by viewModel.apiVersion.collectAsState()
 
+    // Mutable states for inputs
     var apiInput by remember { mutableStateOf(apiEndpoint ?: "") }
     var mediaInput by remember { mutableStateOf(mediaEndpoint ?: "") }
     var selectedSyncMode by remember { mutableStateOf(syncMode ?: "local") }
@@ -40,13 +49,16 @@ fun SettingsScreen(
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
 
+        // Last sync display
         Text("🕒 Last sync: ${lastSyncDate?.let { Date(it).toLocaleString() } ?: "Never"}")
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Cached fields and fruits
         Text("🧭 Fields Cached: ${OrchardCache.locations.size}")
         Text("🍏 Fruits Cached: ${OrchardCache.fruits.size}")
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Sync mode selection
         Text("🌐 Sync Mode:")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("cloud", "local").forEach { mode ->
@@ -63,6 +75,7 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // API Endpoint input
         Text("🔌 API Endpoint:")
         TextField(
             value = apiInput,
@@ -72,6 +85,7 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Media Endpoint input
         Text("🖼 Media Endpoint:")
         TextField(
             value = mediaInput,
@@ -81,6 +95,7 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Save settings button
         Button(
             onClick = {
                 scope.launch {
@@ -94,12 +109,13 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Config path display
         Text("📂 Image Path: ${configPath?.replace("/config", "/images")}")
         Text("📂 Config Path: $configPath")
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Test connection
+        // Test connection button
         Button(onClick = {
             scope.launch {
                 connectionStatus = if (testConnection(context)) "✅ Connection OK" else "❌ Connection failed"
@@ -111,6 +127,7 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Sync now button
         Button(onClick = {
             scope.launch {
                 syncMessage = syncOrchard(context)

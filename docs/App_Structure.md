@@ -6,6 +6,7 @@
 <!-- TOC -->
 - [**️ Project Architecture**](#project-architecture)
 - [**Project Structure**](#project-structure)
+    - [Folder Recap](#folder-recap)
   - [**Root Files**](#root-files)
     - [**1 `MainActivity.kt`**](#1-mainactivitykt)
   - [**Navigation Manages Screen Routing**](#navigation-manages-screen-routing)
@@ -125,6 +126,20 @@ app/src/main/java
 
 ```
 
+---
+
+### Folder Recap
+
+| Folder | Use for |
+|--------|---------|
+| `ui/` | Composable screens, components, themes |
+| `viewmodel/` | Jetpack ViewModels (UI/business logic) |
+| `repository/` | Data sources (local, remote, combined) |
+| `network/` | Retrofit/API definitions |
+| `model/` | Data classes, DTOs |
+| `cache/` | In-memory singleton caches |
+| `data/` | Data storage (e.g., `UserPreferences`) |
+| `utils/` | General-purpose helpers
 ---
 
 ## **Root Files**

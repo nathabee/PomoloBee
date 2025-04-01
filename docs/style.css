@@ -4,7 +4,7 @@
 
 /* Page background inspired by SVG colors */
 body {
-  background: linear-gradient(to right, #aac300 0%, #cccccc 50%, #aac300 100%);
+  background: linear-gradient(to right, #aac300 0%, #cccccc 30%, #aac300 100%);
   margin: 0;
   font-family: sans-serif;
 }
@@ -251,8 +251,8 @@ label {
 }
 
 
-.checklist h2::after,
-.checklist h3::after {
+.checklist-section h2::after,
+.checklist-section h3::after {
   background-color: #ffe500;
   color: #000;
   padding: 0.4rem 0.8rem;

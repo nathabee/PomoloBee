@@ -16,13 +16,21 @@ import de.nathabee.pomolobee.cache.OrchardCache
 import de.nathabee.pomolobee.data.UserPreferences
 import de.nathabee.pomolobee.navigation.Screen
 import de.nathabee.pomolobee.ui.components.CameraView
+
 import org.opencv.android.OpenCVLoader
+
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
 
 
 @Composable
 fun CameraScreen(navController: NavController) {
     val context = LocalContext.current
-    val userPrefs = remember { UserPreferences(context) }
+    val userPrefs = UserPreferences(context)
+
+    val configDir = runBlocking {
+        userPrefs.getConfigPath().first()
+    }
     val selectedFieldId by userPrefs.getSelectedFieldId().collectAsState(initial = null)
 
 
@@ -68,8 +76,8 @@ fun CameraScreen(navController: NavController) {
             }) {
                 Text("💾 Save Image Locally")
             }
+            Text("Storage Path: $configDir")
 
-            Text("Storage Path: /sdcard/PomoloBee/")
         }
     }
 }

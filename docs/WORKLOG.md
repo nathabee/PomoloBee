@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _97 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _102 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -284,7 +284,7 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
 
  
 ###  Avril 01 2025
-- **Hours Worked**: 2 hours
+- **Hours Worked**: 7 hours
 - **Tasks**:
   - test plan for App : create checklist  and report template  [Template](./Report/App_Test_ReportTemplate.md)
   - look for a solution to run the check list from github page
@@ -294,9 +294,10 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - styles of github page in harmony with svg
   - export report in json format that can be reused with picker, reload report for completion
   - also track meta data in report (date,version android...etc)
+  -  started a android unit test phase on 2025-04-01 -- anomalie with PERMISSION  after copy and sorage not in preference but hardcoded
 - **Theme**: App developpement : githubpage to display in multilanguage project and manage App test report
  
-
+  
   
   
 - **PENDING**
