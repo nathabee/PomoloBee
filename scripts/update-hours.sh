@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WORKLOG_FILE="documentation/WORKLOG.md"
+WORKLOG_FILE="docs/WORKLOG.md"
 README_FILE="README.md"
 
 # Check if the WORKLOG.md file exists, if not, exit with an error

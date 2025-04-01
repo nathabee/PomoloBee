@@ -5,7 +5,7 @@ This repository contains the mobile app, backend server, and ML microservice for
 
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/documentation/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
+    <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/docs/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
 </p>
 
 ![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _97 hours_ (Auto-generated)  
@@ -45,14 +45,14 @@ This repository contains the mobile app, backend server, and ML microservice for
 
 ## **Documentation**
 
-📖 **Scope and Requirements:** [Requirements](documentation/Requirements.md)  
-📖 **API, Interface Definition:** [API](documentation/API.md)  
-📖 **Data Model:** [Data Model](documentation/Django_DataModel.md)  
-📖 **Workflow:** [Workflow](documentation/Workflow.md)  
-📖 **ML Specification:** [ML Specification](documentation/ML_Specification.md)  
-📖 **App Specification:** [App Specification](documentation/App_Specification.md)  [App Structure](documentation/App_Structure.md)  
-📖 **Database Specification:** [PostgresSQL Specification](documentation/Django_PostgreSQL.md)    
-📖 **Tests Django** [Django Test](documentation/Django_Test.md)   **and ML:** [ML Test](documentation/ML_Test.md)   
+📖 **Scope and Requirements:** [Requirements](docs/Requirements.md)  
+📖 **API, Interface Definition:** [API](docs/API.md)  
+📖 **Data Model:** [Data Model](docs/Django_DataModel.md)  
+📖 **Workflow:** [Workflow](docs/Workflow.md)  
+📖 **ML Specification:** [ML Specification](docs/ML_Specification.md)  
+📖 **App Specification:** [App Specification](docs/App_Specification.md)  [App Structure](docs/App_Structure.md)  
+📖 **Database Specification:** [PostgresSQL Specification](docs/Django_PostgreSQL.md)    
+📖 **Tests Django** [Django Test](docs/Django_Test.md)   **and ML:** [ML Test](docs/ML_Test.md)   
 
 
 ---
@@ -207,7 +207,7 @@ touch data/data.yaml
 
 #### 2. Train the Model
 
-Follow the training instructions [ML Training Notebook](documentation/ML_Training_Notebook.md) to set up YOLOv8 and train your model using the dataset.
+Follow the training instructions [ML Training Notebook](docs/ML_Training_Notebook.md) to set up YOLOv8 and train your model using the dataset.
 
 
 
@@ -240,7 +240,7 @@ The Flask API will automatically use this model for inference.
 
 ## 3. install PomoloBeeDjango on the VPS
 - copy the PomoloBeeDjango folder in you server
-- install database : see **Django PostgreSQL specification** [Django_PostgreSQL](documentation/Django_PostgreSQL.md)  
+- install database : see **Django PostgreSQL specification** [Django_PostgreSQL](docs/Django_PostgreSQL.md)  
 
 - **Create a virtual environment and activate**:
    ```bash

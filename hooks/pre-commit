@@ -7,13 +7,13 @@ remove_emojis_from_headers() {
 }
 
 # Check if WORKLOG is updated
-if ! git diff --cached --name-only | grep -q 'documentation/WORKLOG.md'; then
-  echo "Please update documentation/WORKLOG.md before committing."
+if ! git diff --cached --name-only | grep -q 'docs/WORKLOG.md'; then
+  echo "Please update docs/WORKLOG.md before committing."
   exit 1
 fi
 
-# Loop through staged markdown files in documentation
-for file in $(git diff --cached --name-only | grep '^documentation/.*\.md$'); do
+# Loop through staged markdown files in docs
+for file in $(git diff --cached --name-only | grep '^docs/.*\.md$'); do
   if [ -f "$file" ]; then
     echo "Cleaning header emojis in $file"
     remove_emojis_from_headers "$file"
@@ -45,5 +45,5 @@ fi
 ./scripts/update-hours.sh
 
 # Re-add key files after update
-git add documentation/WORKLOG.md
+git add docs/WORKLOG.md
 git add README.md

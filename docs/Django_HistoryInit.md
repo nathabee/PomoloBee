@@ -100,7 +100,7 @@ echo "PomoloBeeDjango/venv/" >> .gitignore
  
  ## ✅ **4 . database creation
 
-install database : see **Django PostgreSQL specification** [Django_PostgreSQL](documentation/Django_PostgreSQL.md)  
+install database : see **Django PostgreSQL specification** [Django_PostgreSQL](docs/Django_PostgreSQL.md)  
  
 
 

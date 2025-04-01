@@ -289,7 +289,7 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - test plan for App . create checklist  [checklist](./Report/App_Test_ChecklistTemplate.md) and report template  [Template](./Report/App_Test_ReportTemplate.md)
   - started a android unit test phase on 2025-04-01  
   - look for a solution to run the check list from github page
-  - create docs for the github page 
+  - create docs for the github page (renamed documentation folder in docs and changed github hooks), add index.html. main.js, style.cs and multilanguage presentation.md
 - **Theme**: App developpement
 
 
