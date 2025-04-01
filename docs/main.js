@@ -4,6 +4,23 @@ async function loadStructuredChecklist(file = "App_Test_checklist.json") {
   const data = await res.json();
 
   const container = document.getElementById("content");
+  const loadJsonInput = document.createElement("input");
+  loadJsonInput.type = "file";
+  loadJsonInput.accept = ".json";
+  loadJsonInput.style.marginLeft = "1rem";
+  loadJsonInput.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const loadedData = JSON.parse(event.target.result);
+        renderChecklistFromData(loadedData);
+      };
+      reader.readAsText(file);
+    }
+  };
+  container.appendChild(loadJsonInput);
+  
   container.innerHTML = `<h2>✅ Interactive App Test Checklist</h2>`;
 
   data.forEach((section, secIndex) => {
@@ -61,22 +78,7 @@ async function loadStructuredChecklist(file = "App_Test_checklist.json") {
   saveJsonBtn.onclick = saveChecklistAsJSON;
   container.appendChild(saveJsonBtn);
 
-  const loadJsonInput = document.createElement("input");
-  loadJsonInput.type = "file";
-  loadJsonInput.accept = ".json";
-  loadJsonInput.style.marginLeft = "1rem";
-  loadJsonInput.onchange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const loadedData = JSON.parse(event.target.result);
-        renderChecklistFromData(loadedData);
-      };
-      reader.readAsText(file);
-    }
-  };
-  container.appendChild(loadJsonInput);
+
 }
 
 function saveStructuredChecklist() {
