@@ -1,68 +1,105 @@
-
 /***************************************************/
 /* general */
 /***************************************************/
 
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f7f7f7;
-    color: #222;
-  }
-  
-  .container {
-    max-width: 900px;
-    margin: auto;
-    padding: 2rem;
-  }
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f7f7f7;
+  color: #222;
+}
 
-  .logo {
-    height: 120px;
-    width: auto;
-    display: block;
-    margin: 0 auto 1rem auto;
-  }
-  
-  
-  h1 {
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-  
-  .menu {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-  
-  button {
-    background-color: #ffcc00;
-    border: none;
-    padding: 0.7rem 1.5rem;
-    font-size: 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-  
-  button:hover {
-    background-color: #e6b800;
-  }
-  
-  #content {
-    background-color: white;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  label {
-    display: block;
-    margin: 0.4rem 0;
-  }
-  
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+}
+
+
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-left h1 {
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.logo {
+  height: 120px;
+  width: auto;
+  display: block;
+  margin: 0 auto 1rem auto;
+
+}
+
+.translate-box {
+  font-size: 0.9rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+
+h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.menu {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+button {
+  background-color: #ffcc00;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #e6b800;
+}
+
+#content {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  display: block;
+  margin: 0.4rem 0;
+}
+
+.note-field {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.5rem;
+  padding: 0.4rem;
+  font-size: 1rem;
+}
+
 
 /***************************************************/
 /* Markdown content styling */
@@ -78,12 +115,15 @@ body {
   overflow-x: auto;
 }
 
-.markdown h1, .markdown h2, .markdown h3 {
+.markdown h1,
+.markdown h2,
+.markdown h3 {
   margin-top: 1.5em;
   color: #333;
 }
 
-.markdown ul, .markdown ol {
+.markdown ul,
+.markdown ol {
   padding-left: 2rem;
   margin-bottom: 1rem;
 }
@@ -109,7 +149,8 @@ body {
   margin: 1rem 0;
 }
 
-.markdown th, .markdown td {
+.markdown th,
+.markdown td {
   border: 1px solid #ddd;
   padding: 0.6rem;
   text-align: left;

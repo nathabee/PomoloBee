@@ -88,3 +88,27 @@ function saveStructuredChecklist() {
 function loadChecklist() {
   loadStructuredChecklist();
 }
+
+//display markdown
+async function loadMarkdown(file) {
+  const res = await fetch(file);
+  return await res.text();
+}
+
+
+// 📌 Handle all .md links as markdown-rendered pages
+document.addEventListener("DOMContentLoaded", () => {
+  const docLinks = document.querySelectorAll(".doc-list a");
+  docLinks.forEach(link => {
+    if (link.href.endsWith(".md")) {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const file = link.getAttribute("href");
+        loadMarkdown(file).then(md => {
+          document.getElementById("content").innerHTML =
+            `<div class="markdown">${marked.parse(md)}</div>`;
+        });
+      });
+    }
+  });
+});
