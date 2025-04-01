@@ -293,6 +293,7 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - create a json with a checklist of app install
   - styles of github page in harmony with svg
   - export report in json format that can be reused with picker, reload report for completion
+  - also track meta data in report (date,version android...etc)
 - **Theme**: App developpement : githubpage to display in multilanguage project and manage App test report
  
 
