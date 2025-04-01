@@ -1,0 +1,47 @@
+[
+  {
+    "section": "Installation Behavior",
+    "items": [
+      {
+        "test": "Test",
+        "expected": "Expected Outcome",
+        "state": ""
+      },
+      {
+        "test": "------",
+        "expected": "------------------",
+        "state": ""
+      },
+      {
+        "test": "App requests permissions (CAMERA, READ/WRITE)",
+        "expected": "System permission dialog shown",
+        "state": ""
+      },
+      {
+        "test": "App copies initial assets to `/sdcard/PomoloBee/` on first run",
+        "expected": "Files exist after install: `config/fruits.json` etc.",
+        "state": ""
+      }
+    ]
+  },
+  {
+    "section": "Drawer Menu Navigation",
+    "items": [
+      {
+        "test": "Test",
+        "expected": "Navigate To",
+        "state": ""
+      },
+      {
+        "test": "------",
+        "expected": "-------------",
+        "state": ""
+      },
+      {
+        "test": "Tap `Camera`",
+        "expected": "CameraScreen",
+        "state": ""
+      }
+    ]
+  }
+]

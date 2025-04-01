@@ -1,64 +1,80 @@
-// Load and render Markdown using marked.js
-async function loadMarkdown(file) {
-  const res = await fetch(file);
-  return await res.text();
-}
+// Load and render structured checklist JSON
+async function loadStructuredChecklist() {
+  const res = await fetch("App_Test_checklist.json");
+  const data = await res.json();
 
-// Render checklist interactively
-function parseChecklist(md) {
-  const lines = md.split("\n");
-  let output = "<ul class='checklist'>";
-  for (let line of lines) {
-    const match = line.match(/^- \[( |x)] (.+)/);
-    if (match) {
-      const checked = match[1] === "x";
-      const label = match[2];
-      output += `<li><label><input type="checkbox" ${checked ? "checked" : ""}> ${label}</label></li>`;
-    } else if (line.trim() === "") {
-      output += "";
-    } else if (line.startsWith("##")) {
-      const heading = line.replace(/^##+/, "").trim();
-      output += `</ul><h3>${heading}</h3><ul class='checklist'>`;
-    } else if (line.startsWith("#")) {
-      const heading = line.replace(/^#+/, "").trim();
-      output += `</ul><h2>${heading}</h2><ul class='checklist'>`;
-    }
-  }
-  output += "</ul>";
-  return output;
-}
+  const container = document.getElementById("content");
+  container.innerHTML = `<h2>✅ Interactive App Test Checklist</h2>`;
 
+  data.forEach((section, secIndex) => {
+    const sectionDiv = document.createElement("div");
+    sectionDiv.classList.add("checklist-section");
 
-// Load Project Presentation
-function loadPresentation() {
-  loadMarkdown("presentation.md").then(text => {
-    document.getElementById("content").innerHTML =
-      `<div class='markdown'>${marked.parse(text)}</div>`;
+    const title = document.createElement("h3");
+    title.textContent = section.section;
+    sectionDiv.appendChild(title);
+
+    section.items.forEach((item, itemIndex) => {
+      const row = document.createElement("div");
+      row.classList.add("checklist-item");
+
+      const label = document.createElement("p");
+      label.innerHTML = `<strong>${item.test}</strong><br><em>${item.expected}</em>`;
+      row.appendChild(label);
+
+      const options = ["Pass", "Partial", "Fail"];
+      const name = `check-${secIndex}-${itemIndex}`;
+      options.forEach(opt => {
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = name;
+        input.value = opt;
+
+        const radioLabel = document.createElement("label");
+        radioLabel.style.marginRight = "1rem";
+        radioLabel.appendChild(input);
+        radioLabel.append(` ${opt}`);
+        row.appendChild(radioLabel);
+      });
+
+      const note = document.createElement("input");
+      note.type = "text";
+      note.placeholder = "(Optional) Notes if Partial/Fail";
+      note.classList.add("note-field");
+      row.appendChild(note);
+
+      sectionDiv.appendChild(row);
+    });
+
+    container.appendChild(sectionDiv);
   });
+
+  const saveBtn = document.createElement("button");
+  saveBtn.textContent = "💾 Save Checklist Report";
+  saveBtn.onclick = saveStructuredChecklist;
+  container.appendChild(saveBtn);
 }
 
-// Load Interactive Checklist
-function loadChecklist() {
-  loadMarkdown("App_Test_ChecklistTemplate.md").then(md => {
-    const checklistHtml = parseChecklist(md);
-    document.getElementById("content").innerHTML = `
-      <h2>✅ Interactive App Test Checklist</h2>
-      <div id='checklist' class='markdown'>${checklistHtml}</div>
-      <button onclick="saveChecklist()">💾 Save Checklist Report</button>
-    `;
-  });
-}
+function saveStructuredChecklist() {
+  const sections = document.querySelectorAll(".checklist-section");
+  let lines = [`# App Test Checklist\n`, `Date: ${new Date().toISOString().split('T')[0]}\n`];
 
-// Save checklist to file
-function saveChecklist() {
-  const checkboxes = document.querySelectorAll('#checklist input[type="checkbox"]');
-  const lines = Array.from(checkboxes).map(cb => {
-    const mark = cb.checked ? "x" : " ";
-    const label = cb.parentElement.textContent.trim();
-    return `- [${mark}] ${label}`;
-  });
-  const content = `# App Test Checklist\n\nDate: ${new Date().toISOString().split('T')[0]}\n\n` + lines.join("\n");
+  sections.forEach(section => {
+    const heading = section.querySelector("h3").textContent;
+    lines.push(`\n## ${heading}`);
 
+    const items = section.querySelectorAll(".checklist-item");
+    items.forEach(item => {
+      const testLabel = item.querySelector("p").innerText.split("\n")[0];
+      const selected = item.querySelector("input[type='radio']:checked");
+      const note = item.querySelector(".note-field").value;
+      const status = selected ? selected.value : "Not marked";
+
+      lines.push(`- **${testLabel}** — ${status}${note ? `: ${note}` : ""}`);
+    });
+  });
+
+  const content = lines.join("\n");
   const blob = new Blob([content], { type: 'text/markdown' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -68,19 +84,7 @@ function saveChecklist() {
   URL.revokeObjectURL(url);
 }
 
-// 📌 New: Handle all .md links as markdown-rendered pages
-document.addEventListener("DOMContentLoaded", () => {
-  const docLinks = document.querySelectorAll(".doc-list a");
-  docLinks.forEach(link => {
-    if (link.href.endsWith(".md")) {
-      link.addEventListener("click", (e) => {
-        e.preventDefault();
-        const file = link.getAttribute("href");
-        loadMarkdown(file).then(md => {
-          document.getElementById("content").innerHTML =
-            `<div class="markdown">${marked.parse(md)}</div>`;
-        });
-      });
-    }
-  });
-});
+// Swap to use structured checklist instead of raw markdown one
+function loadChecklist() {
+  loadStructuredChecklist();
+}
