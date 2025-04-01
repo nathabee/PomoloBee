@@ -290,7 +290,7 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - started a android unit test phase on 2025-04-01  
   - look for a solution to run the check list from github page
   - create docs for the github page (renamed documentation folder in docs and changed github hooks), add index.html. main.js, style.cs and multilanguage presentation.md
-  - add .nojekill in the github page
+  - add .nojekill in the github page, list of all docs, link to github
 - **Theme**: App developpement
 
 
