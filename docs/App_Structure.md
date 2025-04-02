@@ -43,7 +43,7 @@
     - [**ImageRepository.kt**](#imagerepositorykt)
     - [**OrchardRepository.kt**](#orchardrepositorykt)
     - [**SettingsRepository.kt** *optional but recommended*](#settingsrepositorykt-optional-but-recommended)
-- [**Summary**](#summary)
+  - [**Folder overview**](#folder-overview)
 <!-- TOC END -->
  
 </details>
@@ -483,7 +483,7 @@ Wraps:
 
 ---
 
-# **Summary**
+## **Folder overview**
 | **📂 Folder** | **Purpose** |
 |--------------|------------|
 | `MainActivity.kt` | **Entry point** of the app, initializes UI & navigation |
@@ -499,3 +499,135 @@ Wraps:
 | `network/` | **Retrofit interfaces and API config** |
 
 --- 
+
+
+---
+
+ ## Data architecture 
+ 
+ ### Data storage
+
+
+| **Key (DataStore)** | **Purpose** | **Method in ViewModel** | **Type** | **Used In** |
+|---------------------|-------------|--------------------------|----------|-------------|
+| `storage_root_path` | Root folder | `storageRoot`, `updateStorageRoot()` | StateFlow + suspend | `InitScreen`, `SettingsScreen` |
+| *(derived)* | Config path | `configDirectory` | Computed | `SettingsScreen` |
+| *(derived)* | Image path | `imageDirectory` | Computed | `SettingsScreen` |
+| *(derived)* | Root fallback | `effectiveStorageRoot` | Computed | Internal logic |
+| *(derived)* | Setup check | `isSetupComplete` | Computed | `PomoloBeeApp`, `InitScreen` |
+| `sync_mode` | Sync strategy | `syncMode`, `updateSyncMode()` | StateFlow + suspend | `SettingsScreen` |
+| `api_endpoint` | Server URL | `apiEndpoint`, `updateApiEndpoint()` | StateFlow + suspend | `SettingsScreen` |
+| `media_endpoint` | Media server URL | `mediaEndpoint`, `updateMediaEndpoint()` | StateFlow + suspend | `SettingsScreen` |
+| `debug_enabled` | Debug features toggle | `isDebug`, `updateDebugMode()` | StateFlow + suspend | `SettingsScreen` |
+| `api_version` | Backend version synced | `apiVersion`, `updateApiVersion()` | StateFlow + suspend | `SettingsScreen` |
+| `last_sync_date` | Sync timestamp | `lastSyncDate`, `updateLastSync()` | StateFlow + suspend | `SettingsScreen` |
+| `selected_field` | Selected field ID | `selectedFieldId`, `updateSelectedField()` | StateFlow + suspend | `OrchardScreen`, `CameraScreen` |
+| `selected_row` | Selected row ID | `selectedRowId`, `updateSelectedRow()` | StateFlow + suspend | `SvgMapScreen`, `CameraScreen` |
+
+
+ 
+ ### example from storage to screen
+  
+ - example : `media_endpoint`**  
+ 
+
+---
+#### What is `media_endpoint`?
+
+- It’s a **user-configurable** URL.
+- Stored as a string in `DataStore` under the key `"media_endpoint"`.
+- Exposed via `UserPreferences`, accessed and mutated through `SettingsViewModel`.
+
+---
+
+#### ️ How it’s defined in the code
+
+##### In `UserPreferences.kt`
+
+```kotlin
+fun getMediaEndpoint(): Flow<String?> =
+    context.dataStore.data.map { it[MEDIA_ENDPOINT_KEY] }
+
+suspend fun setMediaEndpoint(value: String) {
+    context.dataStore.edit { it[MEDIA_ENDPOINT_KEY] = value }
+}
+```
+
+This gives us:
+- A **Flow** of the current value (`null` if not set)
+- A **suspend** setter to store a new value
+
+---
+
+#### In `SettingsViewModel.kt`
+
+##### Reading
+
+```kotlin
+val mediaEndpoint = prefs.getMediaEndpoint().stateIn(
+    viewModelScope, SharingStarted.Eagerly, ""
+)
+```
+
+This gives you:
+- `StateFlow<String?>` → which can be **observed in Compose** using `.collectAsState()`
+- It **reactively updates** if the stored value changes
+
+##### Writing
+
+```kotlin
+fun updateMediaEndpoint(value: String) = viewModelScope.launch {
+    prefs.setMediaEndpoint(value)
+}
+```
+
+This wraps the `UserPreferences` write method in coroutine scope for safe Compose usage.
+
+---
+
+#### ️ In `SettingsScreen.kt` the UI
+
+##### Reading
+
+```kotlin
+val mediaEndpoint by viewModel.mediaEndpoint.collectAsState()
+```
+
+- This makes the value available inside the screen.
+- It’s used to **pre-fill** the TextField when the screen loads.
+
+##### Writing
+
+```kotlin
+TextField(
+    value = mediaInput,
+    onValueChange = { mediaInput = it },
+    modifier = Modifier.fillMaxWidth()
+)
+
+Button(onClick = {
+    scope.launch {
+        viewModel.updateMediaEndpoint(mediaInput)
+    }
+}) {
+    Text("💾 Save Settings")
+}
+```
+
+- User types a new value → stored in `mediaInput`
+- On button click, `viewModel.updateMediaEndpoint(...)` is called
+
+---
+
+#### TL;DR Summary
+
+| Layer | Code | Purpose |
+|-------|------|---------|
+| `UserPreferences` | `getMediaEndpoint()` + `setMediaEndpoint()` | Raw storage/retrieval |
+| `SettingsViewModel` | `val mediaEndpoint`, `fun updateMediaEndpoint()` | Reactive access + save logic |
+| `SettingsScreen` | `collectAsState()`, `TextField`, `Button` | Display + update via ViewModel only |
+
+---
+
+✅ **You never call `prefs.setMediaEndpoint(...)` in the screen directly** — only the ViewModel does that. The screen only observes or triggers updates through the ViewModel.
+ 

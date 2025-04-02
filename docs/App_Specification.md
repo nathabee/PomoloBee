@@ -46,6 +46,11 @@ Since **video processing is not in scope right now**, we will focus only on **im
   - [**`OrchardScreen`**](#orchardscreen)
     - [**Purpose**](#purpose)
     - [**Wireframe**](#wireframe)
+  - [**`InitScreen`**](#initscreen)
+    - [**Purpose**](#purpose)
+  - [What It Does](#what-it-does)
+    - [Behavior Flow](#behavior-flow)
+    - [Wireframe](#wireframe)
   - [**ℹ️ `AboutScreen`**](#i-aboutscreen)
     - [**Purpose**](#purpose)
     - [**Updated Wireframe**](#updated-wireframe)
@@ -94,9 +99,11 @@ Since **video processing is not in scope right now**, we will focus only on **im
 # **PomoloBeeApp Workflow**
 
 ## **Screen Flow Diagram**
-```mermaid
+```mermaid 
 graph TD  
-  A[📷 CameraScreen] -->|User selects image| B[🖼️ Image Preview]
+  I[🛑 No storage root yet] --> IS[⚙️ InitScreen]
+  IS --> A[📷 CameraScreen]
+  A -->|User selects image| B[🖼️ Image Preview]
   B -->|Select Field & Row| L[📍 LocationScreen]
   L -->|Select Field| L1[Field Selected]
   L1 -->|Dropdown Row| L2[Row Selected from Dropdown]
@@ -120,6 +127,8 @@ graph TD
   A --> H1[⚙️ SettingsScreen]
   A --> H2[🌳 OrchardScreen]
   H2 -->|Visualize Field| M
+ 
+
 
 ```
 
@@ -307,6 +316,13 @@ The app now shows the selected field and row.
 - **Triggered API Calls:**
 **none**    
 - All field/row data shown in this screen is retrieved from `OrchardCache`.
+
+- **logic**
+- User taps on a path in the SVG.
+- That path has an ID like row_2557 → extract 2557 as rowId.
+- Using: the current fieldId (we already know it from location.field.fieldId) and the tapped rowId
+    - look up the Row object and its FruitType from the OrchardCache.
+    - Then show this info in a Dialog (or bottom sheet, but dialog is easier to start).
 
 
 
@@ -554,13 +570,69 @@ This screen enables users to:
 The "Visualize" button allows users to preview the layout of a field. Unlike the `LocationScreen`, row selection is **optional** and no changes are applied.
 ---
 
-- ✅ **API Calls (Read-Only):**
-  - in cloud the synchronisation is made in the settings from `GET /api/locations/` (used to fetch fields and rows in a single request)
+ 
+ -
 
+  
 
-- All field/row data shown in this screen is retrieved from `OrchardCache`.
+## **`InitScreen`**
+
+### **Purpose**
+
+`InitScreen` is the **first screen shown** after permission is granted, when the app detects that the required initial storage root path is not configured yet.
+
+This is the user's entry point to:
+- **Choose or confirm** a default storage root
+- select a folder on SD card
+- Persist this information for all image/config storage
+
+It ensures that:
+- Images are saved in a known, user-approved location
+- App assets and config files can be copied there
+- Further screens (like Camera, Processing, Location) can work properly
+
 ---
 
+## What It Does
+
+| Feature                | Description                                                                 |
+|------------------------|-----------------------------------------------------------------------------|
+| Shows default path     | Uses the internal app storage path (via ViewModel logic)                    |
+| Allows custom path     | User can type or select SD card folder (future: folder picker)              |
+| Stores via ViewModel   | Calls `updateStorageRoot(path)` to persist in `UserPreferences`             |
+| Blocks rest of app     | App does **not** navigate until this screen is completed                     |
+
+
+
+### Behavior Flow
+
+1. User opens app → no storage path saved → `InitScreen` shows.
+2. User types a custom path OR clicks **"Use Default"**.
+3. Path is saved in `DataStore` through the ViewModel.
+4. `onSetupComplete()` tells `MainActivity` to load main UI.
+5. `copyAssetsIfNotExists()` is triggered once storage root exists.
+
+
+
+---
+
+### Wireframe
+
+```
++-----------------------------------+
+| 🐝 PomoloBee - Initial Setup      |
+|-----------------------------------|
+| Configure your storage:           |
+|                                   |
+| [ /storage/emulated/0/PomoloBee ] |
+| [ Use Default ]   [ Select Folder ] |
+|                                   |
+| [ Save and Continue ]             |
++-----------------------------------+
+```
+
+---
+ 
 ## **ℹ️ `AboutScreen`**
 
 

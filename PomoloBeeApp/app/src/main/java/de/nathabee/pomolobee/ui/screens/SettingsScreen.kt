@@ -7,14 +7,13 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import de.nathabee.pomolobee.cache.OrchardCache
-import de.nathabee.pomolobee.repository.ConnectionRepository.syncOrchard
-import de.nathabee.pomolobee.repository.ConnectionRepository.testConnection
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 import java.util.*
 import androidx.compose.ui.platform.LocalContext
+import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 
 @Composable
 fun SettingsScreen(
@@ -35,7 +34,9 @@ fun SettingsScreen(
     val apiEndpoint by viewModel.apiEndpoint.collectAsState()
     val syncMode by viewModel.syncMode.collectAsState()
 
-    val configPath by viewModel.configPath.collectAsState()
+    // val configPath by viewModel.configPath.collectAsState()
+    val configPath by viewModel.configDirectory.collectAsState()
+
     val mediaEndpoint by viewModel.mediaEndpoint.collectAsState()
     val isDebug by viewModel.isDebug.collectAsState()
     val apiVersion by viewModel.apiVersion.collectAsState()
@@ -54,8 +55,16 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         // Cached fields and fruits
-        Text("🧭 Fields Cached: ${OrchardCache.locations.size}")
-        Text("🍏 Fruits Cached: ${OrchardCache.fruits.size}")
+
+        val orchardViewModel: OrchardViewModel = viewModel()
+
+        val fieldCount by orchardViewModel.fieldCount.collectAsState()
+        val fruitCount by orchardViewModel.fruitCount.collectAsState()
+
+        Text("🧭 Fields Cached: $fieldCount")
+        Text("🍏 Fruits Cached: $fruitCount")
+
+
         Spacer(modifier = Modifier.height(16.dp))
 
         // Sync mode selection
@@ -107,6 +116,7 @@ fun SettingsScreen(
             Text("💾 Save Settings")
         }
 
+
         Spacer(modifier = Modifier.height(24.dp))
 
         // Config path display
@@ -117,8 +127,8 @@ fun SettingsScreen(
 
         // Test connection button
         Button(onClick = {
-            scope.launch {
-                connectionStatus = if (testConnection(context)) "✅ Connection OK" else "❌ Connection failed"
+            viewModel.performConnectionTest { success ->
+                connectionStatus = if (success) "✅ Connection OK" else "❌ Connection failed"
             }
         }) {
             Text("🔌 Test Connection")
@@ -129,8 +139,8 @@ fun SettingsScreen(
 
         // Sync now button
         Button(onClick = {
-            scope.launch {
-                syncMessage = syncOrchard(context)
+            viewModel.performLocalSync { msg ->
+                syncMessage = msg
             }
         }) {
             Text("🔄 Sync Now")

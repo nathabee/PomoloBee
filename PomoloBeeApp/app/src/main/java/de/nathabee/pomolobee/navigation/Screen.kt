@@ -8,6 +8,8 @@ sealed class Screen(val route: String, val title: String) {
     object Orchard : Screen("orchard", "Orchard")
     object About : Screen("about", "About")
     object Location : Screen("location", "Location")
+    object Init : Screen("init", "Initialisation")
+
     object SvgMap : Screen("svgmap/{fieldId}", "SVG Map") {
         fun createRoute(fieldId: Int) = "svgmap/$fieldId"
     }

@@ -1,78 +1,86 @@
 package de.nathabee.pomolobee.repository
 
-import de.nathabee.pomolobee.data.UserPreferences
 import android.content.Context
+import android.net.Uri
 import android.util.Log
+import androidx.documentfile.provider.DocumentFile
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import de.nathabee.pomolobee.cache.OrchardCache
-import de.nathabee.pomolobee.model.FruitResponse
-import de.nathabee.pomolobee.model.LocationResponse
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.io.File
+import de.nathabee.pomolobee.model.FruitType
+import de.nathabee.pomolobee.model.Location
 import java.net.HttpURLConnection
 import java.net.URL
-import com.google.gson.Gson
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-
 
 object ConnectionRepository {
 
-    suspend fun testConnection(context: Context): Boolean {
-        val prefs = UserPreferences(context)
-        val apiUrl = prefs.getApiEndpoint().firstOrNull()
-        val mediaUrl = prefs.getMediaEndpoint().firstOrNull()
-
+    suspend fun testConnection(
+        apiUrl: String,
+        mediaUrl: String,
+        onVersionRetrieved: (String) -> Unit
+    ): Boolean {
         return try {
-            val apiCheck = apiUrl?.let {
-                val conn = URL("$it/api/ml/version/").openConnection() as HttpURLConnection
+            val apiCheck = runCatching {
+                val conn = URL("$apiUrl/api/ml/version/").openConnection() as HttpURLConnection
                 conn.requestMethod = "GET"
                 conn.connect()
                 if (conn.responseCode == 200) {
                     val version = conn.inputStream.bufferedReader().readText().trim()
-                    prefs.setApiVersion(version) // ✅ Save version
+                    onVersionRetrieved(version)
                     true
                 } else false
-            } ?: false
+            }.getOrDefault(false)
 
-            val mediaCheck = mediaUrl?.let {
-                val conn = URL("$it/svg/fields/default_map.svg").openConnection() as HttpURLConnection
+            val mediaCheck = runCatching {
+                val conn = URL("$mediaUrl/svg/fields/default_map.svg").openConnection() as HttpURLConnection
                 conn.requestMethod = "HEAD"
                 conn.connect()
                 conn.responseCode == 200
-            } ?: false
+            }.getOrDefault(false)
 
             apiCheck && mediaCheck
         } catch (e: Exception) {
-            Log.e("Repository", "Connection test failed", e)
+            Log.e("ConnectionRepository", "Test failed", e)
             false
         }
     }
 
-    suspend fun syncOrchard(context: Context): String = withContext(Dispatchers.IO) {
-        val prefs = UserPreferences(context)
-        val mode = prefs.getSyncMode().firstOrNull()
-
-        return@withContext if (mode == "local") {
-            try {
-                val configDir = prefs.getConfigPath().first()
-
-                val fruitsJson = File(configDir, "fruits.json").readText()
-                val locationsJson = File(configDir, "locations.json").readText()
-
-                val fruits = Gson().fromJson(fruitsJson, FruitResponse::class.java)
-                val locations = Gson().fromJson(locationsJson, LocationResponse::class.java)
-
-                OrchardCache.fruits = fruits.data.fruits
-                OrchardCache.locations = locations.data.locations
-
-                "✅ Synced from local files"
-            } catch (e: Exception) {
-                Log.e("Repository", "Local sync failed", e)
-                "❌ Failed to load local data"
-            }
-        } else {
-            "❌ Cloud sync not supported yet"
+    fun syncOrchard(context: Context, configDirUri: Uri): String {
+        val configDir = DocumentFile.fromTreeUri(context, configDirUri)
+        if (configDir == null || !configDir.isDirectory) {
+            return "❌ Invalid config directory"
         }
+
+        val fruitsFile = configDir.findFile("fruits.json")
+        val locationsFile = configDir.findFile("locations.json")
+
+        if (fruitsFile == null || locationsFile == null) {
+            return "❌ Required config files missing"
+        }
+
+        val gson = Gson()
+        val fruitsList = readListFromJson<FruitType>(context, fruitsFile.uri, gson)
+        val locationsList = readListFromJson<Location>(context, locationsFile.uri, gson)
+
+        if (fruitsList == null || locationsList == null) {
+            return "❌ Failed to parse config files"
+        }
+
+        OrchardCache.load(fruitsList, locationsList)
+        return "✅ Orchard configuration synced"
+    }
+}
+
+// Generic list reader
+inline fun <reified T> readListFromJson(context: Context, fileUri: Uri, gson: Gson): List<T>? {
+    return try {
+        context.contentResolver.openInputStream(fileUri)?.use { stream ->
+            val json = stream.bufferedReader().readText()
+            val type = TypeToken.getParameterized(List::class.java, T::class.java).type
+            gson.fromJson(json, type)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }

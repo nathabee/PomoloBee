@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.play.services.awareness)
     implementation(libs.protolite.well.known.types)
+    implementation(libs.androidx.documentfile)
 
     // Testing
     testImplementation(libs.junit)

@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _102 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _108 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -29,6 +29,7 @@
   - [Week 4 Dates from Mars 31 to Avril 6 2025](#week-4-dates-from-mars-31-to-avril-6-2025)
     - [Mars 31 2025](#mars-31-2025)
     - [Avril 01 2025](#avril-01-2025)
+    - [Avril 02 2025](#avril-02-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -296,9 +297,20 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - also track meta data in report (date,version android...etc)
   -  started a android unit test phase on 2025-04-01 -- anomalie with PERMISSION  after copy and sorage not in preference but hardcoded
 - **Theme**: App developpement : githubpage to display in multilanguage project and manage App test report
- 
   
+
+
+###  Avril 02 2025
+- **Hours Worked**: 6 hours
+- **Tasks**:
+- Refactored application architecture:
+  - Updated flow to follow: **[UI Composables] ⇄ [OrchardViewModel] ⇄ [OrchardRepository] ⇄ [JSON / API / Files]**
+  - Reorganized separation of concerns: **[Screen] ⇄ [ViewModel] ⇄ [Preferences + Repository (pure I/O)] ⇄ [Cache / Filesystem / Remote]**
+- Migrated all string-based file paths to **Storage Access Framework (SAF)** using `Uri` exclusively.
+- Resolved type mismatches, standardized URI usage across **FolderPicker**, **InitScreen**, and **SettingsViewModel**.
   
+**Theme**: Application Development (architecture + SAF migration)
+
   
 - **PENDING**
   - started a android unit test phase on 2025-04-01  

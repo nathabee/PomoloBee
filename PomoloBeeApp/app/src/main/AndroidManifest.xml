@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+
+
     <!-- ✅ Declare the camera hardware feature (set to not required!) -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 

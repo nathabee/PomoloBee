@@ -1,9 +1,8 @@
 package de.nathabee.pomolobee.cache
 
-import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.model.FruitType
+import de.nathabee.pomolobee.model.Location
 
-// cache/OrchardCache.kt
 object OrchardCache {
     var fruits: List<FruitType> = emptyList()
     var locations: List<Location> = emptyList()
@@ -14,5 +13,10 @@ object OrchardCache {
     fun clear() {
         fruits = emptyList()
         locations = emptyList()
+    }
+
+    fun load(fruitList: List<FruitType>, locationList: List<Location>) {
+        fruits = fruitList
+        locations = locationList
     }
 }

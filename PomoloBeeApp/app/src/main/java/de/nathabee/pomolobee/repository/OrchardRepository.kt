@@ -12,23 +12,16 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
 
 
-
+// OrchardRepository.kt
 object OrchardRepository {
 
-    fun loadAllConfig(context: Context): Boolean {
+    fun loadAllConfigFromPath(configDir: String): Boolean {
         return try {
-            val userPrefs = UserPreferences(context)
-
-            val configDir = runBlocking {
-                userPrefs.getConfigPath().first()
-            }
-
-
-
-
-
             val locationsJson = File(configDir, "locations.json").readText()
+            val fruitsJson = File(configDir, "fruits.json").readText()
+
             val locationResponse = Gson().fromJson(locationsJson, LocationResponse::class.java)
+            val fruitResponse = Gson().fromJson(fruitsJson, FruitResponse::class.java)
 
             val validLocations = locationResponse.data.locations.filter {
                 it.field.fieldId != null
@@ -40,9 +33,6 @@ object OrchardRepository {
             }
 
             OrchardCache.locations = validLocations
-
-            val fruitsJson = File(configDir, "fruits.json").readText()
-            val fruitResponse = Gson().fromJson(fruitsJson, FruitResponse::class.java)
             OrchardCache.fruits = fruitResponse.data.fruits
 
             true
