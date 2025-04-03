@@ -39,7 +39,12 @@ Use Android Studio → `View > Tool Windows > Logcat`
 
 ---
 ## Test list
-Test report will be stored in documentation/Reports
-use the most recent checklist, save it with current datum 
-use the report Template, save it with current datum 
-run the test
+
+- go to thje github  page : https://nathabee.github.io/PomoloBee/
+- click button "App Test Check List"
+- fill meta data in "Test Session Info"
+- there is 2 button for 2 choices :
+- open a "new app test checklist" (per default opened, can be used to reset a test)
+- open a "JSON checklist" (to continue working on a JSON exported locally / on the cloud last time)
+- fill test result
+- export as JSON (to keep working on the checklist ) at the end or as MD (to get a finalized output)

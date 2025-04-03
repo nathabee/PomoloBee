@@ -6,14 +6,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import de.nathabee.pomolobee.cache.OrchardCache
-import de.nathabee.pomolobee.viewmodel.SettingsViewModel
-import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 import java.util.*
 import androidx.compose.ui.platform.LocalContext
+
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
+import de.nathabee.pomolobee.ui.components.FolderPicker
+import de.nathabee.pomolobee.viewmodel.SettingsViewModel
+import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
+import de.nathabee.pomolobee.util.copyAssetsIfNotExists
+
 
 @Composable
 fun SettingsScreen(
@@ -34,8 +37,6 @@ fun SettingsScreen(
     val apiEndpoint by viewModel.apiEndpoint.collectAsState()
     val syncMode by viewModel.syncMode.collectAsState()
 
-    // val configPath by viewModel.configPath.collectAsState()
-    val configPath by viewModel.configDirectory.collectAsState()
 
     val mediaEndpoint by viewModel.mediaEndpoint.collectAsState()
     val isDebug by viewModel.isDebug.collectAsState()
@@ -47,6 +48,28 @@ fun SettingsScreen(
     var selectedSyncMode by remember { mutableStateOf(syncMode ?: "local") }
     var connectionStatus by remember { mutableStateOf<String?>(null) }
     var syncMessage by remember { mutableStateOf<String?>(null) }
+
+    val orchardViewModel: OrchardViewModel = viewModel()
+
+
+
+    val storageRootUri by viewModel.storageRootUri.collectAsState()
+
+    var showFolderPicker by remember { mutableStateOf(false) }
+
+    if (showFolderPicker) {
+        FolderPicker(onFolderSelected = { selectedUri ->
+            showFolderPicker = false
+            scope.launch {
+                viewModel.setStorageRoot(selectedUri)
+                copyAssetsIfNotExists(context, selectedUri)
+                viewModel.configDirectory.value?.let { configUri ->
+                    orchardViewModel.loadLocalConfig(configUri, context)
+                }
+            }
+        })
+    }
+
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
 
@@ -119,11 +142,7 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Config path display
-        Text("📂 Image Path: ${configPath?.replace("/config", "/images")}")
-        Text("📂 Config Path: $configPath")
 
-        Spacer(modifier = Modifier.height(16.dp))
 
         // Test connection button
         Button(onClick = {
@@ -139,9 +158,10 @@ fun SettingsScreen(
 
         // Sync now button
         Button(onClick = {
-            viewModel.performLocalSync { msg ->
+            viewModel.performLocalSync(context) { msg ->
                 syncMessage = msg
             }
+
         }) {
             Text("🔄 Sync Now")
         }
@@ -150,5 +170,20 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Text("🧪 API Version: ${apiVersion ?: "Unknown"}")
         Text("🐞 Debug: ${if (isDebug) "ON" else "OFF"}")
+
+        // ✅ Change storage folder button
+        Button(
+            onClick = { showFolderPicker = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("📂 Change Storage Folder")
+        }
+
+
+
+        Text("📂 Storage Location: ${storageRootUri?.toString() ?: "Not set"}")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
     }
 }

@@ -13,23 +13,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
-import de.nathabee.pomolobee.navigation.NavGraph
-import de.nathabee.pomolobee.ui.components.DrawerMenu
-import de.nathabee.pomolobee.ui.theme.PomoloBeeTheme
-import de.nathabee.pomolobee.ui.screens.InitScreen
 import kotlinx.coroutines.launch
-
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+
+
+
+import de.nathabee.pomolobee.navigation.NavGraph
+import de.nathabee.pomolobee.ui.components.DrawerMenu
+import de.nathabee.pomolobee.ui.theme.PomoloBeeTheme
+import de.nathabee.pomolobee.ui.screens.InitScreen
 import de.nathabee.pomolobee.cache.OrchardCache
 import de.nathabee.pomolobee.ui.components.PermissionManager
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
+import de.nathabee.pomolobee.util.copyAssetsIfNotExists
 
 
 
@@ -81,59 +84,6 @@ class MainActivity : ComponentActivity() {
 
 }
 
-
-//###########################################################################
-
-fun copyAssetsIfNotExists(context: Context, treeUri: Uri) {
-    val assetManager = context.assets
-    val assetStructure = listOf(
-        "config/fruits.json",
-        "config/locations.json",
-        "fields/svg/C1_map.svg",
-        "fields/svg/default_map.svg",
-        "fields/background/C1.jpeg"
-    )
-
-    val rootDoc = DocumentFile.fromTreeUri(context, treeUri)
-
-    for (assetPath in assetStructure) {
-        val parts = assetPath.split("/")
-        val fileName = parts.last()
-        val subDirs = parts.dropLast(1)
-
-        // Walk or create the directory structure
-        var currentDir = rootDoc
-        for (dir in subDirs) {
-            currentDir = currentDir?.findFile(dir)?.takeIf { it.isDirectory }
-                ?: currentDir?.createDirectory(dir)
-        }
-
-        val existingFile = currentDir?.findFile(fileName)
-        if (existingFile == null) {
-            val mimeType = guessMimeType(fileName)
-            val destFile = currentDir?.createFile(mimeType, fileName)
-
-            if (destFile != null) {
-                assetManager.open(assetPath).use { input ->
-                    context.contentResolver.openOutputStream(destFile.uri)?.use { output ->
-                        input.copyTo(output)
-
-                    }
-                }
-            }
-        }
-    }
-}
-
-// Basic guess for MIME type
-fun guessMimeType(fileName: String): String {
-    return when {
-        fileName.endsWith(".json") -> "application/json"
-        fileName.endsWith(".svg") -> "image/svg+xml"
-        fileName.endsWith(".jpeg") || fileName.endsWith(".jpg") -> "image/jpeg"
-        else -> "application/octet-stream"
-    }
-}
 
 
 //###########################################################################
@@ -205,7 +155,7 @@ fun PomoloBeeApp(viewModel: SettingsViewModel) {
                 }
 
                 viewModel.configDirectory.value?.let { configUri ->
-                    orchardViewModel.loadLocalConfig(configUri)
+                    orchardViewModel.loadLocalConfig(configUri, context)
                 }
 
             }

@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _108 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _111 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -30,6 +30,7 @@
     - [Mars 31 2025](#mars-31-2025)
     - [Avril 01 2025](#avril-01-2025)
     - [Avril 02 2025](#avril-02-2025)
+    - [Avril 03 2025](#avril-03-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -312,6 +313,14 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
 **Theme**: Application Development (architecture + SAF migration)
 
   
+
+###  Avril 03 2025
+- **Hours Worked**: 3 hours
+- **Tasks**:
+- started a android unit test phase on 2025-04-03
+- still proble URI, got camera screen coded
+
+
 - **PENDING**
   - started a android unit test phase on 2025-04-01  
 

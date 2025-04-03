@@ -88,6 +88,7 @@ dependencies {
     // Coil for SVG support
     implementation(libs.coil)
     implementation(libs.coil.svg)
+    implementation(libs.coil.compose)
 
     //interface json
     implementation(libs.gson)

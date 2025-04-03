@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+import android.content.Context
+import android.net.Uri
+
 class OrchardViewModel : ViewModel() {
 
 
@@ -21,9 +24,9 @@ class OrchardViewModel : ViewModel() {
     private val _syncStatus = MutableStateFlow<String?>(null)
     val syncStatus: StateFlow<String?> = _syncStatus
 
-    fun loadLocalConfig(configPath: String) {
+    fun loadLocalConfig(configUri: Uri, context: Context) {
         viewModelScope.launch {
-            val success = OrchardRepository.loadAllConfigFromPath(configPath)
+            val success = OrchardRepository.loadAllConfigFromUri(context, configUri)
             if (success) {
                 _fruitCount.value = OrchardCache.fruits.size
                 _fieldCount.value = OrchardCache.locations.size
@@ -31,6 +34,7 @@ class OrchardViewModel : ViewModel() {
             _syncStatus.value = if (success) "✅ Config loaded" else "❌ Failed to load"
         }
     }
+
 
 }
 

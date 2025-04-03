@@ -11,6 +11,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import de.nathabee.pomolobee.ui.components.FolderPicker
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
+import de.nathabee.pomolobee.util.copyAssetsIfNotExists
+
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -20,6 +20,7 @@ Since **video processing is not in scope right now**, we will focus only on **im
     - [**Purpose**](#purpose)
     - [**Main UI Elements**](#main-ui-elements)
     - [**Wireframe**](#wireframe)
+    - [ALGORITHM FLOW](#algorithm-flow)
   - [**`LocationScreen`**](#locationscreen)
     - [**Purpose**](#purpose)
     - [**Main UI Elements**](#main-ui-elements)
@@ -224,6 +225,31 @@ The app now shows the selected field and row.
   - **None**
 
 📌 After saving, image is listed in ProcessingScreen > Unsent Images.
+ 
+### ALGORITHM FLOW
+
+1. **Storage Uri**: Loaded from DataStore via `SettingsViewModel` → used with `DocumentFile` API.
+
+2. **Image Capture**:
+   - `cameraImageUri`: created via `FileProvider`.
+   - `cameraLauncher.launch(uri)` opens native camera.
+   - Result is stored in `selectedImageUri`.
+
+3. **Gallery Picker**:
+   - Uses `GetContent()` launcher for `"image/*"`.
+   - Uri directly assigned to `selectedImageUri`.
+
+4. **Preview**:
+   - If `selectedImageUri` is not null, show preview with `AsyncImage`.
+
+5. **Save Image**:
+   - Uses `contentResolver.openInputStream(uri)` to load.
+   - Decodes to bitmap.
+   - Resizes to `800x600` (💡 ~200kB estimated).
+   - Uses `DocumentFile.createFile(...)` to create target SAF uri.
+   - Compresses and saves to output stream (`JPEG`, 85% quality).
+
+6. **Toast** on save success or error.
 
 ---
 

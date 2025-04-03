@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.webkit.JavascriptInterface
+import androidx.documentfile.provider.DocumentFile
 
 import de.nathabee.pomolobee.cache.OrchardCache
 import de.nathabee.pomolobee.model.Location
@@ -19,6 +20,7 @@ import de.nathabee.pomolobee.model.Row
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import java.io.File
+import de.nathabee.pomolobee.util.getSvgUriForLocation
 
 @Composable
 fun SvgMapScreen(
@@ -28,13 +30,14 @@ fun SvgMapScreen(
 ) {
     val context = LocalContext.current
     val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
-    val rootPath by viewModel.effectiveStorageRoot.collectAsState()
 
-    val svgFilePath = remember(rootPath, location) {
-        val fileName = location.field.svgMapUrl?.substringAfterLast("/") ?: "default_map.svg"
-        File("$rootPath/fields/svg/$fileName").takeIf { it.exists() }
-            ?: File("$rootPath/fields/svg/default_map.svg")
+
+    val storageRootUri by viewModel.storageRootUri.collectAsState()
+    val svgUri = remember(storageRootUri, location) {
+        storageRootUri?.let { getSvgUriForLocation(context, it, location) }
     }
+
+
 
     var selectedRowInfo by remember { mutableStateOf<Row?>(null) }
     val fruitName = selectedRowInfo?.let { OrchardCache.fruits.find { f -> f.fruitId == it.fruitId }?.name }
@@ -60,10 +63,12 @@ fun SvgMapScreen(
                         }
                     }, "Android")
 
+                    val svgHtml = svgUri?.let { "data=\"${it}\"" } ?: ""
+
                     val htmlContent = """
                         <html>
                         <body>
-                            <object id="svg" type="image/svg+xml" data="file://${svgFilePath.absolutePath}"></object>
+                            <object id="svg" type="image/svg+xml" $svgHtml></object>
                             <script>
                                 document.addEventListener("DOMContentLoaded", function() {
                                     const embed = document.getElementById("svg");
