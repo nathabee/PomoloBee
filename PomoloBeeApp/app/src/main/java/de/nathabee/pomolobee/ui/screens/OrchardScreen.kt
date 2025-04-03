@@ -20,6 +20,7 @@ fun OrchardScreen(navController: NavController) {
         items(locations) { location ->
             FieldCard(location = location, onVisualize = {
                 navController.navigate(Screen.SvgMap.createRoute(location.field.fieldId))
+
             })
 
 

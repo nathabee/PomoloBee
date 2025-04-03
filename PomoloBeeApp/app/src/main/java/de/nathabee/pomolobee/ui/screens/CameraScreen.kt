@@ -29,6 +29,7 @@ import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 
 import org.opencv.android.OpenCVLoader
 import coil.compose.AsyncImage
+import de.nathabee.pomolobee.util.getFriendlyFolderName
 import java.io.File
 
 
@@ -134,23 +135,30 @@ fun CameraScreen(navController: NavController) {
                 val resized = Bitmap.createScaledBitmap(originalBitmap, 800, 600, true)
 
                 val imageFile = docDir?.createFile("image/jpeg", "IMG_${System.currentTimeMillis()}.jpg")
-                imageFile?.uri?.let { targetUri ->
+                if (imageFile == null) {
+                    Toast.makeText(context, "❌ Failed to create file", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
+                imageFile.uri.let { targetUri ->
                     resolver.openOutputStream(targetUri)?.use { output ->
                         resized.compress(Bitmap.CompressFormat.JPEG, 85, output)
-
+                        val folderName = getFriendlyFolderName(context, imageDirectory!!)
+                        Toast.makeText(context, "✅ Image saved to $folderName", Toast.LENGTH_SHORT).show()
+                        Log.d("CameraScreen", "✅ Image saved to:  $folderName")
                     }
                 }
             } else {
                 Toast.makeText(context, "❌ No image or storage path", Toast.LENGTH_SHORT).show()
+                Log.e("CameraScreen", "No source image or storage URI set")
             }
         }) {
             Text("💾 Save Image Locally")
         }
 
+        Text("📂 Storage Location: ${imageDirectory?.let { getFriendlyFolderName(context, it) } ?: "❌ Not set"}")
 
 
-        Text("Storage URI: ${imageDirectory?.toString() ?: "❌ Not set"}")
-        Toast.makeText(context, "✅ Image saved", Toast.LENGTH_SHORT).show()
 
     }
 }

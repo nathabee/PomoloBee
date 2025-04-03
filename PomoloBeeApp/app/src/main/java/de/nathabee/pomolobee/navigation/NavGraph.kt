@@ -15,30 +15,24 @@ fun NavGraph(navController: NavHostController) {
         composable(Screen.Camera.route) { CameraScreen(navController) }
         composable(Screen.Processing.route) { ProcessingScreen() }
         composable(Screen.Settings.route) { SettingsScreen() }
-        composable(Screen.Orchard.route) { OrchardScreen( navController) }
+        composable(Screen.Orchard.route) { OrchardScreen(navController) }
         composable(Screen.About.route) { AboutScreen() }
         composable(Screen.Location.route) { LocationScreen(navController) }
 
-
-        composable("svgmap/{fieldId}") { backStackEntry ->
+        composable(Screen.SvgMap.route) { backStackEntry ->
             val fieldId = backStackEntry.arguments?.getString("fieldId")?.toIntOrNull()
             val location = OrchardCache.locations.find { it.field.fieldId == fieldId }
 
             if (location != null) {
-
-
                 SvgMapScreen(
                     location = location,
-                    onRawSelected = { rowId ->
-                        println("Row selected: $rowId") // Later use for selection
-                    },
+                    onRawSelected = { rowId -> println("Row selected: $rowId") },
                     onBack = { navController.popBackStack() }
                 )
             } else {
-                Text("Field not found")
+                Text("❌ Field not found")
             }
         }
-
 
     }
 }

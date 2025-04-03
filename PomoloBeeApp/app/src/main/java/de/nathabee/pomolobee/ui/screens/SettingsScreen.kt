@@ -16,45 +16,33 @@ import de.nathabee.pomolobee.ui.components.FolderPicker
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import de.nathabee.pomolobee.util.copyAssetsIfNotExists
+import de.nathabee.pomolobee.util.getFriendlyFolderName
 
 
 @Composable
 fun SettingsScreen(
-    navController: NavController? = null
+    navController: NavController? = null,
+    orchardViewModel: OrchardViewModel = viewModel() // you can override this from PomoloBeeApp
 ) {
-    // Get context
     val context = LocalContext.current
-
-    // Get SettingsViewModel using factory
-    val viewModel: SettingsViewModel = viewModel(
-        factory = SettingsViewModelFactory(context) // Pass context to factory
-    )
-
+    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
     val scope = rememberCoroutineScope()
 
-    // Collecting state values
     val lastSyncDate by viewModel.lastSyncDate.collectAsState()
     val apiEndpoint by viewModel.apiEndpoint.collectAsState()
     val syncMode by viewModel.syncMode.collectAsState()
-
-
     val mediaEndpoint by viewModel.mediaEndpoint.collectAsState()
     val isDebug by viewModel.isDebug.collectAsState()
     val apiVersion by viewModel.apiVersion.collectAsState()
 
-    // Mutable states for inputs
+
     var apiInput by remember { mutableStateOf(apiEndpoint ?: "") }
     var mediaInput by remember { mutableStateOf(mediaEndpoint ?: "") }
     var selectedSyncMode by remember { mutableStateOf(syncMode ?: "local") }
     var connectionStatus by remember { mutableStateOf<String?>(null) }
     var syncMessage by remember { mutableStateOf<String?>(null) }
 
-    val orchardViewModel: OrchardViewModel = viewModel()
-
-
-
     val storageRootUri by viewModel.storageRootUri.collectAsState()
-
     var showFolderPicker by remember { mutableStateOf(false) }
 
     if (showFolderPicker) {
@@ -63,9 +51,10 @@ fun SettingsScreen(
             scope.launch {
                 viewModel.setStorageRoot(selectedUri)
                 copyAssetsIfNotExists(context, selectedUri)
-                viewModel.configDirectory.value?.let { configUri ->
-                    orchardViewModel.loadLocalConfig(configUri, context)
-                }
+                orchardViewModel.loadLocalConfig(selectedUri, context)
+// ↓ Add after if you want to force recomposition
+                viewModel.invalidate()
+
             }
         })
     }
@@ -78,9 +67,6 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         // Cached fields and fruits
-
-        val orchardViewModel: OrchardViewModel = viewModel()
-
         val fieldCount by orchardViewModel.fieldCount.collectAsState()
         val fruitCount by orchardViewModel.fruitCount.collectAsState()
 
@@ -180,8 +166,9 @@ fun SettingsScreen(
         }
 
 
+        Text("📂 Storage Location: ${storageRootUri?.let { getFriendlyFolderName(context, it) } ?: "Not set"}")
 
-        Text("📂 Storage Location: ${storageRootUri?.toString() ?: "Not set"}")
+
 
         Spacer(modifier = Modifier.height(16.dp))
 

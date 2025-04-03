@@ -3,6 +3,7 @@ package de.nathabee.pomolobee
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -29,6 +30,7 @@ import de.nathabee.pomolobee.ui.theme.PomoloBeeTheme
 import de.nathabee.pomolobee.ui.screens.InitScreen
 import de.nathabee.pomolobee.cache.OrchardCache
 import de.nathabee.pomolobee.ui.components.PermissionManager
+import de.nathabee.pomolobee.ui.screens.SettingsScreen
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
@@ -136,31 +138,40 @@ fun PomoloBeeApp(viewModel: SettingsViewModel) {
     val storageRootUri by viewModel.storageRootUri.collectAsState()
     val isInitialized by viewModel.isSetupComplete.collectAsState()
 
-    val orchardViewModel: OrchardViewModel = viewModel()
+    val orchardViewModel: OrchardViewModel = viewModel() // ✅ good, used for state
     val setupState = remember { mutableStateOf(false) }
 
+    Log.d("PomoloBeeApp", "storageRootUri = $storageRootUri")
+    Log.d("PomoloBeeApp", "isInitialized = $isInitialized")
+    Log.d("PomoloBeeApp", "setupState = ${setupState.value}")
+
     if (!isInitialized || !setupState.value) {
+        Log.d("PomoloBeeApp", "Showing InitScreen...")
         InitScreen(onSetupComplete = { pickedUri ->
+            Log.d("PomoloBeeApp", "Folder picked: $pickedUri")
             viewModel.setStorageRoot(pickedUri)
             setupState.value = true
         })
-
     } else {
+        Log.d("PomoloBeeApp", "Launching AppScaffold...")
         AppScaffold(navController = navController)
 
+        // ✅ This is fine
         LaunchedEffect(storageRootUri) {
+            Log.d("PomoloBeeApp", "LaunchedEffect with storageRootUri = $storageRootUri")
+
             if (OrchardCache.locations.isEmpty()) {
+                Log.d("PomoloBeeApp", "OrchardCache is empty. Trying to copy assets and load config...")
+
                 storageRootUri?.let { uri ->
+                    Log.d("PomoloBeeApp", "Calling copyAssetsIfNotExists...")
                     copyAssetsIfNotExists(context, uri)
-                }
 
-                viewModel.configDirectory.value?.let { configUri ->
-                    orchardViewModel.loadLocalConfig(configUri, context)
+                    Log.d("PomoloBeeApp", "Calling loadLocalConfig with root...")
+                    orchardViewModel.loadLocalConfig(uri, context)
+                    viewModel.invalidate()
                 }
-
             }
         }
     }
 }
-
-

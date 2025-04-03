@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee.ui.screens
 
+import android.util.Log
 import android.widget.ImageView
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -36,6 +37,14 @@ fun SvgMapScreen(
     val svgUri = remember(storageRootUri, location) {
         storageRootUri?.let { getSvgUriForLocation(context, it, location) }
     }
+    LaunchedEffect(svgUri) {
+        Log.d("SvgMapScreen", "📍 SVG URI resolved to: $svgUri")
+    }
+    if (svgUri == null) {
+        Log.e("SvgMapScreen", "❌ SVG URI is null — check if svgMapUrl is missing or file not found.")
+    }
+    Log.d("SvgMapScreen", "🗺 svgMapUrl from location = ${location.field.svgMapUrl}")
+
 
 
 
@@ -43,29 +52,30 @@ fun SvgMapScreen(
     val fruitName = selectedRowInfo?.let { OrchardCache.fruits.find { f -> f.fruitId == it.fruitId }?.name }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        AndroidView(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            factory = { ctx ->
-                WebView(ctx).apply {
-                    settings.javaScriptEnabled = true
-                    addJavascriptInterface(object {
-                        @JavascriptInterface
-                        fun onRowClicked(rowId: String) {
-                            val id = rowId.removePrefix("row_").toIntOrNull()
-                            val row = location.rows.find { it.rowId == id }
-                            if (row != null) {
-                                this@apply.post {
-                                    selectedRowInfo = row
+        if (svgUri != null) {
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                factory = { ctx ->
+                    WebView(ctx).apply {
+                        settings.javaScriptEnabled = true
+                        addJavascriptInterface(object {
+                            @JavascriptInterface
+                            fun onRowClicked(rowId: String) {
+                                val id = rowId.removePrefix("row_").toIntOrNull()
+                                val row = location.rows.find { it.rowId == id }
+                                if (row != null) {
+                                    this@apply.post {
+                                        selectedRowInfo = row
+                                    }
                                 }
                             }
-                        }
-                    }, "Android")
+                        }, "Android")
 
-                    val svgHtml = svgUri?.let { "data=\"${it}\"" } ?: ""
+                        val svgHtml = "data=\"${svgUri}\""
 
-                    val htmlContent = """
+                        val htmlContent = """
                         <html>
                         <body>
                             <object id="svg" type="image/svg+xml" $svgHtml></object>
@@ -88,12 +98,23 @@ fun SvgMapScreen(
                         </html>
                     """.trimIndent()
 
-                    loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+                        loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+                    }
                 }
+            )
+        } else {
+            // Show a message or loader while waiting for svgUri to be available
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = androidx.compose.ui.Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+        }
 
+        Spacer(modifier = Modifier.height(8.dp))
     }
 
     selectedRowInfo?.let { row ->

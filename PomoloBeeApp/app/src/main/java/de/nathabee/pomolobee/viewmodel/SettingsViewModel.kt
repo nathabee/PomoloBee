@@ -10,6 +10,8 @@ import de.nathabee.pomolobee.repository.ConnectionRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import android.net.Uri
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 
 
 
@@ -52,6 +54,7 @@ class SettingsViewModel(
     val imageDirectory: StateFlow<Uri?> = storageRootUri.map { root ->
         root?.let { Uri.withAppendedPath(it, "images") }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
 
 
     val isSetupComplete: StateFlow<Boolean> = storageRootUri.map { uri ->
@@ -148,6 +151,12 @@ class SettingsViewModel(
     }
 
 
+    private val _recomposeTrigger = mutableStateOf(0)
+    val recomposeTrigger: State<Int> get() = _recomposeTrigger
+
+    fun invalidate() {
+        _recomposeTrigger.value++
+    }
 
 
 }

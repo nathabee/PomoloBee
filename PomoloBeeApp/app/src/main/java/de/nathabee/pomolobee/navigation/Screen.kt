@@ -10,6 +10,7 @@ sealed class Screen(val route: String, val title: String) {
     object Location : Screen("location", "Location")
     object Init : Screen("init", "Initialisation")
 
+    // Parametrized screen
     object SvgMap : Screen("svgmap/{fieldId}", "SVG Map") {
         fun createRoute(fieldId: Int) = "svgmap/$fieldId"
     }

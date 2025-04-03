@@ -92,6 +92,7 @@ fun LocationScreen(navController: NavController) {
         if (selectedLocation != null) {
             Button(onClick = {
                 navController.navigate(Screen.SvgMap.createRoute(selectedLocation!!.field.fieldId))
+
             }) {
                 Text("🗺️ Select from Map")
             }

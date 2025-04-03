@@ -24,9 +24,9 @@ class OrchardViewModel : ViewModel() {
     private val _syncStatus = MutableStateFlow<String?>(null)
     val syncStatus: StateFlow<String?> = _syncStatus
 
-    fun loadLocalConfig(configUri: Uri, context: Context) {
+    fun loadLocalConfig(rootUri: Uri, context: Context) {
         viewModelScope.launch {
-            val success = OrchardRepository.loadAllConfigFromUri(context, configUri)
+            val success = OrchardRepository.loadAllConfigFromUri(context, rootUri)
             if (success) {
                 _fruitCount.value = OrchardCache.fruits.size
                 _fieldCount.value = OrchardCache.locations.size

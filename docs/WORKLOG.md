@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _111 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _114 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -315,15 +315,31 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   
 
 ###  Avril 03 2025
-- **Hours Worked**: 3 hours
-- **Tasks**:
-- started a android unit test phase on 2025-04-03
-- still proble URI, got camera screen coded
+- **Hours Worked**: 6 hours
+- **Tasks**:    
+  - Debugging application initialization and data flow issues  
+  - Validated:
+    - ✅ Permissions request flow  
+    - ✅ Folder selection and directory creation on SD card or internal storage  
+    - ✅ Asset copy process on first init  
+    - ✅ JSON config parsing: `fruits.json`, `locations.json`  
+  - Investigated issues with state not updating in `SettingsScreen`:
+    - Attempted workaround using a `recomposeTrigger` in `SettingsViewModel`
+    - Linked `OrchardViewModel` state to screen correctly, ensured `.collectAsState()` was used
+    - Corrected invalid import and misuse of `Recomposer.State`
+  - Cleaned up and tested `SvgMapScreen` with improved SVG loading logic and URI logging
 
+- **PENDING / OPEN ISSUES**:
+  - ❌ Fields and fruits count always show `0` on `SettingsScreen`
+    - `OrchardViewModel.invalidate()` doesn’t trigger recomposition in `SettingsScreen`
+    - Default values not displaying on first load  
+  - ❌ Regression: App shows `InitScreen` again on restart, even after setup  
+  - ❌ `SvgMapScreen` still shows white screen:
+    - SVG URI resolves correctly and logs look fine
+    - But embedded SVG not rendered inside WebView  
+    - Needs deeper check of HTML load, `WebView` behavior, and asset access
 
-- **PENDING**
-  - started a android unit test phase on 2025-04-01  
-
+---
 rqiase error to fix in views.py:
 ⚠️ Views With Hidden Risks
 These are okay-ish, but could fail in edge cases (e.g., filesystem issues, malformed request data, etc.)
@@ -337,41 +353,7 @@ os.rename(...) → raises FileNotFoundError, PermissionError, etc.
 
 image_file.name may be weird if it's manually crafted
 
-📌 Fix: Wrap file ops in try/except, log, and raise clean APIError
-
-⚠️ MLResultView.post(...)
-Risk areas:
-
-Doesn't validate the type of nb_fruit, confidence_score, processed (could be string, not int/bool)
-
-Assumes image has a row and row.fruit → might be None if DB is misconfigured
-
-📌 Fix:
-
-Add type checks (isinstance(nb_fruit, int) etc.)
-
-Validate image.row and row.fruit before accessing
-
-finish workflow test 
-- need to django startserver to acess media
-- start also flask  
-
-
-  - **APP**
-  - at this point App is just specified but not implented in code. just empty nutshell
-  - Check App specification aligned with API_1. 
-  - write code for files  ui/components/ImageCard.kt , FolderPicker.kt,  PermissionManager.kt
-  - write code for files  ui/screens/ProcessingScreen.kt ResultScreen.kt OrchardScreen.kt LocationScreen.kt ErrorLogScreen.kt ImageHistoryScreen.kt LocalResultScreen.kt PreviewScreen.kt SettingsRepository.kt
-  - **DJANGO**
-  - at this point DjangoApp is just specified , shortly implented in code but not tested  
-  - Django code must be tested. 
-  - need to change and test: test_migration, test_endpoint, test_workflow and test_ml.  
-  - **ML**
-  - at this point ML is not specified (except API) and not implented in code. just empty nutshell to have a endpoint to test app and django
-  - make Flask implementation aligned with API_2 and API_3. 
-  - ML code empty shell must be tested. 
  
-
   
  
  

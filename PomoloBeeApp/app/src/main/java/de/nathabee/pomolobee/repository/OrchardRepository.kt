@@ -7,72 +7,89 @@ import de.nathabee.pomolobee.cache.OrchardCache
 import de.nathabee.pomolobee.model.*
 
 import android.net.Uri
+import androidx.documentfile.provider.DocumentFile
 
 
 // OrchardRepository.kt
 object OrchardRepository {
+    fun loadAllConfigFromUri(context: Context, rootUri: Uri): Boolean {
+        Log.d("ConfigLoad", "🚀 Starting config load from rootUri = $rootUri")
 
-    fun loadAllConfigFromUri(context: Context, configUri: Uri): Boolean {
         return try {
-            val configDir = androidx.documentfile.provider.DocumentFile.fromTreeUri(context, configUri)
-            val locationsFile = configDir?.findFile("locations.json")
-            val fruitsFile = configDir?.findFile("fruits.json")
+            val rootDoc = DocumentFile.fromTreeUri(context, rootUri)
+            if (rootDoc == null) {
+                Log.e("ConfigLoad", "❌ Failed to create DocumentFile from rootUri")
+                return false
+            }
 
-            val locationsJson = locationsFile?.uri?.let {
-                context.contentResolver.openInputStream(it)?.bufferedReader()?.readText()
-            } ?: return false
+            val configDir = rootDoc.findFile("config")
+            if (configDir == null || !configDir.isDirectory) {
+                Log.e("ConfigLoad", "❌ 'config' folder not found under $rootUri")
+                return false
+            } else {
+                Log.d("ConfigLoad", "📁 Found config directory: ${configDir.uri}")
+            }
 
-            val fruitsJson = fruitsFile?.uri?.let {
-                context.contentResolver.openInputStream(it)?.bufferedReader()?.readText()
-            } ?: return false
+            val locationsFile = configDir.findFile("locations.json")
+            if (locationsFile == null) {
+                Log.e("ConfigLoad", "❌ locations.json not found in config directory")
+            } else {
+                Log.d("ConfigLoad", "📄 Found locations.json at: ${locationsFile.uri}")
+            }
+
+            val fruitsFile = configDir.findFile("fruits.json")
+            if (fruitsFile == null) {
+                Log.e("ConfigLoad", "❌ fruits.json not found in config directory")
+            } else {
+                Log.d("ConfigLoad", "📄 Found fruits.json at: ${fruitsFile.uri}")
+            }
+
+            if (locationsFile == null || fruitsFile == null) {
+                return false
+            }
+
+            val locationsJson = context.contentResolver.openInputStream(locationsFile.uri)
+                ?.bufferedReader().use { it?.readText() }
+
+            if (locationsJson == null) {
+                Log.e("ConfigLoad", "❌ Failed to read locations.json")
+                return false
+            }
+
+            val fruitsJson = context.contentResolver.openInputStream(fruitsFile.uri)
+                ?.bufferedReader().use { it?.readText() }
+
+            if (fruitsJson == null) {
+                Log.e("ConfigLoad", "❌ Failed to read fruits.json")
+                return false
+            }
+
+            Log.d("ConfigLoad", "✅ Successfully read both config files")
 
             val locationResponse = Gson().fromJson(locationsJson, LocationResponse::class.java)
             val fruitResponse = Gson().fromJson(fruitsJson, FruitResponse::class.java)
 
             val validLocations = locationResponse.data.locations.filter { it.field.fieldId != null }
 
+            Log.d("ConfigLoad", "🧭 Loaded ${validLocations.size} valid locations")
+            Log.d("ConfigLoad", "🍎 Loaded ${fruitResponse.data.fruits.size} fruits")
+
             if (validLocations.isEmpty()) {
-                Log.e("ConfigLoad", "No valid fields in locations.json")
+                Log.e("ConfigLoad", "❌ No valid fields in locations.json")
                 return false
             }
 
             OrchardCache.locations = validLocations
             OrchardCache.fruits = fruitResponse.data.fruits
 
-            true
-        } catch (e: Exception) {
-            Log.e("ConfigLoad", "Error loading config from Uri", e)
-            false
-        }
-    }
 
-    /*
-    fun loadAllConfigFromPath(configDir: String): Boolean {
-        return try {
-            val locationsJson = File(configDir, "locations.json").readText()
-            val fruitsJson = File(configDir, "fruits.json").readText()
 
-            val locationResponse = Gson().fromJson(locationsJson, LocationResponse::class.java)
-            val fruitResponse = Gson().fromJson(fruitsJson, FruitResponse::class.java)
-
-            val validLocations = locationResponse.data.locations.filter {
-                it.field.fieldId != null
-            }
-
-            if (validLocations.isEmpty()) {
-                Log.e("ConfigLoad", "No valid fields in locations.json")
-                return false
-            }
-
-            OrchardCache.locations = validLocations
-            OrchardCache.fruits = fruitResponse.data.fruits
+            Log.d("ConfigLoad", "🎉 Config successfully loaded and cached")
 
             true
         } catch (e: Exception) {
-            Log.e("ConfigLoad", "Error loading config", e)
+            Log.e("ConfigLoad", "💥 Exception while loading config from Uri", e)
             false
         }
     }
-
-     */
 }
