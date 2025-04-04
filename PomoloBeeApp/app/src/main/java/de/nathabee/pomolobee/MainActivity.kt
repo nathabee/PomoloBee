@@ -35,9 +35,9 @@ import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.util.copyAssetsIfNotExists
-
-
-
+import de.nathabee.pomolobee.util.hasAccessToUri
+import de.nathabee.pomolobee.viewmodel.OrchardViewModelFactory
+import kotlinx.coroutines.flow.StateFlow
 
 
 class MainActivity : ComponentActivity() {
@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PomoloBeeTheme {
-                PomoloBeeAppWithViewModel()
+                PomoloBeeApp()
             }
         }
 
@@ -92,7 +92,11 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppScaffold(navController: NavHostController) {
+fun AppScaffold(
+    navController: NavHostController,
+    orchardViewModel: OrchardViewModel,
+    settingsViewModel: SettingsViewModel
+) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -115,63 +119,73 @@ fun AppScaffold(navController: NavHostController) {
             }
         ) { padding ->
             Box(modifier = Modifier.padding(padding)) {
-                NavGraph(navController)
+                NavGraph(
+                    navController = navController,
+                    orchardViewModel = orchardViewModel,
+                    settingsViewModel = settingsViewModel
+                )
             }
         }
     }
 }
 
-//###########################################################################
-@Composable
-fun PomoloBeeAppWithViewModel() {
-    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(LocalContext.current))
-    PomoloBeeApp(viewModel)
-}
+
 
 
 //###########################################################################
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PomoloBeeApp(viewModel: SettingsViewModel) {
+fun PomoloBeeApp() {
     val context = LocalContext.current
     val navController = rememberNavController()
-    val storageRootUri by viewModel.storageRootUri.collectAsState()
-    val isInitialized by viewModel.isSetupComplete.collectAsState()
 
-    val orchardViewModel: OrchardViewModel = viewModel() // ✅ good, used for state
-    val setupState = remember { mutableStateOf(false) }
+    Log.d("PomoloBeeApp", "🔥 Composable recomposed")
 
-    Log.d("PomoloBeeApp", "storageRootUri = $storageRootUri")
-    Log.d("PomoloBeeApp", "isInitialized = $isInitialized")
-    Log.d("PomoloBeeApp", "setupState = ${setupState.value}")
+    val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
+    val orchardViewModel: OrchardViewModel = viewModel(factory = OrchardViewModelFactory(context))
 
-    if (!isInitialized || !setupState.value) {
-        Log.d("PomoloBeeApp", "Showing InitScreen...")
-        InitScreen(onSetupComplete = { pickedUri ->
-            Log.d("PomoloBeeApp", "Folder picked: $pickedUri")
-            viewModel.setStorageRoot(pickedUri)
-            setupState.value = true
-        })
-    } else {
-        Log.d("PomoloBeeApp", "Launching AppScaffold...")
-        AppScaffold(navController = navController)
+    val storageRootUri by settingsViewModel.storageRootUri.collectAsState()
+    val rawUri = storageRootUri
+    var initDone by remember { mutableStateOf(false) }
 
-        // ✅ This is fine
-        LaunchedEffect(storageRootUri) {
-            Log.d("PomoloBeeApp", "LaunchedEffect with storageRootUri = $storageRootUri")
+    Log.d("PomoloBeeApp", "📦 Raw URI from preferences = $rawUri")
+    Log.d("PomoloBeeApp", "📦 OrchardCache initialized = ${OrchardCache.isInitialized()}")
+    Log.d("PomoloBeeApp", "📦 hasAccessToUri = ${rawUri?.let { hasAccessToUri(context, it) }}")
+    Log.d("PomoloBeeApp", "📦 initDone = $initDone")
 
-            if (OrchardCache.locations.isEmpty()) {
-                Log.d("PomoloBeeApp", "OrchardCache is empty. Trying to copy assets and load config...")
+    if (rawUri == null || !initDone || !hasAccessToUri(context, rawUri)) {
+        Log.w("PomoloBeeApp", "🚨 Invalid or not ready → showing InitScreen")
 
-                storageRootUri?.let { uri ->
-                    Log.d("PomoloBeeApp", "Calling copyAssetsIfNotExists...")
-                    copyAssetsIfNotExists(context, uri)
-
-                    Log.d("PomoloBeeApp", "Calling loadLocalConfig with root...")
-                    orchardViewModel.loadLocalConfig(uri, context)
-                    viewModel.invalidate()
-                }
+        InitScreen(
+            settingsViewModel = settingsViewModel,
+            orchardViewModel = orchardViewModel,
+            onInitFinished = {
+                Log.i("PomoloBeeApp", "✅ Init finished")
+                initDone = true
             }
+        )
+        return // 🛑 Prevent launching the rest of the app
+    }
+
+    Log.i("PomoloBeeApp", "✅ Valid URI + initDone → launching full app")
+
+    AppScaffold(
+        navController = navController,
+        orchardViewModel = orchardViewModel,
+        settingsViewModel = settingsViewModel
+    )
+
+    LaunchedEffect(Unit) {
+        Log.d("PomoloBeeApp", "⏳ LaunchedEffect started. Is cache empty? ${OrchardCache.locations.isEmpty()}")
+
+        if (OrchardCache.locations.isEmpty()) {
+            Log.i("PomoloBeeApp", "📦 Cache is empty. Starting config load and asset copy...")
+            copyAssetsIfNotExists(context, rawUri)
+            orchardViewModel.loadLocalConfig(rawUri, context)
+            settingsViewModel.invalidate()
+            Log.i("PomoloBeeApp", "🎉 Config load complete")
+        } else {
+            Log.d("PomoloBeeApp", "👍 Cache already initialized — skipping config load")
         }
     }
 }

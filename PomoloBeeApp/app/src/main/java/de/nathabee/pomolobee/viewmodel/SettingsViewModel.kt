@@ -12,7 +12,8 @@ import kotlinx.coroutines.launch
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-
+import de.nathabee.pomolobee.util.hasAccessToUri
+import kotlinx.coroutines.runBlocking
 
 
 class SettingsViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
@@ -57,10 +58,6 @@ class SettingsViewModel(
 
 
 
-    val isSetupComplete: StateFlow<Boolean> = storageRootUri.map { uri ->
-        uri != null
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
 
 
     val mediaEndpoint = prefs.getMediaEndpoint().stateIn(
@@ -102,10 +99,19 @@ class SettingsViewModel(
         prefs.setSyncMode(value)
     }
 
-
-    fun updateStorageRoot(path: String) = viewModelScope.launch {
-        prefs.setStorageRoot(path)
+    fun clearStorageRoot() = viewModelScope.launch {
+        prefs.setStorageRoot("") // or null, depending on your implementation
     }
+
+    // check URI in blocking mode from preference and check for access : at start to see if initialisation must be done
+    fun getStartupStorageUri(context: Context): Uri? {
+        val rawPath = runBlocking {
+            prefs.getRawStorageRoot().first() // <== direct read of latest value
+        }
+        return rawPath?.let { Uri.parse(it) }?.takeIf { hasAccessToUri(context, it) }
+    }
+
+
 
 
     fun updateDebugMode(enabled: Boolean) = viewModelScope.launch {

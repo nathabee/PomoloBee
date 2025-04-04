@@ -30,3 +30,17 @@ fun getFriendlyFolderName(context: Context, uri: Uri): String {
         "Interner Speicher/$folderName"
     }
 }
+
+
+fun hasAccessToUri(context: Context, uri: Uri): Boolean {
+    return try {
+        val docFile = DocumentFile.fromTreeUri(context, uri)
+        val exists = docFile != null && docFile.exists() && docFile.isDirectory
+        if (!exists) Log.e("UriAccess", "❌ No access or invalid doc file for: $uri")
+        exists
+    } catch (e: Exception) {
+        Log.e("UriAccess", "❌ Exception checking URI: ${e.message}")
+        false
+    }
+}
+

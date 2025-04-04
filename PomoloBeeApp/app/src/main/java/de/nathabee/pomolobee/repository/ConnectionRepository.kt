@@ -7,7 +7,7 @@ import androidx.documentfile.provider.DocumentFile
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import de.nathabee.pomolobee.cache.OrchardCache
-import de.nathabee.pomolobee.model.FruitType
+import de.nathabee.pomolobee.model.Fruit
 import de.nathabee.pomolobee.model.Location
 import java.net.HttpURLConnection
 import java.net.URL
@@ -59,7 +59,7 @@ object ConnectionRepository {
         }
 
         val gson = Gson()
-        val fruitsList = readListFromJson<FruitType>(context, fruitsFile.uri, gson)
+        val fruitsList = readListFromJson<Fruit>(context, fruitsFile.uri, gson)
         val locationsList = readListFromJson<Location>(context, locationsFile.uri, gson)
 
         if (fruitsList == null || locationsList == null) {

@@ -56,10 +56,10 @@ data class FruitResponse(
 )
 
 data class FruitData(
-    val fruits: List<FruitType>
+    val fruits: List<Fruit>
 )
 
-data class FruitType(
+data class Fruit(
     @SerializedName("fruit_id") val fruitId: Int,
     @SerializedName("short_name") val shortName: String,
     val name: String,

@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee.ui.screens
 
+import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -7,36 +8,42 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import de.nathabee.pomolobee.ui.components.FolderPicker
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
-import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import de.nathabee.pomolobee.util.copyAssetsIfNotExists
+import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InitScreen(onSetupComplete: (Uri) -> Unit) {
+fun InitScreen(
+    settingsViewModel: SettingsViewModel,
+    orchardViewModel: OrchardViewModel,
+    onInitFinished: () -> Unit
+) {
     val context = LocalContext.current
-    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
     val coroutineScope = rememberCoroutineScope()
 
-    val storageRootUri by viewModel.storageRootUri.collectAsState()
+    val storageRootUri by settingsViewModel.storageRootUri.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var showFolderPicker by remember { mutableStateOf(false) }
 
-    if (showFolderPicker) {
-        if (showFolderPicker) {
-            FolderPicker(onFolderSelected = { selectedUri ->
-                viewModel.setStorageRoot(selectedUri)
-                onSetupComplete(selectedUri)
-            })
+    FolderPicker(onFolderSelected = { selectedUri ->
+        coroutineScope.launch {
+            // 🛡 Take access permission!
+            context.contentResolver.takePersistableUriPermission(
+                selectedUri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
 
-
+            settingsViewModel.setStorageRoot(selectedUri)
+            copyAssetsIfNotExists(context, selectedUri)
+            orchardViewModel.loadLocalConfig(selectedUri, context)
+            onInitFinished()
         }
+    })
 
-    }
 
     if (showDialog) {
         AlertDialog(
@@ -47,9 +54,9 @@ fun InitScreen(onSetupComplete: (Uri) -> Unit) {
                 TextButton(onClick = {
                     storageRootUri?.let {
                         coroutineScope.launch {
-                            viewModel.setStorageRoot(it)
+                            settingsViewModel.setStorageRoot(it)
                             showDialog = false
-                            onSetupComplete(it)
+                            onInitFinished()
                         }
                     }
                 }) {
@@ -96,7 +103,7 @@ fun InitScreen(onSetupComplete: (Uri) -> Unit) {
                     if (storageRootUri == null) {
                         showDialog = true
                     } else {
-                        onSetupComplete(storageRootUri!!)
+                        onInitFinished()
                     }
                 },
                 modifier = Modifier.fillMaxWidth()

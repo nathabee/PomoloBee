@@ -11,6 +11,19 @@ import kotlinx.coroutines.launch
 
 import android.content.Context
 import android.net.Uri
+import androidx.lifecycle.ViewModelProvider
+import de.nathabee.pomolobee.data.UserPreferences
+import de.nathabee.pomolobee.model.Location
+import de.nathabee.pomolobee.model.Fruit
+
+class OrchardViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        //val prefs = UserPreferences(context)
+        //return OrchardViewModel(prefs, context.getExternalFilesDir(null)?.absolutePath + "/PomoloBee") as T
+        return OrchardViewModel() as T
+
+    }
+}
 
 class OrchardViewModel : ViewModel() {
 
@@ -21,6 +34,14 @@ class OrchardViewModel : ViewModel() {
     private val _fieldCount = MutableStateFlow(0)
     val fieldCount: StateFlow<Int> = _fieldCount
 
+    private val _locations = MutableStateFlow<List<Location>>(emptyList())
+    val locations: StateFlow<List<Location>> = _locations
+
+    private val _fruits = MutableStateFlow<List<Fruit>>(emptyList())
+    val fruits: StateFlow<List<Fruit>> = _fruits
+
+
+
     private val _syncStatus = MutableStateFlow<String?>(null)
     val syncStatus: StateFlow<String?> = _syncStatus
 
@@ -30,6 +51,8 @@ class OrchardViewModel : ViewModel() {
             if (success) {
                 _fruitCount.value = OrchardCache.fruits.size
                 _fieldCount.value = OrchardCache.locations.size
+                _locations.value = OrchardCache.locations
+
             }
             _syncStatus.value = if (success) "✅ Config loaded" else "❌ Failed to load"
         }

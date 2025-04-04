@@ -1,58 +1,59 @@
 package de.nathabee.pomolobee.ui.screens
 
 import android.util.Log
-import android.widget.ImageView
+import android.webkit.JavascriptInterface
+import android.webkit.WebView
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.viewmodel.compose.viewModel
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.webkit.JavascriptInterface
-import androidx.documentfile.provider.DocumentFile
-
-import de.nathabee.pomolobee.cache.OrchardCache
 import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.model.Row
-import de.nathabee.pomolobee.viewmodel.SettingsViewModel
-import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
-import java.io.File
 import de.nathabee.pomolobee.util.getSvgUriForLocation
+import de.nathabee.pomolobee.viewmodel.OrchardViewModel
+import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 
 @Composable
 fun SvgMapScreen(
     location: Location,
+    settingsViewModel: SettingsViewModel,
+    orchardViewModel: OrchardViewModel,
     onRawSelected: (String) -> Unit,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
 
+    val storageRootUri by settingsViewModel.storageRootUri.collectAsState()
+    val fruits by orchardViewModel.fruits.collectAsState()
 
-    val storageRootUri by viewModel.storageRootUri.collectAsState()
     val svgUri = remember(storageRootUri, location) {
         storageRootUri?.let { getSvgUriForLocation(context, it, location) }
     }
-    LaunchedEffect(svgUri) {
-        Log.d("SvgMapScreen", "📍 SVG URI resolved to: $svgUri")
+
+    val svgContent = remember(svgUri) {
+        svgUri?.let {
+            try {
+                context.contentResolver.openInputStream(it)?.use { inputStream ->
+                    inputStream.bufferedReader().readText()
+                }
+            } catch (e: Exception) {
+                Log.e("SvgMapScreen", "❌ Error reading SVG file: ${e.message}")
+                null
+            }
+        }
     }
-    if (svgUri == null) {
-        Log.e("SvgMapScreen", "❌ SVG URI is null — check if svgMapUrl is missing or file not found.")
-    }
-    Log.d("SvgMapScreen", "🗺 svgMapUrl from location = ${location.field.svgMapUrl}")
-
-
-
 
     var selectedRowInfo by remember { mutableStateOf<Row?>(null) }
-    val fruitName = selectedRowInfo?.let { OrchardCache.fruits.find { f -> f.fruitId == it.fruitId }?.name }
+    val fruitName = selectedRowInfo?.let { row ->
+        fruits.find { it.fruitId == row.fruitId }?.name
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        if (svgUri != null) {
+        if (svgContent != null) {
             AndroidView(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -73,18 +74,13 @@ fun SvgMapScreen(
                             }
                         }, "Android")
 
-                        val svgHtml = "data=\"${svgUri}\""
-
                         val htmlContent = """
-                        <html>
-                        <body>
-                            <object id="svg" type="image/svg+xml" $svgHtml></object>
-                            <script>
-                                document.addEventListener("DOMContentLoaded", function() {
-                                    const embed = document.getElementById("svg");
-                                    embed.addEventListener("load", function() {
-                                        const svgDoc = embed.contentDocument;
-                                        const paths = svgDoc.querySelectorAll("path[id^='row_']");
+                            <html>
+                            <body>
+                                $svgContent
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function() {
+                                        const paths = document.querySelectorAll("path[id^='row_']");
                                         paths.forEach(function(p) {
                                             p.style.stroke = "blue";
                                             p.addEventListener("click", function() {
@@ -92,23 +88,21 @@ fun SvgMapScreen(
                                             });
                                         });
                                     });
-                                });
-                            </script>
-                        </body>
-                        </html>
-                    """.trimIndent()
+                                </script>
+                            </body>
+                            </html>
+                        """.trimIndent()
 
                         loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
                     }
                 }
             )
         } else {
-            // Show a message or loader while waiting for svgUri to be available
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                contentAlignment = androidx.compose.ui.Alignment.Center
+                contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
             }

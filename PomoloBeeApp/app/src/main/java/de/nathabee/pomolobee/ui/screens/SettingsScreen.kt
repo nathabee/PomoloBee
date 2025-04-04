@@ -22,18 +22,19 @@ import de.nathabee.pomolobee.util.getFriendlyFolderName
 @Composable
 fun SettingsScreen(
     navController: NavController? = null,
-    orchardViewModel: OrchardViewModel = viewModel() // you can override this from PomoloBeeApp
+    orchardViewModel: OrchardViewModel,
+    settingsViewModel: SettingsViewModel
 ) {
     val context = LocalContext.current
-    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
+    //val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
     val scope = rememberCoroutineScope()
 
-    val lastSyncDate by viewModel.lastSyncDate.collectAsState()
-    val apiEndpoint by viewModel.apiEndpoint.collectAsState()
-    val syncMode by viewModel.syncMode.collectAsState()
-    val mediaEndpoint by viewModel.mediaEndpoint.collectAsState()
-    val isDebug by viewModel.isDebug.collectAsState()
-    val apiVersion by viewModel.apiVersion.collectAsState()
+    val lastSyncDate by settingsViewModel.lastSyncDate.collectAsState()
+    val apiEndpoint by settingsViewModel.apiEndpoint.collectAsState()
+    val syncMode by settingsViewModel.syncMode.collectAsState()
+    val mediaEndpoint by settingsViewModel.mediaEndpoint.collectAsState()
+    val isDebug by settingsViewModel.isDebug.collectAsState()
+    val apiVersion by settingsViewModel.apiVersion.collectAsState()
 
 
     var apiInput by remember { mutableStateOf(apiEndpoint ?: "") }
@@ -42,18 +43,18 @@ fun SettingsScreen(
     var connectionStatus by remember { mutableStateOf<String?>(null) }
     var syncMessage by remember { mutableStateOf<String?>(null) }
 
-    val storageRootUri by viewModel.storageRootUri.collectAsState()
+    val storageRootUri by settingsViewModel.storageRootUri.collectAsState()
     var showFolderPicker by remember { mutableStateOf(false) }
 
     if (showFolderPicker) {
         FolderPicker(onFolderSelected = { selectedUri ->
             showFolderPicker = false
             scope.launch {
-                viewModel.setStorageRoot(selectedUri)
+                settingsViewModel.setStorageRoot(selectedUri)
                 copyAssetsIfNotExists(context, selectedUri)
                 orchardViewModel.loadLocalConfig(selectedUri, context)
 // ↓ Add after if you want to force recomposition
-                viewModel.invalidate()
+                settingsViewModel.invalidate()
 
             }
         })
@@ -84,7 +85,7 @@ fun SettingsScreen(
                     selected = selectedSyncMode == mode,
                     onClick = {
                         selectedSyncMode = mode
-                        scope.launch { viewModel.updateSyncMode(mode) }
+                        scope.launch { settingsViewModel.updateSyncMode(mode) }
                     },
                     label = { Text(mode.uppercase()) }
                 )
@@ -117,8 +118,8 @@ fun SettingsScreen(
         Button(
             onClick = {
                 scope.launch {
-                    viewModel.updateApiEndpoint(apiInput)
-                    viewModel.updateMediaEndpoint(mediaInput)
+                    settingsViewModel.updateApiEndpoint(apiInput)
+                    settingsViewModel.updateMediaEndpoint(mediaInput)
                 }
             }
         ) {
@@ -132,7 +133,7 @@ fun SettingsScreen(
 
         // Test connection button
         Button(onClick = {
-            viewModel.performConnectionTest { success ->
+            settingsViewModel.performConnectionTest { success ->
                 connectionStatus = if (success) "✅ Connection OK" else "❌ Connection failed"
             }
         }) {
@@ -144,7 +145,7 @@ fun SettingsScreen(
 
         // Sync now button
         Button(onClick = {
-            viewModel.performLocalSync(context) { msg ->
+            settingsViewModel.performLocalSync(context) { msg ->
                 syncMessage = msg
             }
 

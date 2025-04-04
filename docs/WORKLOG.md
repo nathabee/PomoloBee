@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _114 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _118 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -31,6 +31,7 @@
     - [Avril 01 2025](#avril-01-2025)
     - [Avril 02 2025](#avril-02-2025)
     - [Avril 03 2025](#avril-03-2025)
+    - [Avril 04 2025](#avril-04-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -329,7 +330,7 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
     - Corrected invalid import and misuse of `Recomposer.State`
   - Cleaned up and tested `SvgMapScreen` with improved SVG loading logic and URI logging
 
-- **PENDING / OPEN ISSUES**:
+- **anomalie / pending**:    
   - ❌ Fields and fruits count always show `0` on `SettingsScreen`
     - `OrchardViewModel.invalidate()` doesn’t trigger recomposition in `SettingsScreen`
     - Default values not displaying on first load  
@@ -338,6 +339,28 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
     - SVG URI resolves correctly and logs look fine
     - But embedded SVG not rendered inside WebView  
     - Needs deeper check of HTML load, `WebView` behavior, and asset access
+
+
+
+###  Avril 04 2025
+- **Hours Worked**: 4 hours
+- **Tasks**:    
+  - Refactor App to instantiate view just once in mainActivity and pass them to screen in parameter. check pref and cach not called directly in each screen
+  - Validated : svg open correctly for default map (without raw)
+  - validated : svg open a correct file but display is not correct
+  - validated initScreen not opened in loop at start anymore
+  - validated : settings should correct of fields and fruits in cache
+  - validated : selection of row and field is sent back from locations zu camera screen
+
+
+- **PENDING / OPEN ISSUES**:
+  - ANOMALIE allways ask for permission on storage auch when it is already done before
+  - ANIMALIE SVG not displayed like they should be
+  - ANOMALIE : can not select a row in the displayed SVG
+  - ANOMALIE save image from copiey image from gallery "no image or storage path " but we print a correct one in StorageLocation
+  - ANOMALIE save image from camera is saved in storage root not on storageroot/images with wrong name (same as before)
+  - anomalie ? : no version displayed. should be a default in about
+
 
 ---
 rqiase error to fix in views.py:

@@ -22,26 +22,33 @@ import java.io.InputStream
 
 
 import androidx.navigation.NavController
-import de.nathabee.pomolobee.cache.OrchardCache
 import de.nathabee.pomolobee.navigation.Screen
-import de.nathabee.pomolobee.viewmodel.SettingsViewModel
-import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 
 import org.opencv.android.OpenCVLoader
 import coil.compose.AsyncImage
 import de.nathabee.pomolobee.util.getFriendlyFolderName
+import de.nathabee.pomolobee.viewmodel.OrchardViewModel
+import de.nathabee.pomolobee.viewmodel.SettingsViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.File
 
 
 @Composable
-fun CameraScreen(navController: NavController) {
+fun CameraScreen(
+    navController: NavController,
+    settingsViewModel: SettingsViewModel,
+    orchardViewModel: OrchardViewModel
+)
+{
     val context = LocalContext.current
-    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
-    val imageDirectory by viewModel.imageDirectory.collectAsState()
-    val selectedFieldId by viewModel.selectedFieldId.collectAsState()
-    val selectedRowId by viewModel.selectedRowId.collectAsState()
 
+    val imageDirectory by settingsViewModel.imageDirectory.collectAsState()
+    val selectedFieldId by settingsViewModel.selectedFieldId.collectAsState()
+    val selectedRowId by settingsViewModel.selectedRowId.collectAsState()
     val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
+    val locations by orchardViewModel.locations.collectAsState()
+
+
 
     // ✅ Define this at the top level of the composable
     val pickImageLauncher = rememberLauncherForActivityResult(
@@ -61,7 +68,11 @@ fun CameraScreen(navController: NavController) {
         onDispose {}
     }
 
-    val selectedLocation = OrchardCache.locations.find { it.field.fieldId == selectedFieldId }
+
+
+    val selectedLocation = locations.find { it.field.fieldId == selectedFieldId }
+
+
     val selectedRow = selectedLocation?.rows?.find { it.rowId == selectedRowId }
     val locationStatus = if (selectedLocation != null && selectedRow != null)
         "✅ ${selectedLocation.field.name} / ${selectedRow.shortName}"

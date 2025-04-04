@@ -5,19 +5,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.*
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import de.nathabee.pomolobee.data.UserPreferences
+import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 
 @Composable
-fun AboutScreen(navController: NavController? = null) {
-    val context = LocalContext.current
-    val prefs = remember { UserPreferences(context) }
+fun AboutScreen(settingsViewModel: SettingsViewModel) {
 
-    val apiVersion by prefs.getApiVersion().collectAsState(initial = "Not available")
+
+    val apiVersion by settingsViewModel.apiVersion.collectAsState()
+
 
     Column(
         modifier = Modifier

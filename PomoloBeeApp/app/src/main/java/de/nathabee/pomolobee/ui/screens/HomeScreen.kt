@@ -10,29 +10,13 @@ import androidx.navigation.NavController
 import de.nathabee.pomolobee.navigation.Screen
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen( ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
         Text("Welcome to PomoloBee", fontSize = 24.sp)
 
-        Spacer(modifier = Modifier.height(20.dp))
 
-        Button(onClick = { navController.navigate(Screen.Camera.route) }) {
-            Text("Open Camera")
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Button(onClick = { navController.navigate(Screen.Settings.route) }) {
-            Text("Settings")
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Button(onClick = { navController.navigate(Screen.About.route) }) {
-            Text("About")
-        }
     }
 }

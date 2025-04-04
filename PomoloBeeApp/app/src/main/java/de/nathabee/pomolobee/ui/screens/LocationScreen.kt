@@ -8,26 +8,30 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import de.nathabee.pomolobee.cache.OrchardCache
 import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.model.Row
 import de.nathabee.pomolobee.navigation.Screen
 import de.nathabee.pomolobee.ui.components.ExposedDropdownMenuBoxWithLabel
+import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
-import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 
 @Composable
-fun LocationScreen(navController: NavController) {
+fun LocationScreen(
+    navController: NavController,
+    settingsViewModel: SettingsViewModel,
+    orchardViewModel: OrchardViewModel
+)
+{
     val context = LocalContext.current
-    val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
 
-    val locations = OrchardCache.locations
+    val locations by orchardViewModel.locations.collectAsState()
+
 
     var selectedLocation by remember { mutableStateOf<Location?>(null) }
     var selectedRow by remember { mutableStateOf<Row?>(null) }
 
-    val selectedRowId by viewModel.selectedRowId.collectAsState()
-    val selectedFieldId by viewModel.selectedFieldId.collectAsState()
+    val selectedRowId by settingsViewModel.selectedRowId.collectAsState()
+    val selectedFieldId by settingsViewModel.selectedFieldId.collectAsState()
 
     val rows = selectedLocation?.rows ?: emptyList()
 
@@ -50,7 +54,7 @@ fun LocationScreen(navController: NavController) {
 
         // 🔄 Sync field to preferences
         LaunchedEffect(selectedLocation?.field?.fieldId) {
-            selectedLocation?.field?.fieldId?.let { viewModel.updateSelectedField(it) }
+            selectedLocation?.field?.fieldId?.let { settingsViewModel.updateSelectedField(it) }
         }
 
         // 🔁 Restore location from stored fieldId
@@ -68,7 +72,7 @@ fun LocationScreen(navController: NavController) {
                 selectedItem = selectedRow?.name,
                 onItemSelected = { rowName ->
                     selectedRow = rows.find { it.name == rowName }
-                    selectedRow?.rowId?.let { viewModel.updateSelectedRow(it) }
+                    selectedRow?.rowId?.let { settingsViewModel.updateSelectedRow(it) }
                 }
             )
         }
@@ -83,7 +87,7 @@ fun LocationScreen(navController: NavController) {
         // 📝 Status
         Text("📌 Status: ${
             if (selectedLocation != null && selectedRow != null)
-                "✅ ${selectedLocation!!.field.name} / ${selectedRow!!.shortName}"
+                "✅ ${selectedLocation?.field?.name ?: "?"} / ${selectedRow!!.shortName}"
             else
                 "❌ No location selected"
         }")
