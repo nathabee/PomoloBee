@@ -6,6 +6,24 @@ import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import de.nathabee.pomolobee.model.Location
 
+fun getBackgroundUriForLocation(context: Context, baseUri: Uri, location: Location): Uri? {
+    val fileName = location.field.backgroundImageUrl
+        ?.takeIf { it.isNotBlank() }
+        ?.substringAfterLast("/")
+        ?: return null // nothing to load or inject
+
+    val rootDoc = DocumentFile.fromTreeUri(context, baseUri)
+    val backgroundDir = rootDoc?.findFile("fields")?.findFile("background")
+
+    val target = backgroundDir?.findFile(fileName)
+    if (target == null) {
+        Log.w("BackgroundUri", "⚠️ Background image '$fileName' not found.")
+    }
+
+    return target?.uri
+}
+
+
 fun getSvgUriForLocation(context: Context, baseUri: Uri, location: Location): Uri? {
     val fileName = location.field.svgMapUrl?.substringAfterLast("/") ?: "default_map.svg"
     val rootDoc = DocumentFile.fromTreeUri(context, baseUri)

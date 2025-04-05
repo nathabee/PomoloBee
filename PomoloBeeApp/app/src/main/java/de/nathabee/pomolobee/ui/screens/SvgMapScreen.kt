@@ -13,9 +13,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.model.Row
+import de.nathabee.pomolobee.util.getBackgroundUriForLocation
 import de.nathabee.pomolobee.util.getSvgUriForLocation
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
+
+fun injectBase64Image(svg: String, base64Image: String): String {
+    val base64Tag = """
+        <image x="0" y="0" width="1599" height="978"
+               opacity="0.4" preserveAspectRatio="none"
+               xlink:href="data:image/jpeg;base64,$base64Image"
+               xmlns:xlink="http://www.w3.org/1999/xlink" />
+    """.trimIndent()
+
+    val cleanedSvg = svg.replace(Regex("""<svg:image[^>]+/>"""), "")
+    return cleanedSvg.replace("</svg>", "$base64Tag\n</svg>")
+}
+
 
 @Composable
 fun SvgMapScreen(
@@ -38,7 +52,23 @@ fun SvgMapScreen(
         svgUri?.let {
             try {
                 context.contentResolver.openInputStream(it)?.use { inputStream ->
-                    inputStream.bufferedReader().readText()
+                    var rawSvg = inputStream.bufferedReader().readText()
+
+                    // Inject image based on shortName like "C1"
+                    // val shortName = location.field.shortName
+                    val backgroundUri = getBackgroundUriForLocation(context, storageRootUri!!, location)
+                    if (backgroundUri != null) {
+                        val base64Image = context.contentResolver.openInputStream(backgroundUri)?.use { input ->
+                            android.util.Base64.encodeToString(input.readBytes(), android.util.Base64.NO_WRAP)
+                        }
+
+                        if (base64Image != null) {
+                            rawSvg = injectBase64Image( rawSvg, base64Image)
+                        }
+                    }
+
+
+                    rawSvg
                 }
             } catch (e: Exception) {
                 Log.e("SvgMapScreen", "❌ Error reading SVG file: ${e.message}")
@@ -46,6 +76,8 @@ fun SvgMapScreen(
             }
         }
     }
+
+
 
     var selectedRowInfo by remember { mutableStateOf<Row?>(null) }
     val fruitName = selectedRowInfo?.let { row ->
@@ -61,6 +93,13 @@ fun SvgMapScreen(
                 factory = { ctx ->
                     WebView(ctx).apply {
                         settings.javaScriptEnabled = true
+                        settings.builtInZoomControls = true
+                        settings.displayZoomControls = false
+                        settings.useWideViewPort = true
+                        settings.loadWithOverviewMode = true
+                        isVerticalScrollBarEnabled = true
+                        isHorizontalScrollBarEnabled = true
+
                         addJavascriptInterface(object {
                             @JavascriptInterface
                             fun onRowClicked(rowId: String) {
@@ -75,23 +114,39 @@ fun SvgMapScreen(
                         }, "Android")
 
                         val htmlContent = """
-                            <html>
-                            <body>
-                                $svgContent
-                                <script>
-                                    document.addEventListener("DOMContentLoaded", function() {
-                                        const paths = document.querySelectorAll("path[id^='row_']");
-                                        paths.forEach(function(p) {
-                                            p.style.stroke = "blue";
-                                            p.addEventListener("click", function() {
-                                                Android.onRowClicked(p.id);
-                                            });
-                                        });
-                                    });
-                                </script>
-                            </body>
-                            </html>
-                        """.trimIndent()
+<html>
+<head>
+    <style>
+        svg {
+            width: 100vw;
+            height: auto;
+            max-width: 100%;
+            display: block;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: scroll;
+        }
+    </style>
+</head>
+<body>
+    $svgContent
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const paths = document.querySelectorAll("path[id^='row_']");
+            paths.forEach(function(p) {
+                p.style.stroke = "blue";
+                p.addEventListener("click", function() {
+                    Android.onRowClicked(p.id);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+""".trimIndent()
+
 
                         loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
                     }

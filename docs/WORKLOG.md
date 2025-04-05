@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _118 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _119 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -32,6 +32,7 @@
     - [Avril 02 2025](#avril-02-2025)
     - [Avril 03 2025](#avril-03-2025)
     - [Avril 04 2025](#avril-04-2025)
+    - [Avril 05 2025](#avril-05-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -360,6 +361,14 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - ANOMALIE save image from copiey image from gallery "no image or storage path " but we print a correct one in StorageLocation
   - ANOMALIE save image from camera is saved in storage root not on storageroot/images with wrong name (same as before)
   - anomalie ? : no version displayed. should be a default in about
+
+
+
+###  Avril 05 2025
+- **Hours Worked**: 1 hours
+- **Tasks**:     
+  - Creation SVG_howto.md to explain how to create a SVG files
+ 
 
 
 ---
