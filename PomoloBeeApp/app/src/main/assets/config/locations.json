@@ -249,7 +249,32 @@
           "svg_map_url": "/media/fields/svg/default_map.svg",
           "background_image_url": null
         },
-        "rows": []
+        "rows": [
+            {
+              "row_id": 201,
+              "short_name": "C2-R1",
+              "name": "Rang 1 cote maison Swing 1",
+              "nb_plant": 38,
+              "fruit_id": 1,
+              "fruit_type": "Cultivar Swing on CG1"
+            },
+            {
+              "row_id": 202,
+              "short_name": "C2-R2",
+              "name": "Rang 2 cote maison Swing 2",
+              "nb_plant": 40,
+              "fruit_id": 1,
+              "fruit_type": "Cultivar Swing on CG1"
+            },
+            {
+              "row_id": 203,
+              "short_name": "C2-R3",
+              "name": "Rang 3 cote maison Swing 3",
+              "nb_plant": 40,
+              "fruit_id": 1,
+              "fruit_type": "Cultivar Swing on CG1"
+            }
+          ]
       },
       {
         "field": {
@@ -261,7 +286,33 @@
           "svg_map_url": "/media/fields/svg/default_map.svg",
           "background_image_url": null
         },
-        "rows": []
+
+        "rows": [
+          {
+            "row_id": 301,
+            "short_name": "C3-R1",
+            "name": "Rang 1 cote maison Swing 1",
+            "nb_plant": 38,
+            "fruit_id": 1,
+            "fruit_type": "Cultivar Swing on CG1"
+          },
+          {
+            "row_id": 302,
+            "short_name": "C3-R2",
+            "name": "Rang 2 cote maison Swing 2",
+            "nb_plant": 40,
+            "fruit_id": 1,
+            "fruit_type": "Cultivar Swing on CG1"
+          },
+          {
+            "row_id": 303,
+            "short_name": "C3-R3",
+            "name": "Rang 3 cote maison Swing 3",
+            "nb_plant": 40,
+            "fruit_id": 1,
+            "fruit_type": "Cultivar Swing on CG1"
+          }
+        ]
       },
       {
         "field": {
@@ -273,7 +324,72 @@
           "svg_map_url": "/media/fields/svg/default_map.svg",
           "background_image_url": null
         },
-        "rows": []
+        "rows": [
+          {
+            "row_id": 401,
+            "short_name": "C4-R1",
+            "name": "Rang 1 cote maison Swing 1",
+            "nb_plant": 38,
+            "fruit_id": 1,
+            "fruit_type": "Cultivar Swing on CG1"
+          },
+          {
+            "row_id": 402,
+            "short_name": "C4-R2",
+            "name": "Rang 2 cote maison Swing 2",
+            "nb_plant": 40,
+            "fruit_id": 1,
+            "fruit_type": "Cultivar Swing on CG1"
+          },
+          {
+            "row_id": 403,
+            "short_name": "C4-R3",
+            "name": "Rang 3 cote maison Swing 3",
+            "nb_plant": 40,
+            "fruit_id": 1,
+            "fruit_type": "Cultivar Swing on CG1"
+          },
+          {
+            "row_id": 404,
+            "short_name": "C4-R4",
+            "name": "Rang 4 cote maison Ladina 1",
+            "nb_plant": 40,
+            "fruit_id": 2,
+            "fruit_type": "Cultivar Ladina on CG1"
+          },
+          {
+            "row_id": 405,
+            "short_name": "C4-R5",
+            "name": "Rang 5 cote maison Ladina 2",
+            "nb_plant": 40,
+            "fruit_id": 2,
+            "fruit_type": "Cultivar Ladina on CG1"
+          },
+          {
+            "row_id": 406,
+            "short_name": "C4-R6",
+            "name": "Rang 6 cote maison Ladina 3",
+            "nb_plant": 40,
+            "fruit_id": 2,
+            "fruit_type": "Cultivar Ladina on CG1"
+          },
+          {
+            "row_id": 407,
+            "short_name": "C4-R7",
+            "name": "Rang 7 cote maison Ladina 4",
+            "nb_plant": 40,
+            "fruit_id": 2,
+            "fruit_type": "Cultivar Ladina on CG1"
+          },
+          {
+            "row_id": 408,
+            "short_name": "C4-R8",
+            "name": "Rang 8 cote maison Ladina 5",
+            "nb_plant": 41,
+            "fruit_id": 2,
+            "fruit_type": "Cultivar Ladina on CG1"
+          }
+        ]
       },
       {
         "field": {
@@ -285,7 +401,232 @@
           "svg_map_url": "/media/fields/svg/default_map.svg",
           "background_image_url": null
         },
-        "rows": []
+        "rows": [
+          {
+            "row_id": 501,
+            "short_name": "C5-R1",
+            "name": "Rang 1 cote maison Swing 1",
+            "nb_plant": 138,
+            "fruit_id": 1,
+            "fruit_type": "Cultivar Swing on CG1"
+          },
+          {
+            "row_id": 502,
+            "short_name": "C5-R2",
+            "name": "Rang 2 cote maison Swing 2",
+            "nb_plant": 140,
+            "fruit_id": 1,
+            "fruit_type": "Cultivar Swing on CG1"
+          },
+          {
+            "row_id": 503,
+            "short_name": "C5-R3",
+            "name": "Rang 3 cote maison Swing 3",
+            "nb_plant": 140,
+            "fruit_id": 1,
+            "fruit_type": "Cultivar Swing on CG1"
+          },
+          {
+            "row_id": 504,
+            "short_name": "C5-R4",
+            "name": "Rang 4 cote maison Ladina 1",
+            "nb_plant": 140,
+            "fruit_id": 2,
+            "fruit_type": "Cultivar Ladina on CG1"
+          },
+          {
+            "row_id": 505,
+            "short_name": "C5-R5",
+            "name": "Rang 5 cote maison Ladina 2",
+            "nb_plant": 140,
+            "fruit_id": 2,
+            "fruit_type": "Cultivar Ladina on CG1"
+          },
+          {
+            "row_id": 506,
+            "short_name": "C5-R6",
+            "name": "Rang 6 cote maison Ladina 3",
+            "nb_plant": 140,
+            "fruit_id": 2,
+            "fruit_type": "Cultivar Ladina on CG1"
+          },
+          {
+            "row_id": 507,
+            "short_name": "C5-R7",
+            "name": "Rang 7 cote maison Ladina 4",
+            "nb_plant": 140,
+            "fruit_id": 2,
+            "fruit_type": "Cultivar Ladina on CG1"
+          },
+          {
+            "row_id": 508,
+            "short_name": "C5-R8",
+            "name": "Rang 8 cote maison Ladina 5",
+            "nb_plant": 141,
+            "fruit_id": 2,
+            "fruit_type": "Cultivar Ladina on CG1"
+          },
+          {
+            "row_id": 509,
+            "short_name": "C5-R9",
+            "name": "Rang 9 cote maison Galiwa 1",
+            "nb_plant": 139,
+            "fruit_id": 3,
+            "fruit_type": "Cultivar Gallwa on CG1"
+          },
+          {
+            "row_id": 510,
+            "short_name": "C5-R10",
+            "name": "Rang 10 cote maison Galiwa 2",
+            "nb_plant": 139,
+            "fruit_id": 3,
+            "fruit_type": "Cultivar Gallwa on CG1"
+          },
+          {
+            "row_id": 511,
+            "short_name": "C5-R11",
+            "name": "Rang 11 cote maison Galiwa 3",
+            "nb_plant": 138,
+            "fruit_id": 3,
+            "fruit_type": "Cultivar Gallwa on CG1"
+          },
+          {
+            "row_id": 512,
+            "short_name": "C5-R12",
+            "name": "Rang 12 cote maison Galiwa 4",
+            "nb_plant": 138,
+            "fruit_id": 3,
+            "fruit_type": "Cultivar Gallwa on CG1"
+          },
+          {
+            "row_id": 513,
+            "short_name": "C5-R13",
+            "name": "Rang 13 cote maison Galiwa 5",
+            "nb_plant": 138,
+            "fruit_id": 3,
+            "fruit_type": "Cultivar Gallwa on CG1"
+          },
+          {
+            "row_id": 514,
+            "short_name": "C5-R14",
+            "name": "Rang 14 cote maison Pitch 1",
+            "nb_plant": 138,
+            "fruit_id": 4,
+            "fruit_type": "Cultivar Pitch on M9"
+          },
+          {
+            "row_id": 515,
+            "short_name": "C5-R15",
+            "name": "Rang 15 cote maison Pitch 2",
+            "nb_plant": 139,
+            "fruit_id": 4,
+            "fruit_type": "Cultivar Pitch on M9"
+          },
+          {
+            "row_id": 516,
+            "short_name": "C5-R16",
+            "name": "Rang 16 cote maison Pitch 3",
+            "nb_plant": 139,
+            "fruit_id": 4,
+            "fruit_type": "Cultivar Pitch on M9"
+          },
+          {
+            "row_id": 517,
+            "short_name": "C5-R17",
+            "name": "Rang 17 cote maison Pixie 1",
+            "nb_plant": 139,
+            "fruit_id": 5,
+            "fruit_type": "Cultivar Pixie on CG1"
+          },
+          {
+            "row_id": 518,
+            "short_name": "C5-R18",
+            "name": "Rang 18 cote maison Pixie 2",
+            "nb_plant": 140,
+            "fruit_id": 5,
+            "fruit_type": "Cultivar Pixie on CG1"
+          },
+          {
+            "row_id": 519,
+            "short_name": "C5-R19",
+            "name": "Rang 19 cote maison Pixie 3",
+            "nb_plant": 141,
+            "fruit_id": 5,
+            "fruit_type": "Cultivar Pixie on CG1"
+          },
+          {
+            "row_id": 520,
+            "short_name": "C5-R20",
+            "name": "Rang 20 cote maison Pixie 4",
+            "nb_plant": 142,
+            "fruit_id": 5,
+            "fruit_type": "Cultivar Pixie on CG1"
+          },
+          {
+            "row_id": 521,
+            "short_name": "C5-R21",
+            "name": "Rang 21 cote maison Pixie 5",
+            "nb_plant": 143,
+            "fruit_id": 5,
+            "fruit_type": "Cultivar Pixie on CG1"
+          },
+          {
+            "row_id": 522,
+            "short_name": "C5-R22",
+            "name": "Rang 22 cote maison Pixie 6",
+            "nb_plant": 143,
+            "fruit_id": 5,
+            "fruit_type": "Cultivar Pixie on CG1"
+          },
+          {
+            "row_id": 523,
+            "short_name": "C5-R23",
+            "name": "Rang 23 loin maison Pixie 7",
+            "nb_plant": 141,
+            "fruit_id": 5,
+            "fruit_type": "Cultivar Pixie on CG1"
+          },
+          {
+            "row_id": 524,
+            "short_name": "C5-R24",
+            "name": "Rang 24 loin maison Early Grunch 1",
+            "nb_plant": 137,
+            "fruit_id": 6,
+            "fruit_type": "Cultivar Early Crunch on M9 Nakab"
+          },
+          {
+            "row_id": 525,
+            "short_name": "C5-R25",
+            "name": "Rang 25 loin maison Early Grunch 2",
+            "nb_plant": 132,
+            "fruit_id": 6,
+            "fruit_type": "Cultivar Early Crunch on M9 Nakab"
+          },
+          {
+            "row_id": 526,
+            "short_name": "C5-R26",
+            "name": "Rang 26 loin maison Early Grunch 3",
+            "nb_plant": 127,
+            "fruit_id": 6,
+            "fruit_type": "Cultivar Early Crunch on M9 Nakab"
+          },
+          {
+            "row_id": 527,
+            "short_name": "C5-R27",
+            "name": "Rang 27 loin maison Early Grunch 4",
+            "nb_plant": 117,
+            "fruit_id": 6,
+            "fruit_type": "Cultivar Early Crunch on M9 Nakab"
+          },
+          {
+            "row_id": 528,
+            "short_name": "C5-R28",
+            "name": "Rang 28 loin maison Early Grunch 5",
+            "nb_plant": 17,
+            "fruit_id": 6,
+            "fruit_type": "Cultivar Early Crunch on M9 Nakab"
+          }
+        ]
       },
       {
         "field": {

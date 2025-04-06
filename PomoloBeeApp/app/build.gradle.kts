@@ -20,6 +20,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -53,6 +55,8 @@ android {
             languageVersion.set(JavaLanguageVersion.of(17))
         }
     }  // ✅ Fixed: Correctly closed `android {}` block
+
+
 }
 
 dependencies {

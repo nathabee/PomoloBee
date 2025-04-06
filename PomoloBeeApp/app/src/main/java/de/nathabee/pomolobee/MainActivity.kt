@@ -21,6 +21,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.compose.ui.Alignment
 
 
 
@@ -29,6 +30,7 @@ import de.nathabee.pomolobee.ui.components.DrawerMenu
 import de.nathabee.pomolobee.ui.theme.PomoloBeeTheme
 import de.nathabee.pomolobee.ui.screens.InitScreen
 import de.nathabee.pomolobee.cache.OrchardCache
+import de.nathabee.pomolobee.data.UserPreferences
 import de.nathabee.pomolobee.ui.components.PermissionManager
 import de.nathabee.pomolobee.ui.screens.SettingsScreen
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
@@ -37,7 +39,9 @@ import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.util.copyAssetsIfNotExists
 import de.nathabee.pomolobee.util.hasAccessToUri
 import de.nathabee.pomolobee.viewmodel.OrchardViewModelFactory
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
+
 
 
 class MainActivity : ComponentActivity() {
@@ -70,18 +74,25 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun onPermissionsGranted() {
-        // copyAssetsIfNotExists(this)
-        // OrchardRepository.loadAllConfig(this)
+        // load if needed
+        // System.loadLibrary("opencv_java4")
 
-        System.loadLibrary("opencv_java4")
+        // 🔍 Read preference synchronously BEFORE Compose
+        val prefs = UserPreferences(this)
+        val rawUri = runBlocking { prefs.getRawStorageRoot().first() }
+        val startupUri = rawUri?.let { Uri.parse(it) }?.takeIf { hasAccessToUri(this, it) }
+
+        Log.d("MainActivity", "📦 Loaded startupUri = $startupUri")
 
         setContent {
             PomoloBeeTheme {
-                PomoloBeeApp()
+                PomoloBeeApp(startupUri = startupUri) // 👈 Pass URI once
             }
         }
-
     }
+
+
+
 
 
 }
@@ -131,61 +142,56 @@ fun AppScaffold(
 
 
 
-
 //###########################################################################
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PomoloBeeApp() {
+fun PomoloBeeApp(startupUri: Uri?) {
     val context = LocalContext.current
     val navController = rememberNavController()
-
-    Log.d("PomoloBeeApp", "🔥 Composable recomposed")
 
     val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
     val orchardViewModel: OrchardViewModel = viewModel(factory = OrchardViewModelFactory(context))
 
-    val storageRootUri by settingsViewModel.storageRootUri.collectAsState()
-    val rawUri = storageRootUri
-    var initDone by remember { mutableStateOf(false) }
+    // Logging initial state
+    Log.d("PomoloBeeApp", "🔥 Composable recomposed")
+    Log.d("PomoloBeeApp", "📦 Initial startupUri = $startupUri")
 
-    Log.d("PomoloBeeApp", "📦 Raw URI from preferences = $rawUri")
-    Log.d("PomoloBeeApp", "📦 OrchardCache initialized = ${OrchardCache.isInitialized()}")
-    Log.d("PomoloBeeApp", "📦 hasAccessToUri = ${rawUri?.let { hasAccessToUri(context, it) }}")
-    Log.d("PomoloBeeApp", "📦 initDone = $initDone")
-
-    if (rawUri == null || !initDone || !hasAccessToUri(context, rawUri)) {
-        Log.w("PomoloBeeApp", "🚨 Invalid or not ready → showing InitScreen")
+    // Show InitScreen if URI is missing or invalid
+    if (startupUri == null) {
+        Log.w("PomoloBeeApp", "❌ startupUri is null → launching InitScreen")
 
         InitScreen(
             settingsViewModel = settingsViewModel,
             orchardViewModel = orchardViewModel,
             onInitFinished = {
-                Log.i("PomoloBeeApp", "✅ Init finished")
-                initDone = true
+                Log.i("PomoloBeeApp", "🎉 Init finished → recreating activity")
+                (context as? ComponentActivity)?.recreate()
             }
         )
-        return // 🛑 Prevent launching the rest of the app
+        return
     }
 
-    Log.i("PomoloBeeApp", "✅ Valid URI + initDone → launching full app")
+    // Load config if needed
+    LaunchedEffect(startupUri) {
+        delay(100) // Let Compose settle
+        Log.i("PomoloBeeApp", "🚀 Attempting to load config from: $startupUri")
+
+        if (OrchardCache.locations.isEmpty()) {
+            Log.i("PomoloBeeApp", "📦 Cache empty → Loading config + copying assets")
+            copyAssetsIfNotExists(context, startupUri)
+            orchardViewModel.loadLocalConfig(startupUri, context)
+            settingsViewModel.invalidate()
+            Log.i("PomoloBeeApp", "✅ Config and assets loaded")
+        } else {
+            Log.d("PomoloBeeApp", "👍 Cache already initialized — skipping config load")
+        }
+    }
+
+    Log.i("PomoloBeeApp", "🧭 Launching main app UI")
 
     AppScaffold(
         navController = navController,
         orchardViewModel = orchardViewModel,
         settingsViewModel = settingsViewModel
     )
-
-    LaunchedEffect(Unit) {
-        Log.d("PomoloBeeApp", "⏳ LaunchedEffect started. Is cache empty? ${OrchardCache.locations.isEmpty()}")
-
-        if (OrchardCache.locations.isEmpty()) {
-            Log.i("PomoloBeeApp", "📦 Cache is empty. Starting config load and asset copy...")
-            copyAssetsIfNotExists(context, rawUri)
-            orchardViewModel.loadLocalConfig(rawUri, context)
-            settingsViewModel.invalidate()
-            Log.i("PomoloBeeApp", "🎉 Config load complete")
-        } else {
-            Log.d("PomoloBeeApp", "👍 Cache already initialized — skipping config load")
-        }
-    }
 }

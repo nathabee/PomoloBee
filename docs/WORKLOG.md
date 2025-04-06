@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _119 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _122 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -33,6 +33,7 @@
     - [Avril 03 2025](#avril-03-2025)
     - [Avril 04 2025](#avril-04-2025)
     - [Avril 05 2025](#avril-05-2025)
+    - [Avril 06 2025](#avril-06-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -369,6 +370,14 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
 - **Tasks**:     
   - Creation SVG_howto.md to explain how to create a SVG files
  
+### Avril 06 2025
+- **Hours Worked**: 3 hours
+- **Tasks**:     
+  - APP : init always called on loop performance
+  - APP. analyse problem image created at the wrong place
+  - APP.config,locations,json SVG C1 to C5 with easier config
+
+
 
 
 ---
