@@ -1,57 +1,79 @@
 package de.nathabee.pomolobee.util
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
-
 fun copyAssetsIfNotExists(context: Context, treeUri: Uri) {
     val assetManager = context.assets
-    val assetStructure = listOf(
+
+    val staticAssets = listOf(
         "config/fruits.json",
-        "config/locations.json",
-        "fields/svg/C1_map.svg",
-        "fields/svg/default_map.svg",
-        "fields/background/C1.jpeg",
-        "images/",
-        "logs/",
-        "results/"
+        "config/locations.json"
+    )
+
+    val dynamicFolders = listOf(
+        "fields/svg",              // ✅ All SVG maps
+        "fields/background",       // ✅ All background images
+        "images", "logs", "results"
     )
 
     val rootDoc = DocumentFile.fromTreeUri(context, treeUri)
 
-    for (assetPath in assetStructure) {
-        val parts = assetPath.split("/")
-        val fileName = parts.last()
-        val subDirs = parts.dropLast(1)
+    // Copy static individual files
+    for (assetPath in staticAssets) {
+        copyAssetFile(context, assetManager, rootDoc, assetPath)
+    }
 
-        var currentDir = rootDoc
-        for (dir in subDirs) {
-            currentDir = currentDir?.findFile(dir)?.takeIf { it.isDirectory }
-                ?: currentDir?.createDirectory(dir)
+    // Copy all files from dynamic folders
+    for (folder in dynamicFolders) {
+        val files = assetManager.list(folder) ?: continue
+
+        for (file in files) {
+            if (file.isNullOrBlank()) continue
+            val fullPath = "$folder/$file"
+            copyAssetFile(context, assetManager, rootDoc, fullPath)
         }
+    }
+}
 
-        // If path ends with "/", it's an empty folder — create and continue
-        if (assetPath.endsWith("/")) {
-            currentDir?.findFile(fileName) ?: currentDir?.createDirectory(fileName)
-            continue
-        }
+private fun copyAssetFile(
+    context: Context,
+    assetManager: AssetManager,
+    rootDoc: DocumentFile?,
+    assetPath: String
+)
+ {
+    val parts = assetPath.split("/")
+    val fileName = parts.last()
+    val subDirs = parts.dropLast(1)
 
-        // Otherwise, copy file if it doesn't exist
-        val existingFile = currentDir?.findFile(fileName)
-        if (existingFile == null) {
-            val mimeType = guessMimeType(fileName)
-            val destFile = currentDir?.createFile(mimeType, fileName)
 
-            if (destFile != null) {
-                assetManager.open(assetPath).use { input ->
-                    context.contentResolver.openOutputStream(destFile.uri)?.use { output ->
-                        input.copyTo(output)
-                    }
+    var currentDir = rootDoc
+    for (dir in subDirs) {
+        currentDir = currentDir?.findFile(dir)?.takeIf { it.isDirectory }
+            ?: currentDir?.createDirectory(dir)
+    }
+
+    // Skip if it’s a directory placeholder
+    if (assetPath.endsWith("/")) {
+        currentDir?.findFile(fileName) ?: currentDir?.createDirectory(fileName)
+        return
+    }
+
+    val existingFile = currentDir?.findFile(fileName)
+    if (existingFile == null) {
+        val mimeType = guessMimeType(fileName)
+        val destFile = currentDir?.createFile(mimeType, fileName)
+
+        if (destFile != null) {
+            assetManager.open(assetPath).use { input ->
+                context.contentResolver.openOutputStream(destFile.uri)?.use { output ->
+                    input.copyTo(output)
                 }
             }
         }
     }
-
 }
 
 fun guessMimeType(fileName: String): String {

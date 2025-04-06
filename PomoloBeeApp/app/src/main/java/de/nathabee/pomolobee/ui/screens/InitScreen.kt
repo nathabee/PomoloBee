@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 fun InitScreen(
     settingsViewModel: SettingsViewModel,
     orchardViewModel: OrchardViewModel,
-    onInitFinished: () -> Unit
+    onInitFinished: (Uri) -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -40,7 +40,7 @@ fun InitScreen(
             settingsViewModel.setStorageRoot(selectedUri)
             copyAssetsIfNotExists(context, selectedUri)
             orchardViewModel.loadLocalConfig(selectedUri, context)
-            onInitFinished()
+            onInitFinished(selectedUri)
         }
     })
 
@@ -56,7 +56,7 @@ fun InitScreen(
                         coroutineScope.launch {
                             settingsViewModel.setStorageRoot(it)
                             showDialog = false
-                            onInitFinished()
+                            onInitFinished(it)
                         }
                     }
                 }) {
@@ -100,11 +100,12 @@ fun InitScreen(
 
             Button(
                 onClick = {
-                    if (storageRootUri == null) {
+                    storageRootUri?.let { nonNullUri ->
+                        onInitFinished(nonNullUri) // nonNullUri is Uri (not nullable here)
+                    } ?: run {
                         showDialog = true
-                    } else {
-                        onInitFinished()
                     }
+
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

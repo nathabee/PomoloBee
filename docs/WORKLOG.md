@@ -371,13 +371,28 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - Creation SVG_howto.md to explain how to create a SVG files
  
 ### Avril 06 2025
-- **Hours Worked**: 3 hours
-- **Tasks**:     
-  - APP : init always called on loop performance
-  - APP. analyse problem image created at the wrong place
-  - APP.config,locations,json SVG C1 to C5 with easier config
+- **Hours Worked**: 3 hours  
+- **Tasks Completed**:
+  - ✅ **APP Initialization**:
+    - Fixed performance issue where `InitScreen` was being triggered on loop by using Compose state instead of `Activity.recreate()`.
+  - ✅ **Asset Handling**:
+    - Refactored `copyAssetsIfNotExists()` to copy all files dynamically from `assets/fields/svg` and `assets/fields/background`, instead of manually listing them.
+    - Investigated and documented issue where trash files appear in `images/`; possibly caused by the asset copying logic. ⚠️
+  - ✅ **Field Visualizations (SVG)**:
+    - Added new SVG files for fields **C2** to **C5**.
+    - Adapted C2 and C3 SVG configuration to match field layout.
+    - Made **SVG for fields C4 and C5 selectable** in the orchard screen.
+  - ✅ **Config Updates**:
+    - Updated `locations.json` and folder structure to reflect new field data and SVG maps.
+  - ✅ **Performance Optimization**:
+    - Confirmed OpenCV is no longer loaded at startup unless needed, improving app launch performance.
+  - 🐞 **Bug Logged**:
+    - **Images still saved to wrong path** (`storageRoot/` instead of `storageRoot/images`). Needs further investigation.
+  - 🔍 **To Do**:
+    - Improve SVG map **zooming experience**.
+    - Optimize **initial rendering performance** after config load.
 
-
+---
 
 
 ---

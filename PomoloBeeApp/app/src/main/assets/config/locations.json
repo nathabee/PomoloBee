@@ -246,7 +246,7 @@
           "name": "ChampSud",
           "description": "Champ situé au sud de la propriété, très ensoleillé.",
           "orientation": "S",
-          "svg_map_url": "/media/fields/svg/default_map.svg",
+          "svg_map_url": "/media/fields/svg/C2_map.svg",
           "background_image_url": null
         },
         "rows": [
@@ -283,7 +283,7 @@
           "name": "VergerHaut",
           "description": "Verger en hauteur avec terre calcaire.",
           "orientation": "E",
-          "svg_map_url": "/media/fields/svg/default_map.svg",
+          "svg_map_url": "/media/fields/svg/C3_map.svg",
           "background_image_url": null
         },
 
@@ -321,7 +321,7 @@
           "name": "VergerBas",
           "description": "Verger en contrebas, plus humide.",
           "orientation": "W",
-          "svg_map_url": "/media/fields/svg/default_map.svg",
+          "svg_map_url": "/media/fields/svg/C4_map.svg",
           "background_image_url": null
         },
         "rows": [
@@ -398,7 +398,7 @@
           "name": "PlaineOuest",
           "description": "Grande plaine à l'ouest, sol fertile.",
           "orientation": "W",
-          "svg_map_url": "/media/fields/svg/default_map.svg",
+          "svg_map_url": "/media/fields/svg/C5_map.svg",
           "background_image_url": null
         },
         "rows": [

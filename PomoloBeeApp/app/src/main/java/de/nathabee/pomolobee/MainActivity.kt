@@ -41,6 +41,7 @@ import de.nathabee.pomolobee.util.hasAccessToUri
 import de.nathabee.pomolobee.viewmodel.OrchardViewModelFactory
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.delay
 
 
 
@@ -148,46 +149,39 @@ fun AppScaffold(
 fun PomoloBeeApp(startupUri: Uri?) {
     val context = LocalContext.current
     val navController = rememberNavController()
-
     val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
     val orchardViewModel: OrchardViewModel = viewModel(factory = OrchardViewModelFactory(context))
 
-    // Logging initial state
-    Log.d("PomoloBeeApp", "🔥 Composable recomposed")
-    Log.d("PomoloBeeApp", "📦 Initial startupUri = $startupUri")
+    var resolvedUri by remember { mutableStateOf<Uri?>(startupUri) }
 
-    // Show InitScreen if URI is missing or invalid
-    if (startupUri == null) {
-        Log.w("PomoloBeeApp", "❌ startupUri is null → launching InitScreen")
+    Log.d("PomoloBeeApp", "📦 Initial startupUri = $resolvedUri")
 
+    if (resolvedUri == null) {
         InitScreen(
             settingsViewModel = settingsViewModel,
             orchardViewModel = orchardViewModel,
-            onInitFinished = {
-                Log.i("PomoloBeeApp", "🎉 Init finished → recreating activity")
-                (context as? ComponentActivity)?.recreate()
+            onInitFinished = { newUri ->
+                Log.i("PomoloBeeApp", "🎉 Init finished → updating state instead of recreating")
+                resolvedUri = newUri
             }
         )
+
         return
     }
 
-    // Load config if needed
-    LaunchedEffect(startupUri) {
-        delay(100) // Let Compose settle
-        Log.i("PomoloBeeApp", "🚀 Attempting to load config from: $startupUri")
+    LaunchedEffect(resolvedUri) {
+        delay(100)
+        Log.i("PomoloBeeApp", "🚀 Attempting to load config from: $resolvedUri")
 
         if (OrchardCache.locations.isEmpty()) {
-            Log.i("PomoloBeeApp", "📦 Cache empty → Loading config + copying assets")
-            copyAssetsIfNotExists(context, startupUri)
-            orchardViewModel.loadLocalConfig(startupUri, context)
+            copyAssetsIfNotExists(context, resolvedUri!!)
+            orchardViewModel.loadLocalConfig(resolvedUri!!, context)
             settingsViewModel.invalidate()
             Log.i("PomoloBeeApp", "✅ Config and assets loaded")
         } else {
             Log.d("PomoloBeeApp", "👍 Cache already initialized — skipping config load")
         }
     }
-
-    Log.i("PomoloBeeApp", "🧭 Launching main app UI")
 
     AppScaffold(
         navController = navController,
