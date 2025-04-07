@@ -14,5 +14,7 @@ sealed class Screen(val route: String, val title: String) {
     object SvgMap : Screen("svgmap/{fieldId}", "SVG Map") {
         fun createRoute(fieldId: Int) = "svgmap/$fieldId"
     }
+    object ErrorLog : Screen("errorlog", "Error Log")
+
 
 }

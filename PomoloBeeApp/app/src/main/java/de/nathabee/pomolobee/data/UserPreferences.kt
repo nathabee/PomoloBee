@@ -7,7 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.io.File
+import kotlinx.coroutines.flow.first
 
 // Global property delegate for accessing the DataStore
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_prefs")
@@ -99,4 +99,16 @@ class UserPreferences(private val context: Context) {
         context.dataStore.edit { it[API_VERSION_KEY] = version }
 
     }
+
+    suspend fun initializeDefaultsIfNeeded() {
+        val current = context.dataStore.data.first()
+
+        context.dataStore.edit { prefs ->
+            if (current[SYNC_MODE_KEY] == null) prefs[SYNC_MODE_KEY] = "local"
+            if (current[API_ENDPOINT_KEY] == null) prefs[API_ENDPOINT_KEY] = "http://192.168.178.71:8000/api"
+            if (current[MEDIA_ENDPOINT_KEY] == null) prefs[MEDIA_ENDPOINT_KEY] = "http://192.168.178.71:8000/media"
+            if (current[DEBUG_MODE_KEY] == null) prefs[DEBUG_MODE_KEY] = false
+        }
+    }
+
 }

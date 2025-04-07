@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
+
+
 fun copyAssetsIfNotExists(context: Context, treeUri: Uri) {
     val assetManager = context.assets
 
@@ -12,30 +14,38 @@ fun copyAssetsIfNotExists(context: Context, treeUri: Uri) {
         "config/locations.json"
     )
 
-    val dynamicFolders = listOf(
-        "fields/svg",              // ✅ All SVG maps
-        "fields/background",       // ✅ All background images
+    val assetFoldersToCopy = listOf(
+        "fields/svg",
+        "fields/background"
+    )
+
+    val foldersToCreateEmpty = listOf(
         "images", "logs", "results"
     )
 
     val rootDoc = DocumentFile.fromTreeUri(context, treeUri)
 
-    // Copy static individual files
+    // Copy static files
     for (assetPath in staticAssets) {
         copyAssetFile(context, assetManager, rootDoc, assetPath)
     }
 
-    // Copy all files from dynamic folders
-    for (folder in dynamicFolders) {
+    // Copy all files from asset folders
+    for (folder in assetFoldersToCopy) {
         val files = assetManager.list(folder) ?: continue
-
         for (file in files) {
             if (file.isNullOrBlank()) continue
             val fullPath = "$folder/$file"
             copyAssetFile(context, assetManager, rootDoc, fullPath)
         }
     }
+
+    // Create empty folders
+    for (folderName in foldersToCreateEmpty) {
+        rootDoc?.findFile(folderName) ?: rootDoc?.createDirectory(folderName)
+    }
 }
+
 
 private fun copyAssetFile(
     context: Context,

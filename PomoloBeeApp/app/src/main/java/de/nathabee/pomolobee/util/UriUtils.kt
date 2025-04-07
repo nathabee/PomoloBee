@@ -62,3 +62,13 @@ fun hasAccessToUri(context: Context, uri: Uri): Boolean {
     }
 }
 
+
+fun resolveDocumentDir(context: Context, uri: Uri?): DocumentFile? {
+    if (uri == null) return null
+    return DocumentFile.fromTreeUri(context, uri)?.takeIf { it.isDirectory }
+}
+
+fun resolveSubDirectory(context: Context, baseUri: Uri?, subPath: String): DocumentFile? {
+    val root = baseUri?.let { DocumentFile.fromTreeUri(context, it) } ?: return null
+    return root.findFile(subPath) ?: root.createDirectory(subPath)
+}

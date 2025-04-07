@@ -33,7 +33,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 
-ALLOWED_HOSTS = ['*']  # Update this in production!
+ALLOWED_HOSTS =  os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
+print ( "ALLOWED_HOSTS=", ALLOWED_HOSTS)
 
 
 # Application definition

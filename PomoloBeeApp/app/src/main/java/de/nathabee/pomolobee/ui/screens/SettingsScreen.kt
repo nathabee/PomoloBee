@@ -1,8 +1,11 @@
 package de.nathabee.pomolobee.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -10,6 +13,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 import java.util.*
 import androidx.compose.ui.platform.LocalContext
+import de.nathabee.pomolobee.navigation.Screen
 
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.ui.components.FolderPicker
@@ -17,6 +21,7 @@ import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import de.nathabee.pomolobee.util.copyAssetsIfNotExists
 import de.nathabee.pomolobee.util.getFriendlyFolderName
+import de.nathabee.pomolobee.util.safeLaunch
 
 
 @Composable
@@ -50,20 +55,29 @@ fun SettingsScreen(
         FolderPicker(onFolderSelected = { selectedUri ->
             showFolderPicker = false
             scope.launch {
-                settingsViewModel.setStorageRoot(selectedUri)
-                copyAssetsIfNotExists(context, selectedUri)
-                orchardViewModel.loadLocalConfig(selectedUri, context)
-// ↓ Add after if you want to force recomposition
-                settingsViewModel.invalidate()
-
+                safeLaunch(context, settingsViewModel.storageRootUri.value) {
+                    settingsViewModel.setStorageRoot(selectedUri)
+                    copyAssetsIfNotExists(context, selectedUri)
+                    orchardViewModel.loadLocalConfig(selectedUri, context)
+                    settingsViewModel.invalidate()
+                }
             }
         })
+
     }
 
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    val scrollState = rememberScrollState()
 
-        // Last sync display
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(16.dp)
+    ) {
+
+
+    // Last sync display
         Text("🕒 Last sync: ${lastSyncDate?.let { Date(it).toLocaleString() } ?: "Never"}")
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -85,7 +99,12 @@ fun SettingsScreen(
                     selected = selectedSyncMode == mode,
                     onClick = {
                         selectedSyncMode = mode
-                        scope.launch { settingsViewModel.updateSyncMode(mode) }
+                        scope.launch {
+                            safeLaunch(context, settingsViewModel.storageRootUri.value) {
+                                settingsViewModel.updateSyncMode(mode)
+                            }
+
+                        }
                     },
                     label = { Text(mode.uppercase()) }
                 )
@@ -118,8 +137,12 @@ fun SettingsScreen(
         Button(
             onClick = {
                 scope.launch {
-                    settingsViewModel.updateApiEndpoint(apiInput)
-                    settingsViewModel.updateMediaEndpoint(mediaInput)
+                    safeLaunch(context, settingsViewModel.storageRootUri.value) {
+                        settingsViewModel.updateApiEndpoint(apiInput)
+                        settingsViewModel.updateMediaEndpoint(mediaInput)
+                    }
+
+
                 }
             }
         ) {
@@ -133,7 +156,7 @@ fun SettingsScreen(
 
         // Test connection button
         Button(onClick = {
-            settingsViewModel.performConnectionTest { success ->
+            settingsViewModel.performConnectionTest(context) { success ->
                 connectionStatus = if (success) "✅ Connection OK" else "❌ Connection failed"
             }
         }) {
@@ -145,9 +168,10 @@ fun SettingsScreen(
 
         // Sync now button
         Button(onClick = {
-            settingsViewModel.performLocalSync(context) { msg ->
-                syncMessage = msg
+            safeLaunch(context, settingsViewModel.storageRootUri.value) {
+                settingsViewModel.performLocalSync(context) { msg -> syncMessage = msg }
             }
+
 
         }) {
             Text("🔄 Sync Now")
@@ -156,7 +180,9 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
         Text("🧪 API Version: ${apiVersion ?: "Unknown"}")
-        Text("🐞 Debug: ${if (isDebug) "ON" else "OFF"}")
+        Text("🐞 Debug Mode: ${if (isDebug) "ENABLED" else "DISABLED"}")
+
+
 
         // ✅ Change storage folder button
         Button(
@@ -170,8 +196,40 @@ fun SettingsScreen(
         Text("📂 Storage Location: ${storageRootUri?.let { getFriendlyFolderName(context, it) } ?: "Not set"}")
 
 
+        Divider(modifier = Modifier.padding(vertical = 16.dp))
+        Text("🛠 Developer Options")
 
         Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text("🐞 Enable Debug Mode")
+            Switch(
+                checked = isDebug,
+                onCheckedChange = { newValue ->
+                    scope.launch {
+
+                        safeLaunch(context, settingsViewModel.storageRootUri.value) {
+                            settingsViewModel.updateDebugMode(newValue)
+                        }
+                    }
+                }
+            )
+        }
+        if (isDebug) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = {navController?.navigate(Screen.ErrorLog.route)
+            }) {
+                Text("📜 View Error Log")
+            }
+        }
+
+
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+
 
     }
 }

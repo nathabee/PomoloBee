@@ -70,6 +70,9 @@ fun NavGraph(
             }
         }
 
+        composable(Screen.ErrorLog.route) {
+            ErrorLogScreen(settingsViewModel = settingsViewModel)
+        }
 
     }
 }

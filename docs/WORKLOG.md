@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _122 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _125 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -34,6 +34,8 @@
     - [Avril 04 2025](#avril-04-2025)
     - [Avril 05 2025](#avril-05-2025)
     - [Avril 06 2025](#avril-06-2025)
+  - [Week 5 Dates from April 7 to Avril 13 2025](#week-5-dates-from-april-7-to-avril-13-2025)
+    - [April 7 2025](#april-7-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -393,6 +395,22 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
     - Optimize **initial rendering performance** after config load.
 
 ---
+
+
+##  Week 5 Dates from April 7 to Avril 13 2025
+
+###  April 7 2025
+- **Hours Worked**: 3 hours
+- **Tasks**:
+  - Refactor Camera to better handle name and uri  : name of picture <FieldShortName>_<RowShortName>_<yyyyMMdd_HHmmss>.jpg
+  - Camera : uri is not like screen so we removed configdirectory and imagedirectory from view settings and created util resolveSubDirectory
+  - scroll in settingsscreen
+  - add toogle debug to see errorlog screen
+  - error log screen for backend error
+  - error logging in cameraScreen
+  - error wrapping in settingsScreen
+  - default values in setting screen :API and MEDIA URL
+  - add DJANGO_ALLOWED_HOSTS in DJango .env file
 
 
 ---

@@ -12,8 +12,12 @@ import kotlinx.coroutines.launch
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import de.nathabee.pomolobee.util.ErrorLogger
 import de.nathabee.pomolobee.util.hasAccessToUri
+import de.nathabee.pomolobee.util.resolveSubDirectory
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
+import androidx.datastore.preferences.core.edit
 
 
 class SettingsViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
@@ -45,20 +49,6 @@ class SettingsViewModel(
     val syncMode: StateFlow<String?> = prefs.getSyncMode().stateIn(
         viewModelScope, SharingStarted.Eagerly, "local"
     )
-
-
-    val configDirectory: StateFlow<Uri?> = storageRootUri.map { root ->
-        root?.let { Uri.withAppendedPath(it, "config") }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-
-    val imageDirectory: StateFlow<Uri?> = storageRootUri.map { root ->
-        root?.let { Uri.withAppendedPath(it, "images") }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-
-
-
 
     val mediaEndpoint = prefs.getMediaEndpoint().stateIn(
         viewModelScope, SharingStarted.Eagerly, ""
@@ -99,6 +89,10 @@ class SettingsViewModel(
         prefs.setSyncMode(value)
     }
 
+
+
+
+
     fun clearStorageRoot() = viewModelScope.launch {
         prefs.setStorageRoot("") // or null, depending on your implementation
     }
@@ -135,26 +129,33 @@ class SettingsViewModel(
     }
 
 
-    fun performConnectionTest(onResult: (Boolean) -> Unit) = viewModelScope.launch {
+    fun performConnectionTest(context: Context, onResult: (Boolean) -> Unit) = viewModelScope.launch {
         val api = apiEndpoint.value ?: return@launch
         val media = mediaEndpoint.value ?: return@launch
 
-        val result = ConnectionRepository.testConnection(api, media) { version ->
+        val result = ConnectionRepository.testConnection(context, api, media) { version ->
             updateApiVersion(version)
         }
         onResult(result)
     }
 
-    fun performLocalSync(context: Context, onMessage: (String) -> Unit) = viewModelScope.launch {
-        val configUri = configDirectory.value
-        if (configUri != null) {
-            val message = ConnectionRepository.syncOrchard(context, configUri)
-            updateLastSync(System.currentTimeMillis())
-            onMessage(message)
-        } else {
-            onMessage("❌ Config path missing")
+
+
+    fun performLocalSync(context: Context, onMessage: (String) -> Unit) {
+        safeLaunchInViewModel(context, "❌ Sync failed") {
+            val configUri = resolveSubDirectory(context, storageRootUri.value, "config")?.uri
+            if (configUri != null) {
+                val message = ConnectionRepository.syncOrchard(context, configUri)
+                updateLastSync(System.currentTimeMillis())
+                onMessage(message)
+            } else {
+                onMessage("❌ Config path missing")
+            }
         }
     }
+
+
+
 
 
     private val _recomposeTrigger = mutableStateOf(0)
@@ -162,6 +163,22 @@ class SettingsViewModel(
 
     fun invalidate() {
         _recomposeTrigger.value++
+    }
+
+    fun safeLaunchInViewModel(context: Context, message: String, block: suspend () -> Unit) {
+        viewModelScope.launch {
+            try {
+                block()
+            } catch (e: Exception) {
+                ErrorLogger.logError(context, storageRootUri.value, message, e)
+            }
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            prefs.initializeDefaultsIfNeeded()
+        }
     }
 
 
