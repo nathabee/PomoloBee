@@ -52,6 +52,8 @@ class OrchardViewModel : ViewModel() {
                 _fruitCount.value = OrchardCache.fruits.size
                 _fieldCount.value = OrchardCache.locations.size
                 _locations.value = OrchardCache.locations
+                _fruits.value = OrchardCache.fruits
+
 
             }
             _syncStatus.value = if (success) "✅ Config loaded" else "❌ Failed to load"

@@ -19,10 +19,16 @@ fun OrchardScreen(
 ) {
     val locations by orchardViewModel.locations.collectAsState()
 
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    LazyColumn(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
         items(locations) { location ->
             FieldCard(location = location, onVisualize = {
-                navController.navigate(Screen.SvgMap.createRoute(location.field.fieldId))
+                // navController.navigate(Screen.SvgMap.createRoute(location.field.fieldId))
+                navController.navigate(
+                    Screen.SvgMap.withArgs("fieldId" to location.field.fieldId.toString())
+                )
+
             })
 
             Spacer(modifier = Modifier.height(16.dp))

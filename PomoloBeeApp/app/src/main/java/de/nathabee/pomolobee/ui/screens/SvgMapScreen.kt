@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.model.Row
+import de.nathabee.pomolobee.model.Fruit
 import de.nathabee.pomolobee.util.getBackgroundUriForLocation
 import de.nathabee.pomolobee.util.getSvgUriForLocation
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
@@ -42,7 +43,9 @@ fun SvgMapScreen(
     val context = LocalContext.current
 
     val storageRootUri by settingsViewModel.storageRootUri.collectAsState()
-    val fruits by orchardViewModel.fruits.collectAsState()
+    //val fruits by orchardViewModel.fruits.collectAsState()
+
+
 
     val svgUri = remember(storageRootUri, location) {
         storageRootUri?.let { getSvgUriForLocation(context, it, location) }
@@ -79,10 +82,48 @@ fun SvgMapScreen(
 
 
 
+
+    var showFruitInfo by remember { mutableStateOf(false) }
     var selectedRowInfo by remember { mutableStateOf<Row?>(null) }
-    val fruitName = selectedRowInfo?.let { row ->
-        fruits.find { it.fruitId == row.fruitId }?.name
+
+    val fruits by orchardViewModel.fruits.collectAsState()
+
+
+
+    val selectedFruit by remember(selectedRowInfo, fruits) {
+        derivedStateOf {
+            selectedRowInfo?.let { row ->
+                fruits.find { it.fruitId == row.fruitId }
+            }
+        }
     }
+
+
+
+
+    LaunchedEffect(selectedRowInfo, fruits) {
+        if (selectedRowInfo != null) {
+            Log.d("SvgMapScreen", "🍏 Row selected: ID=${selectedRowInfo!!.rowId}, fruitId=${selectedRowInfo!!.fruitId}")
+
+            Log.d("SvgMapScreen", "🍎 All available fruits (${fruits.size}):")
+            fruits.forEach { fruit ->
+                Log.d("SvgMapScreen", "  • ID=${fruit.fruitId}, Name=${fruit.name}")
+            }
+
+            val matchedFruit = fruits.find { it.fruitId == selectedRowInfo!!.fruitId }
+            Log.d("SvgMapScreen", "✅ Match result: ${matchedFruit?.name ?: "❌ No match found!"}")
+        } else {
+            Log.d("SvgMapScreen", "ℹ️ No row selected yet.")
+            Log.d("SvgMapScreen", "🍎 Fruits at this point (${fruits.size}):")
+            fruits.forEach { fruit ->
+                Log.d("SvgMapScreen", "  • ID=${fruit.fruitId}, Name=${fruit.name}")
+            }
+        }
+    }
+
+
+
+
 
     Column(modifier = Modifier.fillMaxSize()) {
         if (svgContent != null) {
@@ -103,12 +144,21 @@ fun SvgMapScreen(
                         addJavascriptInterface(object {
                             @JavascriptInterface
                             fun onRowClicked(rowId: String) {
+                                Log.d("SvgMapScreen", "🖱️ Row clicked: $rowId")
+                                //val id = rowId.removePrefix("row_").toIntOrNull()
+                                Log.d("SvgMapScreen", "🖱️ Row clicked: $rowId, resolved to ID = $id")
+
+                                Log.d("SvgMapScreen", "📋 Rows in location: ${location.rows.map { it.rowId }}")
+
                                 val id = rowId.removePrefix("row_").toIntOrNull()
                                 val row = location.rows.find { it.rowId == id }
                                 if (row != null) {
                                     this@apply.post {
                                         selectedRowInfo = row
+                                        Log.d("SvgMapScreen", "📦 set selectedRowInfo: rowId=${row.rowId}, fruitId=${row.fruitId}")
                                     }
+                                } else {
+                                    Log.w("SvgMapScreen", "❌ Row not found for id: $id")
                                 }
                             }
                         }, "Android")
@@ -163,36 +213,85 @@ fun SvgMapScreen(
             }
         }
 
+        Log.d("SvgMapScreen", "🔍 Button state → selectedFruit=${selectedFruit?.name}")
+        selectedRowInfo?.let { row ->
+            AlertDialog(
+                onDismissRequest = { selectedRowInfo = null },
+                title = { Text("Row Info") },
+                text = {
+                    Column {
+                        Text("🆔 Row ID: ${row.rowId}")
+                        Text("🌿 Short Name: ${row.shortName}")
+                        Text("🌱 Nb Plants: ${row.nbPlant}")
+                        Text("🍏 Fruit Type: ${row.fruitType}")
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onRawSelected("row_${row.rowId}")
+                        selectedRowInfo = null
+                    }) {
+                        Text("✅ OK")
+                    }
+                },
+                dismissButton = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(onClick = { selectedRowInfo = null }) {
+                            Text("❌ Cancel")
+                        }
+                        TextButton(
+                            onClick = { showFruitInfo = true },
+                            enabled = selectedFruit != null && fruits.isNotEmpty()
+
+                        ) {
+                            Text("🍏 Info Fruit")
+                        }
+
+                    }
+                }
+            )
+        }
+
+
         Spacer(modifier = Modifier.height(8.dp))
     }
 
-    selectedRowInfo?.let { row ->
-        AlertDialog(
-            onDismissRequest = { selectedRowInfo = null },
-            title = { Text("Row Info") },
-            text = {
-                Column {
-                    Text("🆔 Row ID: ${row.rowId}")
-                    Text("🌿 Short Name: ${row.shortName}")
-                    Text("🌱 Nb Plants: ${row.nbPlant}")
-                    Text("🍏 Fruit Type: ${row.fruitType}")
-                    Text("🍎 Fruit Name: $fruitName")
+
+
+    if (showFruitInfo) {
+        selectedFruit?.let { fruit ->
+            AlertDialog(
+                onDismissRequest = { showFruitInfo = false },
+                title = { Text("🍏 ${fruit.name}") },
+                text = {
+                    Column {
+                        Text("📄 ${fruit.description}")
+                        Text("📅 Harvest: ${fruit.yieldStartDate} to ${fruit.yieldEndDate}")
+                        Text("📦 Avg Yield: ${fruit.yieldAvgKg} kg")
+                        Text("🍎 Avg Fruit: ${fruit.fruitAvgKg} kg")
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showFruitInfo = false }) {
+                        Text("✅ Close")
+                    }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    onRawSelected("row_${row.rowId}")
-                    selectedRowInfo = null
-                }) {
-                    Text("✅ OK")
-                }
-            }
-        )
+            )
+        }
     }
+
+
+
+
+
+
+
 
     Spacer(modifier = Modifier.height(8.dp))
 
     Button(onClick = onBack) {
         Text("⬅ Back")
     }
+
+
 }

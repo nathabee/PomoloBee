@@ -16,6 +16,8 @@ object OrchardCache {
         locations = emptyList()
     }
 
+
+
     fun load(fruitList: List<Fruit>, locationList: List<Location>) {
         fruits = fruitList
         locations = locationList

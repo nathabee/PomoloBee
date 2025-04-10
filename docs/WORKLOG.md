@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _125 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _131 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -36,6 +36,7 @@
     - [Avril 06 2025](#avril-06-2025)
   - [Week 5 Dates from April 7 to Avril 13 2025](#week-5-dates-from-april-7-to-avril-13-2025)
     - [April 7 2025](#april-7-2025)
+    - [April 10 2025](#april-10-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -411,6 +412,24 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - error wrapping in settingsScreen
   - default values in setting screen :API and MEDIA URL
   - add DJANGO_ALLOWED_HOSTS in DJango .env file
+ 
+
+###  April 10 2025
+- **Hours Worked**: 6 hours
+- **Tasks**:
+  - 🔧 Updated `gradlew` to the latest version  
+  - 🛠️ Fixed: Location was not retained when navigating back from `SvgMapScreen` to `LocationScreen`  (not saved oin cache properly)
+  - ✅ Implemented feature: Display fruit info when requested in the row info dialog on SVG screen  
+  - 🐛 Investigated issue with storage root persistence after reinstallation  
+  - 🔍 Added and verified logging to `error.json` to trace app reinstallation  
+  - 🧪 Tested that logs are accessible from the debug environment (via settings > debug mode + view logs)  
+ 
+
+---
+  - TO DO bug correction : 
+  - Problem SVG : Field :  raw values like CxR should be renamed to Row.... + 2, 3 should be like 4...adapt 5 to be like structure 4... if all ok save in django (locations.json + svg) 
+  - Test API + Media
+  - Problem:  Task: Check if the error logs are readable from the debug environment.
 
 
 ---

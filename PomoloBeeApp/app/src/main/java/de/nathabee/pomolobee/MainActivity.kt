@@ -75,22 +75,40 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun onPermissionsGranted() {
-        // load if needed
-        // System.loadLibrary("opencv_java4")
+        val persisted = contentResolver.persistedUriPermissions
+        persisted.forEach {
+            Log.d("PersistedPermission", "URI=${it.uri}, Read=${it.isReadPermission}, Write=${it.isWritePermission}")
+        }
 
-        // 🔍 Read preference synchronously BEFORE Compose
         val prefs = UserPreferences(this)
         val rawUri = runBlocking { prefs.getRawStorageRoot().first() }
-        val startupUri = rawUri?.let { Uri.parse(it) }?.takeIf { hasAccessToUri(this, it) }
+        val parsedUri = rawUri?.let { Uri.parse(it) }
+
+        // 👇 Add detailed logging here
+        if (parsedUri != null) {
+            if (!hasAccessToUri(this, parsedUri)) {
+                val rootDoc = DocumentFile.fromTreeUri(this, parsedUri)
+                if (rootDoc == null || !rootDoc.exists()) {
+                    Log.w("Startup", "⚠️ Storage root is inaccessible or missing — SD card may be removed or permission revoked.")
+                    // Don't reset the preference — just inform the user later via UI if needed
+                }
+            } else {
+                Log.i("Startup", "✅ Verified access to storage root: $parsedUri")
+            }
+        }
+
+        val startupUri = parsedUri?.takeIf { hasAccessToUri(this, it) }
 
         Log.d("MainActivity", "📦 Loaded startupUri = $startupUri")
 
         setContent {
             PomoloBeeTheme {
-                PomoloBeeApp(startupUri = startupUri) // 👈 Pass URI once
+                PomoloBeeApp(startupUri = startupUri)
             }
         }
     }
+
+
 
 
 
@@ -149,30 +167,31 @@ fun AppScaffold(
 fun PomoloBeeApp(startupUri: Uri?) {
     val context = LocalContext.current
     val navController = rememberNavController()
-    val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
-    val orchardViewModel: OrchardViewModel = viewModel(factory = OrchardViewModelFactory(context))
 
     var resolvedUri by remember { mutableStateOf<Uri?>(startupUri) }
 
     Log.d("PomoloBeeApp", "📦 Initial startupUri = $resolvedUri")
 
     if (resolvedUri == null) {
+        OrchardCache.clear()
         InitScreen(
-            settingsViewModel = settingsViewModel,
-            orchardViewModel = orchardViewModel,
+            settingsViewModel = viewModel(factory = SettingsViewModelFactory(context)),
+            orchardViewModel = viewModel(factory = OrchardViewModelFactory(context)),
             onInitFinished = { newUri ->
                 Log.i("PomoloBeeApp", "🎉 Init finished → updating state instead of recreating")
                 resolvedUri = newUri
             }
         )
-
         return
     }
+
+    // ✅ Create ViewModels *after* init
+    val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
+    val orchardViewModel: OrchardViewModel = viewModel(factory = OrchardViewModelFactory(context))
 
     LaunchedEffect(resolvedUri) {
         delay(100)
         Log.i("PomoloBeeApp", "🚀 Attempting to load config from: $resolvedUri")
-
         if (OrchardCache.locations.isEmpty()) {
             copyAssetsIfNotExists(context, resolvedUri!!)
             orchardViewModel.loadLocalConfig(resolvedUri!!, context)

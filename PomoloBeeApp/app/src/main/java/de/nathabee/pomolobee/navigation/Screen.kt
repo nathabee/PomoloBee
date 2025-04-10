@@ -11,9 +11,24 @@ sealed class Screen(val route: String, val title: String) {
     object Init : Screen("init", "Initialisation")
 
     // Parametrized screen
-    object SvgMap : Screen("svgmap/{fieldId}", "SVG Map") {
-        fun createRoute(fieldId: Int) = "svgmap/$fieldId"
+
+
+    object SvgMap : Screen("svgmap", "SVG Map") {
+        fun createRoute(fieldId: Int) = "svgmap?fieldId=$fieldId"
+
+        fun withArgs(vararg args: Pair<String, String?>): String {
+            return buildString {
+                append(route)
+                if (args.isNotEmpty()) {
+                    append("?")
+                    append(args.joinToString("&") { (key, value) -> "$key=${value ?: ""}" })
+                }
+            }
+        }
     }
+
+
+
     object ErrorLog : Screen("errorlog", "Error Log")
 
 

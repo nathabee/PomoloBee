@@ -2,6 +2,7 @@ package de.nathabee.pomolobee.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -9,8 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import de.nathabee.pomolobee.ui.components.FolderPicker
+import de.nathabee.pomolobee.util.ErrorLogger
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.util.copyAssetsIfNotExists
+import de.nathabee.pomolobee.util.getFriendlyFolderName
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 
 import kotlinx.coroutines.launch
@@ -29,21 +32,38 @@ fun InitScreen(
     var showDialog by remember { mutableStateOf(false) }
     var showFolderPicker by remember { mutableStateOf(false) }
 
-    FolderPicker(onFolderSelected = { selectedUri ->
-        coroutineScope.launch {
-            // 🛡 Take access permission!
-            context.contentResolver.takePersistableUriPermission(
-                selectedUri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            )
+    // ✅ Trigger folder picker when needed
+    if (showFolderPicker) {
+        FolderPicker(onFolderSelected = { selectedUri ->
+            coroutineScope.launch {
+                try {
+                    context.contentResolver.takePersistableUriPermission(
+                        selectedUri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                } catch (e: SecurityException) {
+                    e.printStackTrace()
+                }
 
-            settingsViewModel.setStorageRoot(selectedUri)
-            copyAssetsIfNotExists(context, selectedUri)
-            orchardViewModel.loadLocalConfig(selectedUri, context)
-            onInitFinished(selectedUri)
-        }
-    })
+                settingsViewModel.setStorageRoot(selectedUri)
+                copyAssetsIfNotExists(context, selectedUri)
+                orchardViewModel.loadLocalConfig(selectedUri, context)
 
+
+                // ✅ Log installation completion AFTER storage and config are initialized
+                Log.d("InitScreen", "📝 Logging initial install to errors.json at ${getFriendlyFolderName(context, selectedUri)}")
+                ErrorLogger.logError(
+                    context,
+                    selectedUri,
+                    "✅ Initial install/setup completed with folder: ${getFriendlyFolderName(context, selectedUri)}"
+                )
+
+
+                onInitFinished(selectedUri)
+                showFolderPicker = false // ✅ reset flag
+            }
+        })
+    }
 
     if (showDialog) {
         AlertDialog(

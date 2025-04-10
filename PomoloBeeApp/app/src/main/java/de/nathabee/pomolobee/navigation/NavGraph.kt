@@ -9,6 +9,9 @@ import de.nathabee.pomolobee.ui.screens.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.datastore.preferences.core.PreferencesSerializer.defaultValue
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 
@@ -50,25 +53,45 @@ fun NavGraph(
             settingsViewModel = settingsViewModel
         ) }
 
-        composable(Screen.SvgMap.route) { backStackEntry ->
+        composable(
+            route = "${Screen.SvgMap.route}?fieldId={fieldId}",
+            arguments = listOf(
+                navArgument("fieldId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+
             val fieldId = backStackEntry.arguments?.getString("fieldId")?.toIntOrNull()
             val location = fieldId?.let { id ->
                 locations.find { it.field.fieldId == id }
             }
-
 
             if (location != null) {
                 SvgMapScreen(
                     location = location,
                     settingsViewModel = settingsViewModel,
                     orchardViewModel = orchardViewModel,
-                    onRawSelected = { rowId -> println("Row selected: $rowId") },
+                    onRawSelected = { rowIdStr ->
+                        val rowId = rowIdStr.removePrefix("row_").toIntOrNull()
+                        if (rowId != null) {
+                            // Best practice: update both field and row in case context was lost
+                            settingsViewModel.updateSelectedField(location.field.fieldId)
+                            settingsViewModel.updateSelectedRow(rowId)
+
+                            // Go back to the Location screen
+                            navController.popBackStack()
+                        }
+                    },
                     onBack = { navController.popBackStack() }
                 )
             } else {
                 Text("❌ Field not found")
             }
         }
+
 
         composable(Screen.ErrorLog.route) {
             ErrorLogScreen(settingsViewModel = settingsViewModel)

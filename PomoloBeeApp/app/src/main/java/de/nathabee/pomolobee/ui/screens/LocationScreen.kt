@@ -25,6 +25,7 @@ fun LocationScreen(
     val context = LocalContext.current
 
     val locations by orchardViewModel.locations.collectAsState()
+    val fruits by orchardViewModel.fruits.collectAsState()
 
 
     var selectedLocation by remember { mutableStateOf<Location?>(null) }
@@ -34,6 +35,24 @@ fun LocationScreen(
     val selectedFieldId by settingsViewModel.selectedFieldId.collectAsState()
 
     val rows = selectedLocation?.rows ?: emptyList()
+
+
+    LaunchedEffect(locations) {
+        println("🌍 Locations loaded: ${locations.size}")
+        println("🍎 Fruits loaded: ${fruits.size}")
+
+        locations.forEach { loc ->
+            println("📦 Field: ${loc.field.name} — Rows: ${loc.rows.size}")
+            loc.rows.forEach { row ->
+                println("  🌿 Row: ${row.name}, fruitId=${row.fruitId}")
+            }
+        }
+        println("🍎 Fruits loaded: ${fruits.size}")
+        fruits.forEach { f ->
+            println("  🍏 Fruit ID=${f.fruitId}, Name=${f.name}")
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -49,7 +68,14 @@ fun LocationScreen(
             onItemSelected = { name ->
                 selectedLocation = locations.find { it.field.name == name }
                 selectedRow = null // reset row when field changes
+
+                println("🔄 Selected Location: ${selectedLocation?.field?.name}")
+                selectedLocation?.rows?.forEach { row ->
+                    val fruitMatch = fruits.find { it.fruitId == row.fruitId }
+                    println("  🔍 Row '${row.name}' → Fruit match: ${fruitMatch?.name ?: "❌ Not found"}")
+                }
             }
+
         )
 
         // 🔄 Sync field to preferences
@@ -58,11 +84,15 @@ fun LocationScreen(
         }
 
         // 🔁 Restore location from stored fieldId
+
         LaunchedEffect(selectedFieldId) {
-            if (selectedFieldId != null && selectedLocation == null) {
+            if (selectedFieldId != null) {
                 selectedLocation = locations.find { it.field.fieldId == selectedFieldId }
             }
         }
+
+
+
 
         // 🌿 Row Dropdown (only after field selected)
         if (selectedLocation != null) {
@@ -95,7 +125,11 @@ fun LocationScreen(
         // 🗺️ SVG Map Button
         if (selectedLocation != null) {
             Button(onClick = {
-                navController.navigate(Screen.SvgMap.createRoute(selectedLocation!!.field.fieldId))
+                // navController.navigate(Screen.SvgMap.createRoute(selectedLocation!!.field.fieldId))
+                navController.navigate(
+                    Screen.SvgMap.withArgs("fieldId" to selectedLocation!!.field.fieldId.toString())
+                )
+
 
             }) {
                 Text("🗺️ Select from Map")

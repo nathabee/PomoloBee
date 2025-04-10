@@ -58,11 +58,12 @@ fun CameraScreen(
 
     val imageSourceUri = rememberSaveable { mutableStateOf<Uri?>(null) }
     val photoTempUri = rememberSaveable { mutableStateOf<Uri?>(null) }
+    val storageRootUri by settingsViewModel.storageRootUri.collectAsState()
 
-    val storageRootUri = settingsViewModel.storageRootUri.collectAsState().value
     val imagesDir = remember(storageRootUri) {
         resolveSubDirectory(context, storageRootUri, "images")
     }
+
 
     // Gallery picker
     val pickImageLauncher = rememberLauncherForActivityResult(
@@ -154,7 +155,7 @@ fun CameraScreen(
                     val rowShort = selectedRow?.shortName ?: "UnknownRow"
                     val fileName = "${fieldShort}_${rowShort}_$timestamp.jpg"
 
-                    val imageFile = imagesDir.createFile("image/jpeg", fileName)
+                    val imageFile = imagesDir!!.createFile("image/jpeg", fileName)
 
                     if (imageFile != null) {
                         resolver.openOutputStream(imageFile.uri)?.use { output ->
