@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _131 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _137 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -37,6 +37,8 @@
   - [Week 5 Dates from April 7 to Avril 13 2025](#week-5-dates-from-april-7-to-avril-13-2025)
     - [April 7 2025](#april-7-2025)
     - [April 10 2025](#april-10-2025)
+    - [April 11 2025](#april-11-2025)
+    - [April 13 2025](#april-13-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -415,21 +417,47 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
  
 
 ###  April 10 2025
-- **Hours Worked**: 6 hours
+- **Hours Worked**: 8 hours
 - **Tasks**:
   - 🔧 Updated `gradlew` to the latest version  
-  - 🛠️ Fixed: Location was not retained when navigating back from `SvgMapScreen` to `LocationScreen`  (not saved oin cache properly)
+  - 🛠️ Fixed: Location was not retained when navigating back from `SvgMapScreen` to `LocationScreen`  (not saved in cache properly)
   - ✅ Implemented feature: Display fruit info when requested in the row info dialog on SVG screen  
   - 🐛 Investigated issue with storage root persistence after reinstallation  
   - 🔍 Added and verified logging to `error.json` to trace app reinstallation  
   - 🧪 Tested that logs are accessible from the debug environment (via settings > debug mode + view logs)  
- 
+  - analyse performance and introduce dispatcher in intScreen to prevent frame skips (Skipped XX frames!) during startup and initializing cache
+
+
+###  April 11 2025
+- **Hours Worked**: 2 hours
+- **Tasks**:
+  - test dispatcher (Skipped XX frames!) : install, debug reinstall 
+  - adapt App_Test_checklist.json and main.json to handle description field and add initScreen Test
+  - Anomalie Test connection :  network requests (URL.openConnection()) on the main thread. (NetworkOnMainThreadException)
+
+
+
+###  April 13 2025
+- **Hours Worked**: 2 hours
+- **Tasks**:
+  - initScreen handle status state (add util/PerimissionManaget.kt and viewmodel/InitViewModel.kt )
+  - changed App spec to explain init screen 
+
 
 ---
   - TO DO bug correction : 
   - Problem SVG : Field :  raw values like CxR should be renamed to Row.... + 2, 3 should be like 4...adapt 5 to be like structure 4... if all ok save in django (locations.json + svg) 
   - Test API + Media
   - Problem:  Task: Check if the error logs are readable from the debug environment.
+
+----
+SettingsScreen responds dynamically to sync mode, and so that:
+- When in cloud mode, API/media fields and test connection are shown.
+- When in local mode, they’re hidden.
+
+The “Sync Now” button calls either the local or cloud sync function (even if cloud sync isn’t ready yet — we’ll add a TODO).
+
+to do :so in the settingsscreen we canswitch beteween local and cloud . id we are local, we do not need to see API Endpoint, media endpoint and test connection. if we are CLOUND then we need to see them....so if we make a test connection we wilkl always be cloud and acess URL like http://192..1.1.1.:800/api . and media.  if we are local, this is not happening. "sync now"  should in cloud (retu´ieve data like ML version , locations and fruits and store answer as json in config , it should also retriev all SVG necessary that are defined in the location fields from the media### we can not developp al of once so we should let place holder to comment what we intend to do )###"syn now" should at the end for both cloud and local : read the fruits and location from json (pay attention we already have function which can do that) and refresh the cache###so let start with the settinsg scren and function to be called depending on local/cloud and composable to display depending on local/cloud
 
 
 ---

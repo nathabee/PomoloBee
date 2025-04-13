@@ -9,45 +9,112 @@
   },
   "sections": [
     {
-      "section": "## Installation Behavior",
+      "section": "InitScreen Startup & Initialization Checklist",
       "items": [
         {
-          "test": "App requests permissions (CAMERA, READ/WRITE)",
-          "expected": "System permission dialog shown",
+          "test": "Fresh install with no storage or cache",
+          "description": "First-time install; app has no saved folder, no permission, no assets.",
+          "expected": "Permission requested → folder picker shown → user picks folder → assets copied → setup completes",
           "state": ""
         },
         {
-          "test": "App copies initial assets to `/sdcard/PomoloBee/` on first run",
-          "expected": "Files exist after install: <br> `config/fruits.json`, `fields/svg/C1_map.svg`, etc.",
+          "test": "Startup with valid `storageRootUri`, but cleared cache",
+          "description": "App was set up previously, user clears app data. URI is still accessible via SAF, but config is missing.",
+          "expected": "`initialize(uri)` runs → assets checked → cache repopulated",
           "state": ""
         },
         {
-          "test": "`OrchardRepository.loadAllConfig()` loads local JSON into cache",
-          "expected": "No crash, log success",
+          "test": "Startup with valid `storageRootUri` and full cache",
+          "description": "Normal case — nothing cleared, everything available.",
+          "expected": "InitScreen detects `StartupStatus.Ready`, calls `onInitFinished()` immediately",
+          "state": ""
+        },
+        {
+          "test": "Startup with missing URI (e.g. SD card removed or never set)",
+          "description": "No folder saved in preferences, or permission to saved URI was lost (SAF).",
+          "expected": "Permission requested → folder picker shown automatically",
+          "state": ""
+        },
+        {
+          "test": "Startup with invalid or inaccessible URI",
+          "description": "App has saved URI, but SAF access is lost (e.g., card removed, folder deleted, no permission).",
+          "expected": "Dialog shown with choice to use existing (if still present) or pick new folder",
+          "state": ""
+        },
+        {
+          "test": "User picks valid folder from picker",
+          "description": "User selects folder with valid SAF permissions (e.g., `/Documents/PomoloBee`).",
+          "expected": "Persisted access granted → `initialize(uri)` → assets copied if needed → config loaded",
+          "state": ""
+        },
+        {
+          "test": "User picks folder that already has assets",
+          "description": "Folder has `config/` + SVGs already present.",
+          "expected": "`copyAssetsIfNotExists()` skips copying → config loaded from existing files",
+          "state": ""
+        },
+        {
+          "test": "User picks folder with missing assets",
+          "description": "Folder is valid but missing required files (broken setup, corrupted storage, etc.)",
+          "expected": "`copyAssetsIfNotExists()` fills gaps → app continues without crash",
+          "state": ""
+        },
+        {
+          "test": "User selects protected or invalid folder",
+          "description": "User picks system folder, read-only dir, or revoked path.",
+          "expected": "Exception caught → Error logged → fallback to folder picker",
+          "state": ""
+        },
+        {
+          "test": "User cancels folder picker and tries to continue",
+          "description": "User dismisses picker, then clicks 'Save and Continue' without valid URI.",
+          "expected": "Dialog shown offering to pick new or retry existing",
+          "state": ""
+        },
+        {
+          "test": "Permissions denied on startup",
+          "description": "User refuses system permission dialog (camera, SAF, etc.)",
+          "expected": "App shows permission required UI and blocks progress",
+          "state": ""
+        },
+        {
+          "test": "Permissions lost after reboot",
+          "description": "App was working, but SAF access to URI is lost after device restart (common on SD).",
+          "expected": "`StartupStatus.InvalidUri` → folder picker or dialog shown again",
+          "state": ""
+        },
+        {
+          "test": "Startup with partial config",
+          "description": "Folder has only `fruits.json` or only `locations.json`",
+          "expected": "`StartupStatus.MissingConfig` → init continues, missing assets are filled",
           "state": ""
         }
       ]
-    },
+    },    
     {
       "section": "Start Navigation",
       "items": [
         {
           "test": "App launches without crash",
+          "description": "Run the app from the launcher icon. Ensure it initializes and lands on the main UI.",
           "expected": "MainActivity starts and UI visible",
           "state": ""
         },
         {
           "test": "First screen is **CameraScreen**",
+          "description": "App should navigate by default to the CameraScreen defined as startDestination in navigation graph.",
           "expected": "As per `startDestination = Screen.Camera.route` in `NavGraph`",
           "state": ""
         },
         {
           "test": "Top bar + drawer icon are visible",
+          "description": "Check for presence of top bar with menu icon at top-left of the screen.",
           "expected": "Drawer opens on click",
           "state": ""
         },
         {
           "test": "Menu shows correct options (see spec)",
+          "description": "Open drawer menu and check that all documented navigation items are present.",
           "expected": "`Camera`, `Settings`, `Orchard`, `Location`, `About`, etc.",
           "state": ""
         }
@@ -58,36 +125,43 @@
       "items": [
         {
           "test": "Tap `Camera`",
+          "description": "From any screen, tap 'Camera' in the drawer to return to the Camera view.",
           "expected": "Navigate To CameraScreen",
           "state": ""
         },
         {
           "test": "Tap `Orchard`",
+          "description": "Navigate to OrchardScreen using drawer menu.",
           "expected": "Navigate To OrchardScreen",
           "state": ""
         },
         {
           "test": "Tap `Location`",
+          "description": "Navigate to LocationScreen via drawer menu.",
           "expected": "Navigate To LocationScreen",
           "state": ""
         },
         {
-          "test": "Tap `SvgMap` via Location \u2192 Select from map",
+          "test": "Tap `SvgMap` via Location → Select from map",
+          "description": "Navigate to map view by opening Location screen, then tapping 'Select from map'.",
           "expected": "Navigate To SvgMapScreen",
           "state": ""
         },
         {
           "test": "Tap `Settings`",
+          "description": "Use drawer menu to access settings screen.",
           "expected": "Navigate To SettingsScreen",
           "state": ""
         },
         {
           "test": "Tap `About`",
+          "description": "Use drawer menu to access about screen.",
           "expected": "Navigate To AboutScreen",
           "state": ""
         },
         {
           "test": "Back button works between screens",
+          "description": "Use the back button from nested screens and verify navigation stack behavior.",
           "expected": "Navigates or exits correctly",
           "state": ""
         }
@@ -98,16 +172,19 @@
       "items": [
         {
           "test": "Orchard screen lists fields (from `OrchardCache`)",
+          "description": "Navigate to Orchard screen and verify that fields are listed from loaded JSON data.",
           "expected": "Fields from `locations.json` shown",
           "state": ""
         },
         {
-          "test": "Selecting field C1 \u2192 opens SvgMap with C1_map.svg",
+          "test": "Selecting field C1 → opens SvgMap with C1_map.svg",
+          "description": "Tap on field C1 from list to open its associated SVG map.",
           "expected": "Map renders correctly",
           "state": ""
         },
         {
-          "test": "Selecting field C2 (not in map) \u2192 default_map.svg shown",
+          "test": "Selecting field C2 (not in map) → default_map.svg shown",
+          "description": "Test for a fallback case when field map doesn't exist. Should show default map.",
           "expected": "Graceful fallback",
           "state": ""
         }
@@ -118,61 +195,71 @@
       "items": [
         {
           "test": "From Camera screen, tap to go to Location screen",
+          "description": "Test camera-to-location navigation via UI.",
           "expected": "Navigation works",
           "state": ""
         },
         {
           "test": "Field dropdown shows available fields",
+          "description": "Verify that dropdown on location screen lists all fields from cache.",
           "expected": "From cache",
           "state": ""
         },
         {
-          "test": "Tap \u201cSelect from map\u201d \u2192 opens SvgMapScreen",
-          "expected": "Field\u2019s SVG shown",
+          "test": "Tap “Select from map” → opens SvgMapScreen",
+          "description": "From Location screen, use the map button to open SVG map screen.",
+          "expected": "Field’s SVG shown",
           "state": ""
         },
         {
-          "test": "Tap a row in SVG \u2192 returns to Location screen",
+          "test": "Tap a row in SVG → returns to Location screen",
+          "description": "Tap on an interactive map row and ensure it returns to Location screen.",
           "expected": "Combo updates with selected row",
           "state": ""
         },
         {
-          "test": "Tap \"Validate\" in Location \u2192 returns to Camera",
+          "test": "Tap \"Validate\" in Location → returns to Camera",
+          "description": "Once a field and row are selected, validating should bring you back to Camera screen with that context.",
           "expected": "Selected field & row shown",
           "state": ""
         }
       ]
     },
     {
-      "section": "\ufe0fSettings Persistence",
+      "section": "🛠️ Settings Persistence",
       "items": [
         {
           "test": "Go to Settings and update values (e.g., API URL, sync mode)",
+          "description": "Manually change values in settings and confirm they can be edited.",
           "expected": "Inputs accept changes",
           "state": ""
         },
         {
-          "test": "Tap \"Validate\" \u2192 changes saved",
+          "test": "Tap \"Validate\" → changes saved",
+          "description": "After modifying settings, validate and check persistence without error.",
           "expected": "No crash or loss",
           "state": ""
         },
         {
           "test": "Close app, restart",
+          "description": "Fully close the app and restart. Settings should be restored from `UserPreferences`.",
           "expected": "Settings are persisted (loaded from `UserPreferences`)",
           "state": ""
         }
       ]
     },
     {
-      "section": "\u2139\ufe0f About Screen",
+      "section": "ℹ️ About Screen",
       "items": [
         {
           "test": "About screen accessible from menu",
+          "description": "Tap About in drawer and confirm it navigates properly.",
           "expected": "Opens normally",
           "state": ""
         },
         {
           "test": "App version (e.g., v0.1.0) displayed",
+          "description": "Check that app version is visible on the About screen. Usually comes from `BuildConfig.VERSION_NAME`.",
           "expected": "Static or from `BuildConfig.VERSION_NAME`",
           "state": ""
         }
@@ -183,20 +270,24 @@
       "items": [
         {
           "test": "Run `ConnectionRepository.syncOrchard()` manually (or via UI)",
+          "description": "Trigger orchard sync from code or developer UI and confirm logs + cache update.",
           "expected": "Log success, cache updated",
           "state": ""
         },
         {
           "test": "Logs show OpenCV library loaded",
+          "description": "At runtime, check logcat for proper OpenCV loading (native library, no errors).",
           "expected": "No native lib error",
           "state": ""
         },
         {
-          "test": "Unknown field ID in SvgMap \u2192 Shows \"Field not found\" text",
+          "test": "Unknown field ID in SvgMap → Shows \"Field not found\" text",
+          "description": "Test UI behavior when trying to open a non-existent field in SvgMap.",
           "expected": "Graceful error",
           "state": ""
         }
       ]
     }
+    
   ]
 }

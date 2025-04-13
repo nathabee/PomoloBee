@@ -62,7 +62,7 @@ fun CameraScreen(
 
     val imagesDir = remember(storageRootUri) {
         resolveSubDirectory(context, storageRootUri, "images")
-    }
+   }
 
 
     // Gallery picker

@@ -18,7 +18,6 @@ import de.nathabee.pomolobee.navigation.Screen
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.ui.components.FolderPicker
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
-import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import de.nathabee.pomolobee.util.copyAssetsIfNotExists
 import de.nathabee.pomolobee.util.getFriendlyFolderName
 import de.nathabee.pomolobee.util.safeLaunch
@@ -31,7 +30,6 @@ fun SettingsScreen(
     settingsViewModel: SettingsViewModel
 ) {
     val context = LocalContext.current
-    //val viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
     val scope = rememberCoroutineScope()
 
     val lastSyncDate by settingsViewModel.lastSyncDate.collectAsState()
@@ -113,70 +111,73 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // API Endpoint input
-        Text("🔌 API Endpoint:")
-        TextField(
-            value = apiInput,
-            onValueChange = { apiInput = it },
-            modifier = Modifier.fillMaxWidth()
-        )
+        // Cloud-specific settings
+        if (selectedSyncMode == "cloud") {
+            // API Endpoint input
+            Text("🔌 API Endpoint:")
+            TextField(
+                value = apiInput,
+                onValueChange = { apiInput = it },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        // Media Endpoint input
-        Text("🖼 Media Endpoint:")
-        TextField(
-            value = mediaInput,
-            onValueChange = { mediaInput = it },
-            modifier = Modifier.fillMaxWidth()
-        )
+            // Media Endpoint input
+            Text("🖼 Media Endpoint:")
+            TextField(
+                value = mediaInput,
+                onValueChange = { mediaInput = it },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Save settings button
-        Button(
-            onClick = {
-                scope.launch {
-                    safeLaunch(context, settingsViewModel.storageRootUri.value) {
-                        settingsViewModel.updateApiEndpoint(apiInput)
-                        settingsViewModel.updateMediaEndpoint(mediaInput)
+            // Save settings button
+            Button(
+                onClick = {
+                    scope.launch {
+                        safeLaunch(context, settingsViewModel.storageRootUri.value) {
+                            settingsViewModel.updateApiEndpoint(apiInput)
+                            settingsViewModel.updateMediaEndpoint(mediaInput)
+                        }
                     }
-
-
                 }
+            ) {
+                Text("💾 Save Settings")
             }
-        ) {
-            Text("💾 Save Settings")
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Test connection button
+            Button(onClick = {
+                settingsViewModel.performConnectionTest(context) { success ->
+                    connectionStatus = if (success) "✅ Connection OK" else "❌ Connection failed"
+                }
+            }) {
+                Text("🔌 Test Connection")
+            }
+            connectionStatus?.let { Text(it) }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-
-
-        // Test connection button
-        Button(onClick = {
-            settingsViewModel.performConnectionTest(context) { success ->
-                connectionStatus = if (success) "✅ Connection OK" else "❌ Connection failed"
-            }
-        }) {
-            Text("🔌 Test Connection")
-        }
-        connectionStatus?.let { Text(it) }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         // Sync now button
         Button(onClick = {
             safeLaunch(context, settingsViewModel.storageRootUri.value) {
-                settingsViewModel.performLocalSync(context) { msg -> syncMessage = msg }
+                if (selectedSyncMode == "local") {
+                    settingsViewModel.performLocalSync(context) { msg -> syncMessage = msg }
+                } else {
+                    // 🔧 Placeholder: implement cloud sync (download + save config + SVGs)
+                    syncMessage = "⏳ Cloud sync not yet implemented"
+                }
             }
-
-
         }) {
             Text("🔄 Sync Now")
         }
         syncMessage?.let { Text(it) }
+
 
         Spacer(modifier = Modifier.height(16.dp))
         Text("🧪 API Version: ${apiVersion ?: "Unknown"}")

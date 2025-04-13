@@ -42,19 +42,28 @@ Since **video processing is not in scope right now**, we will focus only on **im
   - [**`SettingsScreen`**](#settingsscreen)
     - [**Purpose**](#purpose)
     - [**Test Connection**](#test-connection)
-    - [**Wireframe**](#wireframe)
+    - [**Wireframe Cloud vs Local**](#wireframe-cloud-vs-local)
+    - [UI Behavior Dynamic Logic](#ui-behavior-dynamic-logic)
     - [API Calls](#api-calls)
   - [**`OrchardScreen`**](#orchardscreen)
     - [**Purpose**](#purpose)
     - [**Wireframe**](#wireframe)
   - [**`InitScreen`**](#initscreen)
     - [**Purpose**](#purpose)
-  - [What It Does](#what-it-does)
-    - [Behavior Flow](#behavior-flow)
+    - [What It Ensures](#what-it-ensures)
+    - [**Startup Status Behavior Matrix**](#startup-status-behavior-matrix)
+    - [What It Does in code](#what-it-does-in-code)
+    - [Startup Logic Flow](#startup-logic-flow)
     - [Wireframe](#wireframe)
+    - [Required Permissions Requested via Composable](#required-permissions-requested-via-composable)
   - [**ℹ️ `AboutScreen`**](#i-aboutscreen)
     - [**Purpose**](#purpose)
-    - [**Updated Wireframe**](#updated-wireframe)
+    - [**Wireframe**](#wireframe)
+  - [**ℹ️ `ErrorScreen`**](#i-errorscreen)
+    - [**Purpose**](#purpose)
+    - [**Wireframe Preview**](#wireframe-preview)
+    - [**Developer Notes**](#developer-notes)
+    - [**How Logging Works**](#how-logging-works)
 - [️ App Architecture Storage Navigation Behavior](#app-architecture-storage-navigation-behavior)
   - [️ **Architecture Overview**](#architecture-overview)
   - [️ App File Tree in Android Storage](#app-file-tree-in-android-storage)
@@ -468,7 +477,7 @@ The app now shows the selected field and row.
 
 ### **Purpose**
 
-This screen must be used at least once during the first app launch to initialize orchard data (fields, rows, fruits), either from the local configuration files or via the cloud API, depending on the selected mode. Without this step, the app cannot assign location metadata to photos or perform yield estimations.
+Users must visit this screen at least once after first app launch to configure essential settings and sync orchard data (fields, rows, fruits).., either from the local configuration files or via the cloud API, depending on the selected mode. Without this step, the app cannot assign location metadata to photos or perform yield estimations.
 If config already exists from previous sync, this screen can be skipped on startup.
 
 This screen enables users to:
@@ -484,6 +493,8 @@ This screen enables users to:
 
 ✔ Displays the number of **pending local images**  
 ✔ All user input is saved using **Jetpack DataStore**
+🧠 All state changes (URLs, sync mode, debug toggle) are persisted via Jetpack DataStore and exposed by SettingsViewModel.
+
 
 ---
 
@@ -512,35 +523,76 @@ This screen enables users to:
 
 ---
 
-### **Wireframe**
-```
-+--------------------------------+
-|  🌱 Field Count:     [______]   |
-|  📏 Row Count :     [______]  |
-|  🍏 Fruit Type Count : [______]  |
-|--------------------------------|
-|  🌐  Sync Mode: [Cloud ⬇ / Local 📁]   |
-|  📂 Image Storage Path:        |
-|  /sdcard/PomoloBee/            |
-|  📂 Configuration Path:        |
-|  /sdcard/PomoloBee/config            |
-|--------------------------------|
-|  📂 API Endpoint:              |
-|  https://api.pomolobee.com     |
-|  📂 Media Endpoint:            |
-|  https://media.pomolobee.com   |
-|  [🔌 Test Connection] ✅        |
-|--------------------------------|
-|  [📥 Sync Orchard Data]         |
-|  Pending Uploads: 3 Images     | 
-|--------------------------------|
-|  Last Sync: 2025-03-30 10:00   |
-|  [🔄 Sync Now]                 |
-|--------------------------------| 
-|  [💾 Save Settings]            |
-+--------------------------------+
+### **Wireframe Cloud vs Local**
+ 
+
+#### Wireframe Sync Mode = `cloud`
+Shown when local config is selected
 
 ```
++--------------------------------+
+| 🧭 Sync Mode: [CLOUD ⬇ / LOCAL 📁] |
+|--------------------------------|
+| 🌐 API Endpoint:               |
+| [ https://api.example.com ]    |
+|--------------------------------|
+| 🖼 Media Endpoint:             |
+| [ https://media.example.com ]  |
+|--------------------------------|
+| [🔌 Test Connection] ✅        |
+| 🔄 Connection Status: OK       |
+|--------------------------------|
+| [📥 Sync Now]                  |
+| Last Sync: 2025-04-11 12:00    |
+|--------------------------------|
+| 💾 Save Settings               |
++--------------------------------+
+| 🧪 API Version: v1.2.3         |
+| 🐞 Debug Mode: [ON/OFF]        |
+| 📜 View Error Log              |
++--------------------------------+
+```
+
+---
+
+#### Wireframe Sync Mode = `local`
+```
++--------------------------------+
+| 🧭 Sync Mode: [CLOUD ⬇ / LOCAL 📁] |
+|--------------------------------|
+| 📂 Config Path:                |
+| /sdcard/PomoloBee/config/      |
+|--------------------------------|
+| [📥 Sync Now]                  |
+| Last Sync: 2025-04-11 12:00    |
+|--------------------------------|
+| 💾 Save Settings               |
++--------------------------------+
+| 🧪 API Version: —              |
+| 🐞 Debug Mode: [ON/OFF]        |
+| 📜 View Error Log              |
++--------------------------------+
+```
+
+---
+
+### UI Behavior Dynamic Logic
+
+| If `syncMode == "cloud"` | Then show... |
+|--------------------------|--------------|
+| API Endpoint input       | ✅ visible    |
+| Media Endpoint input     | ✅ visible    |
+| 🔌 Test Connection button| ✅ visible    |
+| Version from API         | ✅ shown      |
+
+| If `syncMode == "local"` | Then show... |
+|--------------------------|--------------|
+| API/Media inputs         | ❌ hidden     |
+| Test Connection          | ❌ hidden     |
+| Version                  | ❌ hidden     |
+| Config Path              | ✅ shown      |
+
+
 
 ---
 
@@ -549,10 +601,9 @@ This screen enables users to:
 | Trigger | Endpoint | Purpose |
 |--------|----------|---------|
 | `🔄 Sync Orchard Data` | `GET /api/locations/` or local | Combined field + row |
-|                        | `GET /api/fields/`  or local   | Orchard details |
 |                        | `GET /api/fruits/`  or local  | Fruit types |
 | `Sync Mode = Local` | _none_ | Load from local config JSON files |
-| `Sync Mode = Cloud` | `GET /api/fields/`, `GET /api/fruits/`, `GET /api/locations/` | Save JSONs locally |
+| `Sync Mode = Cloud` | `GET /api/fruits/`, `GET /api/locations/` | Save JSONs locally |
 | `🔌 Test Connection` | `GET /api/ml/version/` | Verifies API endpoint |
 |                      | `HEAD /media/svg/fields/default_map.svg` | Verifies media access |
 | `🛠 Debug Mode`      | `GET /api/ml/version/` | Show model version |
@@ -599,65 +650,138 @@ The "Visualize" button allows users to preview the layout of a field. Unlike the
  
  -
 
-  
+  Absolutely! Here's the updated **`InitScreen`** section for your App Config, reflecting:
+
+- 🔐 **Permission handling**
+- 📦 **Smart status-based logic**
+- 🧠 **Startup scenarios**
+- ✅ **Behavior improvements**
+---
 
 ## **`InitScreen`**
 
 ### **Purpose**
 
-`InitScreen` is the **first screen shown** after permission is granted, when the app detects that the required initial storage root path is not configured yet.
+`InitScreen` is the **first screen displayed** after permission is granted, when the app detects that the required **storage root URI** or **orchard config cache** is missing or invalid.
 
-This is the user's entry point to:
-- **Choose or confirm** a default storage root
-- select a folder on SD card
-- Persist this information for all image/config storage
+This screen guides users through:
 
-It ensures that:
-- Images are saved in a known, user-approved location
-- App assets and config files can be copied there
-- Further screens (like Camera, Processing, Location) can work properly
+- 📂 **Selecting a folder** (SD card or internal) to store config/images/results
+- 🧠 **Restoring local cache** if it was cleared
+- 🛡 **Requesting and handling Android permissions**  
+- ✅ Ensures app cannot continue until setup is complete and valid
 
 ---
 
-## What It Does
+### What It Ensures
 
-| Feature                | Description                                                                 |
-|------------------------|-----------------------------------------------------------------------------|
-| Shows default path     | Uses the internal app storage path (via ViewModel logic)                    |
-| Allows custom path     | User can type or select SD card folder (future: folder picker)              |
-| Stores via ViewModel   | Calls `updateStorageRoot(path)` to persist in `UserPreferences`             |
-| Blocks rest of app     | App does **not** navigate until this screen is completed                     |
+- 🔒 All required permissions are granted (`CAMERA`, `READ/WRITE_EXTERNAL_STORAGE`)
+- 📂 A valid, accessible `storageRootUri` is set in preferences
+- 📥 Orchard config files (`fruits.json`, `locations.json`) exist in `/config/`
+- 🧠 In-memory `OrchardCache` is restored on app start
+- 🚫 No navigation to main UI until setup is completed
 
+---
 
+### **Startup Status Behavior Matrix**
 
-### Behavior Flow
+| 🧪 Scenario | 📂 Storage Available? | 🧠 Config Cache Present? | ⚠️ User Sees | 🛠 App Behavior |
+|------------|-----------------------|--------------------------|--------------|----------------|
+| 1️⃣ First install | ❌ No | ❌ No | Folder picker | Prompt user to pick folder, copy assets |
+| 2️⃣ Restart after cache cleared | ✅ Yes | ❌ No | Init screen briefly | Silently reload config from disk |
+| 3️⃣ Restart after cache + storage removed | ❌ No | ❌ No | Folder picker | Show picker, reset storage root |
+| 4️⃣ Cache OK, SD card removed | ❌ No | ✅ Yes | Error prompt | Show dialog, prompt folder re-pick |
+| 5️⃣ Normal startup | ✅ Yes | ✅ Yes | — (skipped) | Go directly to CameraScreen |
+| 6️⃣ Reinstall, SD still present | ✅ Yes | ❌ No | Init screen | Reload config from disk |
 
-1. User opens app → no storage path saved → `InitScreen` shows.
-2. User types a custom path OR clicks **"Use Default"**.
-3. Path is saved in `DataStore` through the ViewModel.
-4. `onSetupComplete()` tells `MainActivity` to load main UI.
-5. `copyAssetsIfNotExists()` is triggered once storage root exists.
+---
 
+### What It Does in code
 
+| Feature                    | Description |
+|----------------------------|-------------|
+| 📂 Folder selection        | User can pick any SAF-accessible directory |
+| 📥 Config copying          | `copyAssetsIfNotExists()` copies `fruits.json`, `locations.json` from assets |
+| 🧠 Smart restore           | If config exists but cache is empty, it reloads silently |
+| 🧾 Permission guard        | Uses `rememberLauncherForActivityResult(...)` |
+| 🪵 Logging                 | All actions and errors are logged via `ErrorLogger` |
+| 🔒 Persistable URI access | Uses `takePersistableUriPermission(...)` |
+| 🧭 Status logic            | Based on `InitViewModel.getStartupStatusFromUri(...)` |
+| ✅ Finalize setup          | Triggers `onInitFinished()` after config is valid and cache is restored |
+
+---
+
+### Startup Logic Flow
+
+```mermaid
+flowchart TD
+    A[InitScreen appears]
+    B{Permissions granted?}
+    C[Request permissions]
+    D[Check StartupStatus]
+    E{Storage OK?}
+    F{Config files present?}
+    G{Cache present?}
+    H[Reload config from disk]
+    I[Prompt Folder Picker]
+    J[Show Recovery Dialog]
+    K[Complete Initialization]
+    L[Continue to main UI]
+
+    A --> B
+    B -- Yes --> D
+    B -- No --> C
+    D --> E
+    E -- No --> I
+    E -- Yes --> F
+    F -- No --> I
+    F -- Yes --> G
+    G -- No --> H
+    G -- Yes --> K
+    H --> K
+    I --> K
+    J --> I
+    K --> L
+```
 
 ---
 
 ### Wireframe
 
 ```
-+-----------------------------------+
-| 🐝 PomoloBee - Initial Setup      |
-|-----------------------------------|
-| Configure your storage:           |
-|                                   |
-| [ /storage/emulated/0/PomoloBee ] |
-| [ Use Default ]   [ Select Folder ] |
-|                                   |
-| [ Save and Continue ]             |
-+-----------------------------------+
++---------------------------------------------+
+| 🐝 Welcome to PomoloBee                    |
+|---------------------------------------------|
+| Configure your storage location             |
+| 📂 Current URI: /storage/XXXX/...           |
+|---------------------------------------------|
+| [ 📁 Select Folder ]   [ Use Existing ]     |
+| [ Save and Continue ]                       |
++---------------------------------------------+
+| If config missing: show reload logic        |
+| If invalid: show AlertDialog                |
++---------------------------------------------+
 ```
 
 ---
+
+### Required Permissions Requested via Composable
+```kotlin
+<uses-permission android:name="android.permission.CAMERA"/>
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+```
+
+These are requested dynamically in `InitScreen` via:
+
+```kotlin
+val permissionLauncher = rememberLauncherForActivityResult(
+    ActivityResultContracts.RequestMultiplePermissions()
+) { result -> ... }
+```
+
+---
+ 
  
 ## **ℹ️ `AboutScreen`**
 
@@ -665,7 +789,7 @@ It ensures that:
 ### **Purpose**
 ✔ Displays **app version, usage guide, developer info, and licenses**.  
 
-### **Updated Wireframe**
+### **Wireframe**
 ```
 +--------------------------------+
 |  ℹ️ How to use the app         |
@@ -677,16 +801,71 @@ It ensures that:
 ```
 
 ---
-Here’s a fully updated and **streamlined version** of the **"Storage, Navigation & Error Handling"** section. It incorporates:
-
-- Your current architecture decisions
-- Unified storage model
-- JSON + SVG caching
-- Local/Cloud logic
-- Proper renaming of `raw → row`
-- No redundancy
+ Absolutely! Here's a **cleaned-up, structured version** of your `ErrorScreen` documentation — clear, professional, and dev-friendly:
 
 ---
+
+## **ℹ️ `ErrorScreen`**
+
+### **Purpose**
+✅ Display the list of saved application errors from the file `logs/errors.json`.
+
+To view this screen:  
+1. Go to **Settings**  
+2. Enable **Debug Mode**  
+3. Tap **"📜 View Error Log"**
+
+---
+
+### **Wireframe Preview**
+```
++----------------------------------------+
+| 🕒 Timestamp                           |
+| 📜 Description and Stacktrace         |
++----------------------------------------+
+```
+
+---
+
+### **Developer Notes**
+
+- All logs are stored in:  
+  **`logs/errors.json`** (located inside the `storageRootUri` directory)
+  
+- `storageRootUri` is configured during app setup or via the **Settings screen**, and is **persisted using Preferences**.
+
+- In line with **Jetpack Compose architecture**, screens must **never access preferences or cache directly**.
+
+  Instead, the structure follows:
+
+  ```
+  Screen ➡ ViewModel ➡ Util / Repository / Preferences / Cache
+  ```
+
+- `SettingsViewModel` exposes the `storageRootUri`, and **provides wrapper methods to log errors** from any part of the app.
+
+---
+
+### **How Logging Works**
+
+- Errors are saved through `ErrorLogger.logError(...)`  
+- When an error occurs (e.g., in a screen or background operation), call:
+  
+  ```kotlin
+  safeLaunch(context, storageRootUri) {
+      // ... your logic here ...
+  }
+  ```
+  or directly:
+  ```kotlin
+  ErrorLogger.logError(context, storageRootUri, "❌ Something failed", exception)
+  ```
+
+- Screens or repositories **should never hardcode `storageRootUri`** or access preferences directly.  
+  They must rely on the `SettingsViewModel`.
+
+---
+  
 
 # ️ App Architecture Storage Navigation Behavior
 

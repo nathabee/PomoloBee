@@ -10,96 +10,86 @@ import de.nathabee.pomolobee.cache.OrchardCache
 import de.nathabee.pomolobee.model.Fruit
 import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.util.ErrorLogger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
 object ConnectionRepository {
 
     suspend fun testConnection(
-        context: Context,
         apiUrl: String,
         mediaUrl: String,
         onVersionRetrieved: (String) -> Unit
-    ): Boolean {
+    ): Boolean = withContext(Dispatchers.IO) {
         Log.d("ConnectionTest", "🌐 Starting connection test...")
 
-        return try {
-            // --- API Check ---
-            Log.d("ConnectionTest", "🔌 Testing API Endpoint: $apiUrl/ml/version/")
+        // --- API Check ---
+        val version = try {
+            val conn = URL("$apiUrl/ml/version/").openConnection() as HttpURLConnection
+            conn.requestMethod = "GET"
+            conn.connect()
 
-            val apiCheck = try {
-                val conn = URL("$apiUrl/ml/version/").openConnection() as HttpURLConnection
-                conn.requestMethod = "GET"
-                conn.connect()
-
-                if (conn.responseCode == 200) {
-                    val version = conn.inputStream.bufferedReader().readText().trim()
-                    Log.d("ConnectionTest", "✅ API version: $version")
-                    onVersionRetrieved(version)
-                    true
-                } else {
-                    Log.w("ConnectionTest", "⚠️ API responded with ${conn.responseCode}")
-                    false
-                }
-            } catch (e: Exception) {
-                Log.e("ConnectionTest", "❌ API check failed", e)
-                ErrorLogger.logError(context, null, "❌ API connection error", e)
-                false
+            if (conn.responseCode != 200) {
+                throw Exception("API responded with code ${conn.responseCode}")
             }
 
-            // --- Media Check ---
-            Log.d("ConnectionTest", "🖼️ Testing Media Endpoint: $mediaUrl/svg/fields/default_map.svg")
+            val raw = conn.inputStream.bufferedReader().readText()
+            val json = JSONObject(raw)
+            val modelVersion = json.getJSONObject("data").getString("model_version")
 
-            val mediaCheck = try {
-                val conn = URL("$mediaUrl/svg/fields/default_map.svg").openConnection() as HttpURLConnection
-                conn.requestMethod = "HEAD"
-                conn.connect()
-
-                val ok = conn.responseCode == 200
-                if (!ok) Log.w("ConnectionTest", "⚠️ Media check failed: ${conn.responseCode}")
-                ok
-            } catch (e: Exception) {
-                Log.e("ConnectionTest", "❌ Media check failed", e)
-                ErrorLogger.logError(context, null, "❌ Media connection error", e)
-                false
-            }
-
-            val result = apiCheck && mediaCheck
-            Log.d("ConnectionTest", if (result) "✅ Connection test passed" else "❌ Connection test failed")
-            result
+            Log.d("ConnectionTest", "✅ API model version: $modelVersion")
+            modelVersion
         } catch (e: Exception) {
-            Log.e("ConnectionTest", "🔥 Unexpected connection test failure", e)
-            ErrorLogger.logError(context, null, "🔥 Unexpected error in connection test", e)
-            false
+            throw Exception("❌ API connection failed", e)
         }
+
+
+        onVersionRetrieved(version)
+
+        // --- Media Check ---
+        try {
+            val conn = URL("$mediaUrl/svg/fields/default_map.svg").openConnection() as HttpURLConnection
+            conn.requestMethod = "HEAD"
+            conn.connect()
+
+            if (conn.responseCode != 200) {
+                throw Exception("Media responded with code ${conn.responseCode}")
+            }
+        } catch (e: Exception) {
+            throw Exception("❌ Media connection failed", e)
+        }
+
+        Log.d("ConnectionTest", "✅ Connection test passed")
+        true
     }
 
 
-
-    fun syncOrchard(context: Context, configDirUri: Uri): String {
+    fun syncOrchard(context: Context, configDirUri: Uri) {
         val configDir = DocumentFile.fromTreeUri(context, configDirUri)
-        if (configDir == null || !configDir.isDirectory) {
-            return "❌ Invalid config directory"
+            ?: throw IllegalArgumentException("❌ Invalid config directory URI")
+
+        if (!configDir.isDirectory) {
+            throw IllegalStateException("❌ Provided URI is not a directory")
         }
 
         val fruitsFile = configDir.findFile("fruits.json")
-        val locationsFile = configDir.findFile("locations.json")
+            ?: throw IllegalStateException("❌ Missing fruits.json")
 
-        if (fruitsFile == null || locationsFile == null) {
-            return "❌ Required config files missing"
-        }
+        val locationsFile = configDir.findFile("locations.json")
+            ?: throw IllegalStateException("❌ Missing locations.json")
 
         val gson = Gson()
         val fruitsList = readListFromJson<Fruit>(context, fruitsFile.uri, gson)
-        val locationsList = readListFromJson<Location>(context, locationsFile.uri, gson)
+            ?: throw IllegalStateException("❌ Failed to parse fruits.json")
 
-        if (fruitsList == null || locationsList == null) {
-            return "❌ Failed to parse config files"
-        }
+        val locationsList = readListFromJson<Location>(context, locationsFile.uri, gson)
+            ?: throw IllegalStateException("❌ Failed to parse locations.json")
 
         OrchardCache.load(fruitsList, locationsList)
-        return "✅ Orchard configuration synced"
     }
+
 }
 
 // Generic list reader

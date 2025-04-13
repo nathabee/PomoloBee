@@ -283,3 +283,12 @@ label {
 .checklist-item input[type="radio"] {
   margin-right: 0.4rem;
 }
+
+.description-field {
+  font-size: 0.9rem;
+  padding: 0.4rem;
+  font-family: sans-serif;
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}

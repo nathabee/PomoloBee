@@ -76,11 +76,21 @@ async function loadStructuredChecklist(file = "App_Test_checklist.json") {
     section.items.forEach((item, itemIndex) => {
       const row = document.createElement("div");
       row.classList.add("checklist-item");
-
+    
       const label = document.createElement("p");
       label.innerHTML = `<strong>${item.test}</strong><br><em>${item.expected}</em>`;
       row.appendChild(label);
-
+    
+      // 🔹 Optional description field (editable textarea)
+      const desc = document.createElement("textarea");
+      desc.classList.add("description-field");
+      desc.placeholder = "Optional test scenario or setup steps";
+      desc.rows = 2;
+      desc.style.width = "100%";
+      desc.style.marginBottom = "0.5rem";
+      desc.value = item.description || "";
+      row.appendChild(desc);
+    
       const options = ["Pass", "Partial", "Fail"];
       const name = `check-${secIndex}-${itemIndex}`;
       options.forEach(opt => {
@@ -89,23 +99,24 @@ async function loadStructuredChecklist(file = "App_Test_checklist.json") {
         input.name = name;
         input.value = opt;
         if (item.state === opt) input.checked = true;
-
+    
         const radioLabel = document.createElement("label");
         radioLabel.style.marginRight = "1rem";
         radioLabel.appendChild(input);
         radioLabel.append(` ${opt}`);
         row.appendChild(radioLabel);
       });
-
+    
       const note = document.createElement("input");
       note.type = "text";
       note.placeholder = "(Optional) Notes if Partial/Fail";
       note.classList.add("note-field");
       if (item.note) note.value = item.note;
       row.appendChild(note);
-
+    
       sectionDiv.appendChild(row);
     });
+    
 
     container.appendChild(sectionDiv);
   });
@@ -147,12 +158,16 @@ function saveChecklistAsJSON() {
       const selected = item.querySelector("input[type='radio']:checked");
       const note = item.querySelector(".note-field").value;
 
+      const descField = item.querySelector(".description-field");
+
       items.push({
         test: labelText.replace(/<[^>]+>/g, ""),
         expected,
+        description: descField?.value || "",
         state: selected ? selected.value : "",
         note: note || ""
       });
+
     });
     structured.push({ section: heading, items });
   });

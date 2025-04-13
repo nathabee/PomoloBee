@@ -51,66 +51,40 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    class MainActivity : ComponentActivity() {
 
-        permissionLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-            val granted = permissions.all { it.value }
-            if (granted) {
-                onPermissionsGranted()
-            } else {
-                Toast.makeText(this, "Permissions not granted", Toast.LENGTH_LONG).show()
-                finish()
-            }
-        }
+        private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
-        if (PermissionManager.allGranted(this)) {
-            onPermissionsGranted()
-        } else {
-            permissionLauncher.launch(PermissionManager.REQUIRED_PERMISSIONS)
-        }
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
 
-    }
-
-    private fun onPermissionsGranted() {
-        val persisted = contentResolver.persistedUriPermissions
-        persisted.forEach {
-            Log.d("PersistedPermission", "URI=${it.uri}, Read=${it.isReadPermission}, Write=${it.isWritePermission}")
-        }
-
-        val prefs = UserPreferences(this)
-        val rawUri = runBlocking { prefs.getRawStorageRoot().first() }
-        val parsedUri = rawUri?.let { Uri.parse(it) }
-
-        // 👇 Add detailed logging here
-        if (parsedUri != null) {
-            if (!hasAccessToUri(this, parsedUri)) {
-                val rootDoc = DocumentFile.fromTreeUri(this, parsedUri)
-                if (rootDoc == null || !rootDoc.exists()) {
-                    Log.w("Startup", "⚠️ Storage root is inaccessible or missing — SD card may be removed or permission revoked.")
-                    // Don't reset the preference — just inform the user later via UI if needed
+            permissionLauncher = registerForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions()
+            ) { permissions ->
+                val granted = permissions.all { it.value }
+                if (granted) {
+                    launchApp()
+                } else {
+                    Toast.makeText(this, "Permissions not granted", Toast.LENGTH_LONG).show()
+                    finish()
                 }
+            }
+
+            if (PermissionManager.allGranted(this)) {
+                launchApp()
             } else {
-                Log.i("Startup", "✅ Verified access to storage root: $parsedUri")
+                permissionLauncher.launch(PermissionManager.REQUIRED_PERMISSIONS)
             }
         }
 
-        val startupUri = parsedUri?.takeIf { hasAccessToUri(this, it) }
-
-        Log.d("MainActivity", "📦 Loaded startupUri = $startupUri")
-
-        setContent {
-            PomoloBeeTheme {
-                PomoloBeeApp(startupUri = startupUri)
+        private fun launchApp() {
+            setContent {
+                PomoloBeeTheme {
+                    PomoloBeeApp() // 👈 no need to pass URI anymore
+                }
             }
         }
     }
-
-
-
-
 
 
 
@@ -164,47 +138,30 @@ fun AppScaffold(
 //###########################################################################
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PomoloBeeApp(startupUri: Uri?) {
+fun PomoloBeeApp( ) {
     val context = LocalContext.current
     val navController = rememberNavController()
 
-    var resolvedUri by remember { mutableStateOf<Uri?>(startupUri) }
-
-    Log.d("PomoloBeeApp", "📦 Initial startupUri = $resolvedUri")
-
-    if (resolvedUri == null) {
-        OrchardCache.clear()
-        InitScreen(
-            settingsViewModel = viewModel(factory = SettingsViewModelFactory(context)),
-            orchardViewModel = viewModel(factory = OrchardViewModelFactory(context)),
-            onInitFinished = { newUri ->
-                Log.i("PomoloBeeApp", "🎉 Init finished → updating state instead of recreating")
-                resolvedUri = newUri
-            }
-        )
-        return
-    }
-
-    // ✅ Create ViewModels *after* init
     val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
     val orchardViewModel: OrchardViewModel = viewModel(factory = OrchardViewModelFactory(context))
 
-    LaunchedEffect(resolvedUri) {
-        delay(100)
-        Log.i("PomoloBeeApp", "🚀 Attempting to load config from: $resolvedUri")
-        if (OrchardCache.locations.isEmpty()) {
-            copyAssetsIfNotExists(context, resolvedUri!!)
-            orchardViewModel.loadLocalConfig(resolvedUri!!, context)
-            settingsViewModel.invalidate()
-            Log.i("PomoloBeeApp", "✅ Config and assets loaded")
-        } else {
-            Log.d("PomoloBeeApp", "👍 Cache already initialized — skipping config load")
-        }
-    }
+    var initDone by remember { mutableStateOf(false) }
 
-    AppScaffold(
-        navController = navController,
-        orchardViewModel = orchardViewModel,
-        settingsViewModel = settingsViewModel
-    )
+    if (!initDone) {
+        // 🍎 Always go through InitScreen
+        InitScreen(
+            settingsViewModel = settingsViewModel,
+            orchardViewModel = orchardViewModel,
+            onInitFinished = {
+                initDone = true // ✅ Switch only once
+            }
+        )
+    } else {
+        // ✅ Only show main app AFTER init
+        AppScaffold(
+            navController = navController,
+            orchardViewModel = orchardViewModel,
+            settingsViewModel = settingsViewModel
+        )
+    }
 }

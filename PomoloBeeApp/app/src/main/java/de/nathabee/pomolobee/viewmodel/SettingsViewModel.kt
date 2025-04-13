@@ -18,6 +18,7 @@ import de.nathabee.pomolobee.util.resolveSubDirectory
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
 import androidx.datastore.preferences.core.edit
+import de.nathabee.pomolobee.repository.OrchardRepository
 
 
 class SettingsViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
@@ -133,26 +134,68 @@ class SettingsViewModel(
         val api = apiEndpoint.value ?: return@launch
         val media = mediaEndpoint.value ?: return@launch
 
-        val result = ConnectionRepository.testConnection(context, api, media) { version ->
-            updateApiVersion(version)
+        try {
+            val result = ConnectionRepository.testConnection(api, media) { version ->
+                updateApiVersion(version)
+            }
+            onResult(result)
+        } catch (e: Exception) {
+            ErrorLogger.logError(context, storageRootUri.value, e.message ?: "❌ Unknown connection error", e)
+            onResult(false)
         }
-        onResult(result)
     }
 
 
 
-    fun performLocalSync(context: Context, onMessage: (String) -> Unit) {
-        safeLaunchInViewModel(context, "❌ Sync failed") {
-            val configUri = resolveSubDirectory(context, storageRootUri.value, "config")?.uri
-            if (configUri != null) {
-                val message = ConnectionRepository.syncOrchard(context, configUri)
-                updateLastSync(System.currentTimeMillis())
-                onMessage(message)
-            } else {
-                onMessage("❌ Config path missing")
+    fun performLocalSync(context: Context, onResult: (String) -> Unit) = viewModelScope.launch {
+            try {
+                val root = storageRootUri.value ?: throw IllegalStateException("❌ Storage root not set")
+                ConnectionRepository.syncOrchard(context, root)
+                onResult("✅ Orchard configuration synced")
+            } catch (e: Exception) {
+                ErrorLogger.logError(context, storageRootUri.value, e.message ?: "❌ Sync failed", e)
+                onResult(e.message ?: "❌ Unknown sync error")
             }
         }
+
+    fun performCloudSync(context: Context, onComplete: (String) -> Unit) = viewModelScope.launch {
+        val api = apiEndpoint.value
+        val media = mediaEndpoint.value
+        val rootUri = storageRootUri.value
+
+        if (api.isNullOrBlank() || media.isNullOrBlank() || rootUri == null) {
+            onComplete("❌ Missing API, media endpoint, or storage location")
+            return@launch
+        }
+
+        try {
+            // STEP 1: 🔗 Fetch JSON config from API
+            // TODO: Replace with actual network fetch
+            // Example: val locationsJson = fetch("$api/locations.json")
+            //          val fruitsJson = fetch("$api/fruits.json")
+
+            // STEP 2: 💾 Save them into /config/
+            // TODO: Save both JSON responses as "locations.json" and "fruits.json"
+            // val configDir = resolveSubDirectory(context, rootUri, "config")
+            // writeFile(configDir, "locations.json", locationsJson)
+            // writeFile(configDir, "fruits.json", fruitsJson)
+
+            // STEP 3: 📥 Download and save SVGs mentioned in locations
+            // TODO: Parse locationsJson into model → loop over fields → get SVG filenames
+            //       For each, fetch from "$media/svg/fields/$svgName" and save into /fields/svg/
+
+            // STEP 4: 🧠 Update cache using already existing sync logic
+            //OrchardRepository.syncOrchard(context, rootUri)
+
+            // STEP 5: ✅ All done
+            onComplete("✅ Cloud sync completed")
+            //updateLastSyncTime()
+        } catch (e: Exception) {
+            onComplete("❌ Cloud sync failed: ${e.message}")
+            e.printStackTrace()
+        }
     }
+
 
 
 
@@ -180,6 +223,8 @@ class SettingsViewModel(
             prefs.initializeDefaultsIfNeeded()
         }
     }
+
+
 
 
 }
