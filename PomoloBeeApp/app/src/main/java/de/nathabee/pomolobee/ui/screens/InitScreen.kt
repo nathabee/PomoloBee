@@ -32,13 +32,13 @@ import kotlinx.coroutines.withContext
 fun InitScreen(
     settingsViewModel: SettingsViewModel,
     orchardViewModel: OrchardViewModel,
+    initViewModel: InitViewModel,
     onInitFinished: () -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val storageRootUri by settingsViewModel.storageRootUri.collectAsState()
 
-    val initViewModel = remember { InitViewModel() }
     var hasPermission by remember { mutableStateOf(false) }
 
 
@@ -54,12 +54,16 @@ fun InitScreen(
 
     // Request permissions on start if needed
     LaunchedEffect(Unit) {
+        Log.d("InitScreen", "🛂 Checking permissions...")
         if (!PermissionManager.allGranted(context)) {
+            Log.d("InitScreen", "🟡 Permissions not granted — launching request")
             permissionLauncher.launch(PermissionManager.REQUIRED_PERMISSIONS)
         } else {
+            Log.d("InitScreen", "✅ Permissions already granted")
             hasPermission = true
         }
     }
+
 
     if (!hasPermission) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -76,23 +80,47 @@ fun InitScreen(
     var showFolderPicker by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    var initDone by remember { mutableStateOf(false) }
+    val initDone by initViewModel.initDone.collectAsState()
 
-    val status = remember {
-        derivedStateOf {
-            initViewModel.getStartupStatusFromUri(context, storageRootUri)
+    val locations by orchardViewModel.locations.collectAsState()
+    val cacheReady by remember { derivedStateOf { locations.isNotEmpty() } }
+
+
+
+    val status by initViewModel.startupStatus.collectAsState()
+
+    LaunchedEffect(hasPermission) {
+        if (hasPermission && !initDone) {
+            Log.d("InitScreen", "🧪 Bootstrapping initial startup status manually")
+            val uri = storageRootUri
+            val ready = locations.isNotEmpty()
+            initViewModel.refreshStatus(context, uri, ready)
         }
     }
 
+
+
+
     suspend fun initialize(uri: Uri) {
+        Log.d("InitScreen", "🚀 Initializing with URI = $uri")
         isLoading = true
         withContext(Dispatchers.IO) {
             settingsViewModel.setStorageRoot(uri)
             copyAssetsIfNotExists(context, uri)
             orchardViewModel.loadLocalConfig(uri, context)
+            Log.d("InitScreen", "🧠 Orchard config loaded")
         }
-        isLoading = false
+        Log.d("InitScreen", "📦 Initial config load complete, now marking Ready")
+        initViewModel.markInitDone() // ✅ explicitly after config load
         onInitFinished()
+        isLoading = false
+
+
+    }
+
+
+    fun launchInitialize(uri: Uri) {
+        coroutineScope.launch { initialize(uri) }
     }
 
     if (isLoading) {
@@ -106,25 +134,33 @@ fun InitScreen(
         return
     }
 
-    // Behavior based on status
-    LaunchedEffect(status.value) {
+        // Behavior based on status
+        Log.d("InitScreen", "✅ Status calculated = ${status}")
+
+    LaunchedEffect(status) {
+        Log.d("InitScreen", "🔥 Triggered for status: $status")
+
+
         if (!initDone) {
-            when (status.value) {
+            when (status) {
                 StartupStatus.MissingUri -> showFolderPicker = true
                 StartupStatus.InvalidUri -> showDialog = true
-                StartupStatus.MissingConfig -> {
-                    Log.i("InitScreen", "📥 Reloading config because cache was empty")
+
+                StartupStatus.MissingConfig,
+                StartupStatus.InitConfig -> {
                     storageRootUri?.let {
-                        initialize(it)
-                        initDone = true
+                        launchInitialize(it)
                     }
                 }
+
                 StartupStatus.Ready -> {
-                    Log.i("InitScreen", "✅ Ready state, initializing...")
-                    storageRootUri?.let {
-                        initialize(it)
-                        initDone = true
-                    }
+                    //initViewModel.markInitDone()
+                    onInitFinished()
+                }
+
+                // 👇 catch-all fallback for unexpected status
+                else -> {
+                    Log.e("InitScreen", "⚠️ Unhandled startup status: $status")
                 }
             }
         }
@@ -139,6 +175,7 @@ fun InitScreen(
                     Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 )
                 initialize(selectedUri)
+
             }
         })
     }
@@ -151,7 +188,7 @@ fun InitScreen(
             confirmButton = {
                 TextButton(onClick = {
                     storageRootUri?.let {
-                        coroutineScope.launch { initialize(it) }
+                        launchInitialize(it)
                         showDialog = false
                     }
                 }) {
@@ -194,7 +231,7 @@ fun InitScreen(
             Button(
                 onClick = {
                     if (storageRootUri != null) {
-                        coroutineScope.launch { initialize(storageRootUri!!) }
+                        launchInitialize(storageRootUri!!)
                     } else {
                         showDialog = true
                     }

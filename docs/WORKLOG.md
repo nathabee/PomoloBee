@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _137 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _138 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -438,7 +438,7 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
 
 
 ###  April 13 2025
-- **Hours Worked**: 2 hours
+- **Hours Worked**: 3 hours
 - **Tasks**:
   - initScreen handle status state (add util/PerimissionManaget.kt and viewmodel/InitViewModel.kt )
   - changed App spec to explain init screen 

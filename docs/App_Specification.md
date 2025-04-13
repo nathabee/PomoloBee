@@ -56,6 +56,7 @@ Since **video processing is not in scope right now**, we will focus only on **im
     - [Startup Logic Flow](#startup-logic-flow)
     - [Wireframe](#wireframe)
     - [Required Permissions Requested via Composable](#required-permissions-requested-via-composable)
+    - [HOW STATE EVOLVES SCENARIO-BASED](#how-state-evolves-scenario-based)
   - [**ℹ️ `AboutScreen`**](#i-aboutscreen)
     - [**Purpose**](#purpose)
     - [**Wireframe**](#wireframe)
@@ -690,8 +691,8 @@ This screen guides users through:
 | 1️⃣ First install | ❌ No | ❌ No | Folder picker | Prompt user to pick folder, copy assets |
 | 2️⃣ Restart after cache cleared | ✅ Yes | ❌ No | Init screen briefly | Silently reload config from disk |
 | 3️⃣ Restart after cache + storage removed | ❌ No | ❌ No | Folder picker | Show picker, reset storage root |
-| 4️⃣ Cache OK, SD card removed | ❌ No | ✅ Yes | Error prompt | Show dialog, prompt folder re-pick |
-| 5️⃣ Normal startup | ✅ Yes | ✅ Yes | — (skipped) | Go directly to CameraScreen |
+| 4️⃣ Cache OK, SD card removed | ❌ No | ✅ Yes | Error prompt | Show dialog, prompt folder re-pick and reload cache |
+| 5️⃣ Normal startup | ✅ Yes | ✅ Yes | — (skipped) | Go directly to CameraScreen no cache reload no folder picker |
 | 6️⃣ Reinstall, SD still present | ✅ Yes | ❌ No | Init screen | Reload config from disk |
 
 ---
@@ -780,6 +781,66 @@ val permissionLauncher = rememberLauncherForActivityResult(
 ) { result -> ... }
 ```
 
+---
+
+### HOW STATE EVOLVES SCENARIO-BASED
+
+Here’s your **status state machine in practice**:
+
+#### 1 **Fresh install no URI no cache**
+
+```mermaid
+stateDiagram-v2
+    [*] --> MissingUri : URI == null
+    MissingUri --> FolderPicker : User picks folder
+    FolderPicker --> MissingConfig : Config files not there yet
+    MissingConfig --> InitConfig : copyAssetsIfNotExists + loadLocalConfig
+    InitConfig --> Ready : cache is now ready
+    Ready --> Done : markInitDone
+```
+
+#### 2 **Reinstall URI exists but no cache**
+
+```mermaid
+stateDiagram-v2
+    [*] --> InitConfig : URI valid, but orchardViewModel.locations is empty
+    InitConfig --> Ready : config loaded from disk into cache
+    Ready --> Done
+```
+
+#### 3 **SD removed after install no URI**
+
+```mermaid
+stateDiagram-v2
+    [*] --> MissingUri
+    MissingUri --> FolderPicker : manual reselect needed
+```
+
+#### 4 **Cache ok but no folder access**
+
+```mermaid
+stateDiagram-v2
+    [*] --> InvalidUri : hasAccessToUri = false
+    InvalidUri --> ShowDialog : user must act
+```
+
+#### 5 **Normal startup everything OK**
+
+```mermaid
+stateDiagram-v2
+    [*] --> Ready
+    Ready --> Done
+```
+
+#### 6 **Reinstall SD still mounted but cache cleared**
+
+```mermaid
+stateDiagram-v2
+    [*] --> InitConfig : URI valid, cache empty
+    InitConfig --> Ready : after reloading config
+    Ready --> Done
+```
+ 
 ---
  
  

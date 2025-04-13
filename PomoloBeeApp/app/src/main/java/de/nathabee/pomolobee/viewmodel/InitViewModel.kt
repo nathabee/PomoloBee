@@ -6,27 +6,63 @@ import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.ViewModel
 import de.nathabee.pomolobee.util.hasAccessToUri
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+ import androidx.lifecycle.ViewModelProvider
+
+class InitViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return InitViewModel() as T // context is here if you later need it
+    }
+}
 
 enum class StartupStatus {
     MissingUri,
     InvalidUri,
     MissingConfig,
+    InitConfig,
     Ready
 }
 
 class InitViewModel : ViewModel() {
 
-    /**
-     * Evaluates startup status based on a given storage Uri.
-     */
-    fun getStartupStatusFromUri(context: Context, uri: Uri?): StartupStatus {
+    private val _initDone = MutableStateFlow(false)
+    val initDone: StateFlow<Boolean> = _initDone
+
+    private val _startupStatus = MutableStateFlow(StartupStatus.MissingUri)
+    val startupStatus: StateFlow<StartupStatus> = _startupStatus
+
+    fun markInitDone() {
+        Log.d("InitViewModel", "✅ markInitDone() called — setting Ready")
+        _initDone.value = true
+        _startupStatus.value = StartupStatus.Ready
+    }
+
+
+    fun refreshStatus(context: Context, uri: Uri?, cacheReady: Boolean) {
+
+        _startupStatus.value = computeStatus(context, uri, cacheReady)
+    }
+
+    private fun computeStatus(
+        context: Context,
+        uri: Uri?,
+        cacheIsReady: Boolean
+    ): StartupStatus {
+        Log.d("InitViewModel", "🔍 Checking URI: $uri")
+
+        if (_initDone.value) {
+            Log.d("InitViewModel", "✅ Init already done — forcing status = Ready")
+            return StartupStatus.Ready
+        }
+
         if (uri == null) {
-            Log.w("StartupCheck", "📂 No URI provided")
+            Log.w("InitViewModel", "⚠️ URI is null")
             return StartupStatus.MissingUri
         }
 
         if (!hasAccessToUri(context, uri)) {
-            Log.e("StartupCheck", "❌ No access to URI: $uri")
+            Log.e("InitViewModel", "❌ No access to URI: $uri")
             return StartupStatus.InvalidUri
         }
 
@@ -35,12 +71,10 @@ class InitViewModel : ViewModel() {
         val fruits = configDir?.findFile("fruits.json")
         val locations = configDir?.findFile("locations.json")
 
-        return if (fruits != null && locations != null) {
-            Log.i("StartupCheck", "✅ Config ready at $uri")
-            StartupStatus.Ready
-        } else {
-            Log.w("StartupCheck", "⚠️ Config incomplete at $uri")
-            StartupStatus.MissingConfig
+        return when {
+            fruits == null || locations == null -> StartupStatus.MissingConfig
+            !cacheIsReady -> StartupStatus.InitConfig
+            else -> StartupStatus.Ready
         }
     }
 }

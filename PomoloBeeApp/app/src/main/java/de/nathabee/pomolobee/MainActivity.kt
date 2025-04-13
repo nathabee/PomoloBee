@@ -38,6 +38,8 @@ import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.util.copyAssetsIfNotExists
 import de.nathabee.pomolobee.util.hasAccessToUri
+import de.nathabee.pomolobee.viewmodel.InitViewModel
+import de.nathabee.pomolobee.viewmodel.InitViewModelFactory
 import de.nathabee.pomolobee.viewmodel.OrchardViewModelFactory
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
@@ -45,11 +47,6 @@ import kotlinx.coroutines.delay
 
 
 
-class MainActivity : ComponentActivity() {
-
-    //###########################################################################
-
-    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
     class MainActivity : ComponentActivity() {
 
@@ -88,7 +85,7 @@ class MainActivity : ComponentActivity() {
 
 
 
-}
+
 
 
 
@@ -135,33 +132,37 @@ fun AppScaffold(
 
 
 
-//###########################################################################
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PomoloBeeApp( ) {
-    val context = LocalContext.current
-    val navController = rememberNavController()
+    //###########################################################################
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun PomoloBeeApp() {
+        val context = LocalContext.current
+        val navController = rememberNavController()
 
-    val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
-    val orchardViewModel: OrchardViewModel = viewModel(factory = OrchardViewModelFactory(context))
+        val settingsViewModel: SettingsViewModel =
+            viewModel(factory = SettingsViewModelFactory(context))
+        val orchardViewModel: OrchardViewModel = viewModel(factory = OrchardViewModelFactory(context))
+        val initViewModel: InitViewModel = viewModel(factory = InitViewModelFactory(context))
 
-    var initDone by remember { mutableStateOf(false) }
+        val initDone by initViewModel.initDone.collectAsState()
 
-    if (!initDone) {
-        // 🍎 Always go through InitScreen
-        InitScreen(
-            settingsViewModel = settingsViewModel,
-            orchardViewModel = orchardViewModel,
-            onInitFinished = {
-                initDone = true // ✅ Switch only once
-            }
-        )
-    } else {
-        // ✅ Only show main app AFTER init
-        AppScaffold(
-            navController = navController,
-            orchardViewModel = orchardViewModel,
-            settingsViewModel = settingsViewModel
-        )
+        Log.d("PomoloBeeApp", "🚀 recomposed with initDone = $initDone")
+        if (!initDone) {
+            InitScreen(
+                settingsViewModel = settingsViewModel,
+                orchardViewModel = orchardViewModel,
+                initViewModel = initViewModel,
+                onInitFinished = {
+                    // is done is made bei initScreen
+                    // initViewModel.markInitDone() // ✅ Triggers recompose and shows main app
+                    //initViewModel.markInitDone()
+                }
+            )
+        } else {
+            AppScaffold(
+                navController = navController,
+                orchardViewModel = orchardViewModel,
+                settingsViewModel = settingsViewModel
+            )
+        }
     }
-}
