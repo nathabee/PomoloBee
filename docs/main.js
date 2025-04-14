@@ -244,13 +244,32 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const file = link.getAttribute("href");
         loadMarkdown(file).then(md => {
-          document.getElementById("content").innerHTML =
-            `<div class="markdown">${marked.parse(md)}</div>`;
+          const parsed = marked.parse(md);
+          const container = document.getElementById("content");
+          container.innerHTML = `<div class="markdown">${parsed}</div>`;
           scrollToContent();
+  
+          // 🚀 Re-render mermaid graphs after inserting the HTML
+          if (window.mermaid) {
+            const mermaidBlocks = container.querySelectorAll("code.language-mermaid");
+            mermaidBlocks.forEach((block, index) => {
+              const parent = block.closest("pre");
+              const containerId = `mermaid-${index}`;
+              const replacement = document.createElement("div");
+              replacement.className = "mermaid";
+              replacement.id = containerId;
+              replacement.textContent = block.textContent;
+              parent.replaceWith(replacement);
+  
+              // 🔁 Render this graph
+              window.mermaid.init(undefined, `#${containerId}`);
+            });
+          }
         });
       });
     }
   });
+  
 });
 
 async function loadMarkdown(file) {

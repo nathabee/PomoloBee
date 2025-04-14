@@ -458,6 +458,7 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - modified SVG filed to be compatible with our Android App designed. 
   - Django : SVG changed in Django. Change Shortname not unique in ROW. modified Test, migration and sbapshot- propagate JSON locations to App
   - Docs : Docs_Test.md to explain github pages, APP User Manuel
+  - Docs : Re-render mermaid graphs after inserting the HTML
 
 
 
