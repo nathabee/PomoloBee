@@ -19,17 +19,28 @@ import de.nathabee.pomolobee.util.getSvgUriForLocation
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 
+
 fun injectBase64Image(svg: String, base64Image: String): String {
     val base64Tag = """
-        <image x="0" y="0" width="1599" height="978"
+        <image x="0" y="0" width="100%" height="100%"
                opacity="0.4" preserveAspectRatio="none"
                xlink:href="data:image/jpeg;base64,$base64Image"
+               style="pointer-events: none;"
                xmlns:xlink="http://www.w3.org/1999/xlink" />
     """.trimIndent()
 
-    val cleanedSvg = svg.replace(Regex("""<svg:image[^>]+/>"""), "")
-    return cleanedSvg.replace("</svg>", "$base64Tag\n</svg>")
+    // Regex to find the end of the opening <svg ...> tag
+    val svgTagEnd = Regex("""<svg[^>]*>""").find(svg)?.range?.lastOrNull()
+    return if (svgTagEnd != null) {
+        val insertPos = svgTagEnd + 1
+        svg.substring(0, insertPos) + base64Tag + svg.substring(insertPos)
+    } else {
+        // fallback: just append at end if somehow <svg> isn't matched
+        svg.replace("</svg>", "$base64Tag</svg>")
+    }
 }
+
+
 
 
 @Composable
@@ -145,12 +156,14 @@ fun SvgMapScreen(
                             @JavascriptInterface
                             fun onRowClicked(rowId: String) {
                                 Log.d("SvgMapScreen", "🖱️ Row clicked: $rowId")
-                                //val id = rowId.removePrefix("row_").toIntOrNull()
-                                Log.d("SvgMapScreen", "🖱️ Row clicked: $rowId, resolved to ID = $id")
 
+
+                                // Extract the numeric part regardless of "_hit" suffix
+                                val normalizedId = rowId.removePrefix("row_").removeSuffix("_hit")
+                                val id = normalizedId.toIntOrNull()
+                                Log.d("SvgMapScreen", "🖱️ Row clicked: $rowId, resolved to ID = $id")
                                 Log.d("SvgMapScreen", "📋 Rows in location: ${location.rows.map { it.rowId }}")
 
-                                val id = rowId.removePrefix("row_").toIntOrNull()
                                 val row = location.rows.find { it.rowId == id }
                                 if (row != null) {
                                     this@apply.post {

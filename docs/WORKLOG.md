@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _138 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _144 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -39,6 +39,8 @@
     - [April 10 2025](#april-10-2025)
     - [April 11 2025](#april-11-2025)
     - [April 13 2025](#april-13-2025)
+  - [Week 6 Dates from April 14 to Avril 20 2025](#week-6-dates-from-april-14-to-avril-20-2025)
+    - [April 14 2025](#april-14-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -442,6 +444,21 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
 - **Tasks**:
   - initScreen handle status state (add util/PerimissionManaget.kt and viewmodel/InitViewModel.kt )
   - changed App spec to explain init screen 
+  - test connecttion looks in svg/fields and not field/svg (corrected)
+
+
+---
+
+
+##  Week 6 Dates from April 14 to Avril 20 2025
+
+###  April 14 2025
+- **Hours Worked**: 6 hours
+- **Tasks**:
+  - modified SVG filed to be compatible with our Android App designed. 
+  - Django : SVG changed in Django. Change Shortname not unique in ROW. modified Test, migration and sbapshot- propagate JSON locations to App
+  - Docs : Docs_Test.md to explain github pages, APP User Manuel
+
 
 
 ---

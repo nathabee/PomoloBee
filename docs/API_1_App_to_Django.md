@@ -12,6 +12,9 @@ Example of Django json response (snapshots made during Django integration or non
  
 -  **API Example** [JSON example](/PomoloBeeDjango/tests/snapshots)
 
+
+- The background image (e.g. JPEG) must be created/exported with the exact same coordinate system as the SVG viewBox. If the SVG has viewBox="0 0 800 1000", then the background image must be 800px wide and 1000px tall.
+
 ---
 
 <details>

@@ -50,7 +50,7 @@ object ConnectionRepository {
 
         // --- Media Check ---
         try {
-            val conn = URL("$mediaUrl/svg/fields/default_map.svg").openConnection() as HttpURLConnection
+            val conn = URL("$mediaUrl/fields/svg/default_map.svg").openConnection() as HttpURLConnection
             conn.requestMethod = "HEAD"
             conn.connect()
 

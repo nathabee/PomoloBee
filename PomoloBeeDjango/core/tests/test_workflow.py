@@ -55,7 +55,7 @@ class DjangoWorkflowTest(TestCase):
         fruit = Fruit.objects.get(short_name="Swing_CG1")
         self.assertEqual(fruit.name, "Cultivar Swing on CG1")
 
-        row = Row.objects.get(short_name="C1-R3")
+        row = Row.objects.get(short_name="R3", field_id=1 )
         self.assertEqual(row.name, "Rang 3 cote maison Swing 3")
         self.assertEqual(row.nb_plant, 40)
         self.assertEqual(row.field.id, 1)  # Foreign key to Field

@@ -18,7 +18,7 @@ class FieldAdmin(admin.ModelAdmin):
 
 @admin.register(Row)
 class RowAdmin(admin.ModelAdmin):
-    list_display = ('name', 'short_name', 'nb_plant', 'field', 'fruit')
+    list_display = ('name',  'short_name', 'nb_plant', 'field', 'fruit')  
     search_fields = ('name', 'short_name')
     list_filter = ('field', 'fruit')
 

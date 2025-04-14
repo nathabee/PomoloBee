@@ -1,6 +1,6 @@
 {
-  "error": {
-    "code": "ML_RETRY_FAILED",
-    "message": "Retry failed. ML service issue."
+  "status": "success",
+  "data": {
+    "message": "Image processing retry has been requested."
   }
 }

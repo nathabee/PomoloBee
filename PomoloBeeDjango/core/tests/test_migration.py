@@ -38,8 +38,12 @@ class LoadFixtureDataTest(TestCase):
 
     def test_row_count(self):
         """Check if 28 rows are correctly loaded."""
+        row_count = Row.objects.filter(field_id=1).count()
+        self.assertEqual(row_count, 28, "Expected 28 rows in the database for field 1.")
+        """Check if 70 rows are correctly loaded."""
         row_count = Row.objects.count()
-        self.assertEqual(row_count, 28, "Expected 28 rows in the database.")
+        self.assertEqual(row_count, 70, "Expected 70 rows in the database ")
+
 
     def test_specific_field_data(self):
         """Verify specific field data (ChampMaison - C1)."""
@@ -59,8 +63,8 @@ class LoadFixtureDataTest(TestCase):
         self.assertEqual(fruit.fruit_avg_kg, 0.2)
 
     def test_specific_row_data(self):
-        """Verify specific row data (C1-R3)."""
-        row = Row.objects.get(short_name="C1-R3")
+        """Verify specific row data (R3)."""
+        row = Row.objects.get(short_name="R3", field_id=1 )
         self.assertEqual(row.name, "Rang 3 cote maison Swing 3")
         self.assertEqual(row.nb_plant, 40)
         self.assertEqual(row.field.id, 1)  # Foreign key to Field
@@ -74,12 +78,12 @@ class LoadFixtureDataTest(TestCase):
  
 
         self.assertTrue(field.svg_map)  # Should not be None
-        self.assertEqual(str(field.svg_map), 'svg/fields/default_map.svg')
+        self.assertEqual(str(field.svg_map), 'fields/svg/default_map.svg')
 
     def test_svg_map_field_properties(self):
         field = Field._meta.get_field("svg_map")
         self.assertTrue(field.null)
-        self.assertEqual(field.default, 'svg/fields/default_map.svg')
+        self.assertEqual(field.default, '/fields/svg/default_map.svg')
 
 
  

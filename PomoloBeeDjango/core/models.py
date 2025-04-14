@@ -63,7 +63,7 @@ class Field(models.Model):
 
 # Defines a Row (a section in a field)
 class Row(models.Model):
-    short_name = models.CharField(max_length=50, unique=True)
+    short_name = models.CharField(max_length=50 )  #use to recognize a row in a field
     name = models.CharField(max_length=255)
     nb_plant = models.IntegerField()  # Number of plants in the row
     fruit = models.ForeignKey('Fruit', on_delete=models.CASCADE, related_name='rows')
@@ -71,6 +71,11 @@ class Row(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['field', 'short_name'], name='unique_row_shortname_per_field')
+        ]
 
 
 # Image storage for estimation analysis

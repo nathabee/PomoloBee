@@ -3,12 +3,16 @@
 PomoloBee is an AI-powered tool that helps farmers estimate apple yield using image or video analysis.
 This repository contains the mobile app, backend server, and ML microservice for end-to-end deployment.
 
+---
 
+✅ For full documentation, see the [GitHub Pages Portal](https://nathabee.github.io/PomoloBee/)
+
+---
 <p align="center">
     <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/docs/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
 </p>
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _138 hours_ (Auto-generated)  
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _144 hours_ (Auto-generated)  
 
 ---
 
@@ -20,6 +24,8 @@ This repository contains the mobile app, backend server, and ML microservice for
   - [**Documentation**](#documentation)
   - [**Project Definition PomoloBee Bee Smart Know Your Apple**](#project-definition-pomolobee-bee-smart-know-your-apple)
     - [**Goal**](#goal)
+    - [PomoloBee App Android Fruit Detection App](#pomolobee-app-android-fruit-detection-app)
+    - [️ App Screenshots](#app-screenshots)
     - [**Data Flow in PomoloBee**](#data-flow-in-pomolobee)
   - [**Features Functionalities**](#features-functionalities)
     - [**1 Mobile App Frontend Android**](#1-mobile-app-frontend-android)
@@ -61,6 +67,29 @@ This repository contains the mobile app, backend server, and ML microservice for
 
 ### **Goal**
 Develop an **Android app** (Kotlin + Android Studio) that allows farmers to estimate **apple harvest yield** using AI-based **video or image analysis**. The system will use a **cloud-based backend (VPS)** to process data and provide accurate results.  
+
+### PomoloBee App Android Fruit Detection App
+
+PomoloBee is an Android app for **image-based fruit detection** in orchards.  
+It lets users capture or upload a photo, tag it with **field and row location**, and analyze it locally or remotely using a Django + ML backend.
+
+- Works offline with local model
+- Supports field/row selection via **interactive SVG maps**
+- Uses **Jetpack DataStore**, custom config sync (cloud or local), and stores photos in SAF-accessible folders.
+
+---
+
+### ️ App Screenshots
+
+<p align="center">
+  <img src="docs/images/App-CameraScreen.jpeg" alt="CameraScreen" width="160px" style="margin-right: 8px;">
+  <img src="docs/images/App-OrchardScreen.jpeg" alt="OrchardScreen" width="160px" style="margin-right: 8px;">
+  <img src="docs/images/App-SettingsScreen.jpeg" alt="SettingsScreen" width="160px" style="margin-right: 8px;">
+  <img src="docs/images/App-SVGMapScreen-fruits.jpeg" alt="SvgMapScreen" width="160px" style="margin-right: 8px;">
+  <img src="docs/images/App-SVGMapScreen-RowInfos.jpeg" alt="SvgMapScreen Row Info" width="160px">
+</p>
+
+
 
 ---
 
