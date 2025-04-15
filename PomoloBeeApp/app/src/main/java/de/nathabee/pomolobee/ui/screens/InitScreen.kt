@@ -16,10 +16,9 @@ import androidx.compose.ui.unit.dp
 import de.nathabee.pomolobee.ui.components.FolderPicker
 import de.nathabee.pomolobee.util.ErrorLogger
 import de.nathabee.pomolobee.util.PermissionManager
-import de.nathabee.pomolobee.util.copyAssetsIfNotExists
+import de.nathabee.pomolobee.util.StorageUtils
 import de.nathabee.pomolobee.viewmodel.StartupStatus
 
-import de.nathabee.pomolobee.util.getFriendlyFolderName
 import de.nathabee.pomolobee.viewmodel.InitViewModel
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
@@ -106,7 +105,7 @@ fun InitScreen(
         isLoading = true
         withContext(Dispatchers.IO) {
             settingsViewModel.setStorageRoot(uri)
-            copyAssetsIfNotExists(context, uri)
+            StorageUtils.copyAssetsIfNotExists(context, uri)
             orchardViewModel.loadLocalConfig(uri, context)
             Log.d("InitScreen", "🧠 Orchard config loaded")
         }

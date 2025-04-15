@@ -15,6 +15,12 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import de.nathabee.pomolobee.model.LocationResponse
+import de.nathabee.pomolobee.network.OrchardApiService
+import de.nathabee.pomolobee.util.StorageUtils
+
+
+
 
 object ConnectionRepository {
 
@@ -66,33 +72,107 @@ object ConnectionRepository {
     }
 
 
-    fun syncOrchard(context: Context, configDirUri: Uri) {
-        val configDir = DocumentFile.fromTreeUri(context, configDirUri)
-            ?: throw IllegalArgumentException("❌ Invalid config directory URI")
+    //CLOUD
 
-        if (!configDir.isDirectory) {
-            throw IllegalStateException("❌ Provided URI is not a directory")
+
+    suspend fun performCloudSync(context: Context, rootUri: Uri, apiUrl: String, mediaUrl: String): String {
+        return try {
+            val gson = Gson()
+
+            // 🔗 Step 1: Fetch config JSONs
+            val locationsJson = try {
+                OrchardApiService.fetchLocations(apiUrl)
+            } catch (e: Exception) {
+                Log.e("CloudSync", "❌ Failed to fetch locations", e)
+                return "❌ Failed to fetch locations: ${e.message}"
+            }
+
+            val fruitsJson = try {
+                OrchardApiService.fetchFruits(apiUrl)
+            } catch (e: Exception) {
+                Log.e("CloudSync", "❌ Failed to fetch fruits", e)
+                return "❌ Failed to fetch fruits: ${e.message}"
+            }
+
+
+
+            // 💾 Step 2: Save to /config/
+            val savedLocations = StorageUtils.saveTextFile(context, rootUri, "config/locations.json", locationsJson)
+            val savedFruits = StorageUtils.saveTextFile(context, rootUri, "config/fruits.json", fruitsJson)
+
+            if (!savedLocations || !savedFruits) {
+                return "❌ Failed to save config files to local storage"
+            }
+
+            // 🧠 Step 3: Parse locations JSON
+            val locationResponse = gson.fromJson(locationsJson, LocationResponse::class.java)
+
+            // Collect unique SVG names
+            val svgNames = locationResponse.data.locations.mapNotNull {
+                it.field.svgMapUrl?.substringAfterLast("/")?.takeIf { name -> name.endsWith(".svg") }
+            }.distinct()
+
+            // 📥 Step 4: Download SVGs
+            for (svgName in svgNames) {
+                try {
+                    val svgBytes = OrchardApiService.fetchBinaryFromUrl("$mediaUrl/fields/svg/$svgName")
+                    val saved = StorageUtils.saveBinaryFile(
+                        context,
+                        rootUri,
+                        "fields/svg/$svgName",
+                        svgBytes,
+                        "image/svg+xml"
+                    )
+                    if (!saved) {
+                        Log.w("CloudSync", "⚠️ Failed to save SVG: $svgName")
+                    }
+                } catch (e: Exception) {
+                    Log.e("CloudSync", "❌ Error downloading SVG $svgName", e)
+                }
+            }
+
+            // 🖼 Step 5: Download Background Images
+            val backgroundNames = locationResponse.data.locations.mapNotNull {
+                it.field.backgroundImageUrl?.substringAfterLast("/")?.takeIf { name ->
+                    name.endsWith(".jpeg", ignoreCase = true) || name.endsWith(".jpg", ignoreCase = true)
+                }
+            }.distinct()
+
+            for (bgName in backgroundNames) {
+                try {
+                    val bgBytes = OrchardApiService.fetchBinaryFromUrl("$mediaUrl/fields/background/$bgName")
+                    val saved = StorageUtils.saveBinaryFile(
+                        context,
+                        rootUri,
+                        "fields/background/$bgName",
+                        bgBytes,
+                        "image/jpeg"
+                    )
+                    if (!saved) {
+                        Log.w("CloudSync", "⚠️ Failed to save background: $bgName")
+                    }
+                } catch (e: Exception) {
+                    Log.e("CloudSync", "❌ Error downloading background $bgName", e)
+                }
+            }
+
+            // ✅ Step 6: Load config into cache
+            val success = OrchardRepository.loadAllConfigFromUri(context, rootUri)
+            if (!success) {
+                return "❌ Failed to load configuration after sync"
+            }
+
+            return "✅ Cloud sync completed successfully"
+        } catch (e: Exception) {
+            Log.e("CloudSync", "💥 Cloud sync failed", e)
+            return "❌ Cloud sync failed: ${e.message}"
         }
-
-        val fruitsFile = configDir.findFile("fruits.json")
-            ?: throw IllegalStateException("❌ Missing fruits.json")
-
-        val locationsFile = configDir.findFile("locations.json")
-            ?: throw IllegalStateException("❌ Missing locations.json")
-
-        val gson = Gson()
-        val fruitsList = readListFromJson<Fruit>(context, fruitsFile.uri, gson)
-            ?: throw IllegalStateException("❌ Failed to parse fruits.json")
-
-        val locationsList = readListFromJson<Location>(context, locationsFile.uri, gson)
-            ?: throw IllegalStateException("❌ Failed to parse locations.json")
-
-        OrchardCache.load(fruitsList, locationsList)
     }
+
 
 }
 
-// Generic list reader
+// Generic list reader NOT USED ANYMORE
 inline fun <reified T> readListFromJson(context: Context, fileUri: Uri, gson: Gson): List<T>? {
     return try {
         context.contentResolver.openInputStream(fileUri)?.use { stream ->
@@ -104,4 +184,7 @@ inline fun <reified T> readListFromJson(context: Context, fileUri: Uri, gson: Gs
         e.printStackTrace()
         null
     }
+
 }
+
+

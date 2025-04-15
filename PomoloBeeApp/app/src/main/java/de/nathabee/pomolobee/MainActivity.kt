@@ -1,7 +1,5 @@
 package de.nathabee.pomolobee
 
-import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -18,10 +16,8 @@ import kotlinx.coroutines.launch
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.compose.ui.Alignment
 
 
 
@@ -29,21 +25,13 @@ import de.nathabee.pomolobee.navigation.NavGraph
 import de.nathabee.pomolobee.ui.components.DrawerMenu
 import de.nathabee.pomolobee.ui.theme.PomoloBeeTheme
 import de.nathabee.pomolobee.ui.screens.InitScreen
-import de.nathabee.pomolobee.cache.OrchardCache
-import de.nathabee.pomolobee.data.UserPreferences
 import de.nathabee.pomolobee.ui.components.PermissionManager
-import de.nathabee.pomolobee.ui.screens.SettingsScreen
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
-import de.nathabee.pomolobee.util.copyAssetsIfNotExists
-import de.nathabee.pomolobee.util.hasAccessToUri
 import de.nathabee.pomolobee.viewmodel.InitViewModel
 import de.nathabee.pomolobee.viewmodel.InitViewModelFactory
 import de.nathabee.pomolobee.viewmodel.OrchardViewModelFactory
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.delay
 
 
 

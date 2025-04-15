@@ -10,7 +10,6 @@ DisposableEffect(Unit) {
  */
 package de.nathabee.pomolobee.ui.screens
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -27,18 +26,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
-import androidx.documentfile.provider.DocumentFile
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import de.nathabee.pomolobee.navigation.Screen
 import de.nathabee.pomolobee.util.ErrorLogger
-import de.nathabee.pomolobee.util.getFriendlyFolderName
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import java.io.File
-import java.io.InputStream
-import de.nathabee.pomolobee.util.resolveDocumentDir
-import de.nathabee.pomolobee.util.resolveSubDirectory
+import de.nathabee.pomolobee.util.StorageUtils
 import java.util.Locale
 
 // name of picture <FieldShortName>_<RowShortName>_<yyyyMMdd_HHmmss>.jpg
@@ -61,7 +56,7 @@ fun CameraScreen(
     val storageRootUri by settingsViewModel.storageRootUri.collectAsState()
 
     val imagesDir = remember(storageRootUri) {
-        resolveSubDirectory(context, storageRootUri, "images")
+        StorageUtils.resolveSubDirectory(context, storageRootUri, "images")
    }
 
 
@@ -185,7 +180,7 @@ fun CameraScreen(
 
 
 
-        val folderName = imagesDir?.uri?.let { getFriendlyFolderName(context, it) } ?: "❌ Not set"
+        val folderName = imagesDir?.uri?.let { StorageUtils.getFriendlyFolderName(context, it) } ?: "❌ Not set"
         Text("📂 Storage Location: $folderName")
 
     }

@@ -216,8 +216,6 @@ App retrieves ML version (get from ML by Django).
 
 ---
 
-Let me know if you want this in **Markdown**, **OpenAPI**, or **Postman Collection** format as next step 🔧
----
 ## **2. Detailed Requirements**
 
 ### **App Requirements**
@@ -256,5 +254,4 @@ Let me know if you want this in **Markdown**, **OpenAPI**, or **Postman Collecti
    - **`row_kg = plant_kg * row.nb_plant`** (expected total weight for the row).  
 
 ---
- 
---- 
+  

@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _144 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _147 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -9,16 +9,16 @@
 <!-- TOC -->
 - [Project Work Log](#project-work-log)
   - [Detailed Work Log](#detailed-work-log)
-  - [Week 1 Dates from Mars 14 to Mars 16 2025](#week-1-dates-from-mars-14-to-mars-16-2025)
+  - [Dates from Mars 14 to Mars 16 2025](#dates-from-mars-14-to-mars-16-2025)
     - [Mars 14 2025](#mars-14-2025)
     - [Mars 15 2025](#mars-15-2025)
     - [Mars 16 2025](#mars-16-2025)
-  - [Week 2 Dates from Mars 17 to Mars 23 2025](#week-2-dates-from-mars-17-to-mars-23-2025)
+  - [Dates from Mars 17 to Mars 23 2025](#dates-from-mars-17-to-mars-23-2025)
     - [Mars 17 2025](#mars-17-2025)
     - [Mars 18 2025](#mars-18-2025)
     - [Mars 22 2025](#mars-22-2025)
     - [Mars 23 2025](#mars-23-2025)
-  - [Week 3 Dates from Mars 24 to Mars 30 2025](#week-3-dates-from-mars-24-to-mars-30-2025)
+  - [Dates from Mars 24 to Mars 30 2025](#dates-from-mars-24-to-mars-30-2025)
     - [Mars 24 2025](#mars-24-2025)
     - [Mars 25 2025](#mars-25-2025)
     - [Mars 26 2025](#mars-26-2025)
@@ -26,7 +26,7 @@
     - [Mars 28 2025](#mars-28-2025)
     - [Mars 29 2025](#mars-29-2025)
     - [Mars 30 2025](#mars-30-2025)
-  - [Week 4 Dates from Mars 31 to Avril 6 2025](#week-4-dates-from-mars-31-to-avril-6-2025)
+  - [Dates from Mars 31 to Avril 6 2025](#dates-from-mars-31-to-avril-6-2025)
     - [Mars 31 2025](#mars-31-2025)
     - [Avril 01 2025](#avril-01-2025)
     - [Avril 02 2025](#avril-02-2025)
@@ -34,13 +34,14 @@
     - [Avril 04 2025](#avril-04-2025)
     - [Avril 05 2025](#avril-05-2025)
     - [Avril 06 2025](#avril-06-2025)
-  - [Week 5 Dates from April 7 to Avril 13 2025](#week-5-dates-from-april-7-to-avril-13-2025)
+  - [Dates from April 7 to Avril 13 2025](#dates-from-april-7-to-avril-13-2025)
     - [April 7 2025](#april-7-2025)
     - [April 10 2025](#april-10-2025)
     - [April 11 2025](#april-11-2025)
     - [April 13 2025](#april-13-2025)
-  - [Week 6 Dates from April 14 to Avril 20 2025](#week-6-dates-from-april-14-to-avril-20-2025)
+  - [Dates from April 14 to Avril 20 2025](#dates-from-april-14-to-avril-20-2025)
     - [April 14 2025](#april-14-2025)
+    - [April 15 2025](#april-15-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -50,12 +51,19 @@
 This document tracks the number of hours worked each day and provides a brief description of what was accomplished. It is useful to analyze the distribution of time across various activities in the project.
 
 ---
+
 ##  Detailed Work Log
 
  
 ---
 
-##  Week 1 Dates from Mars 14 to Mars 16 2025
+<details>
+<summary>
+Week 1
+</summary>
+
+## Dates from Mars 14 to Mars 16 2025
+---
 
 ###  Mars 14 2025
 - **Hours Worked**: 2 hours
@@ -96,11 +104,17 @@ This document tracks the number of hours worked each day and provides a brief de
 - **PendingAnomalies**: 
     - About screen to be done - Home Remode- dev must nbe done like UI def 
 
-
+</details>
  
 ---
 
-##  Week 2 Dates from Mars 17 to Mars 23 2025
+<details>
+<summary>
+Week 2
+</summary>
+
+## Dates from Mars 17 to Mars 23 2025
+---
 
 ###  Mars 17 2025
 - **Hours Worked**: 7 hours
@@ -167,10 +181,20 @@ This document tracks the number of hours worked each day and provides a brief de
 
 
 
- 
+</details>
+
 ---
 
-##  Week 3 Dates from Mars 24 to Mars 30 2025
+
+<details>
+<summary>
+Week 3
+</summary>
+
+
+##  Dates from Mars 24 to Mars 30 2025
+
+---
 
 ###  Mars 24 2025
 - **Hours Worked**: 10 hours
@@ -275,10 +299,18 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
 - **Theme**: SVG integration – backend + API spec + app connectivity + non-regression test coverage
 
 
+</details>
 
 ---
 
-##  Week 4 Dates from Mars 31 to Avril 6 2025
+<details>
+<summary>
+Week 4
+</summary>
+
+##  Dates from Mars 31 to Avril 6 2025
+
+---
 
 ###  Mars 31 2025
 - **Hours Worked**: 9 hours
@@ -399,10 +431,20 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
     - Improve SVG map **zooming experience**.
     - Optimize **initial rendering performance** after config load.
 
+
+</details>
+
 ---
 
+<details>
+<summary>
+Week 5
+</summary>
 
-##  Week 5 Dates from April 7 to Avril 13 2025
+
+##  Dates from April 7 to Avril 13 2025
+
+---
 
 ###  April 7 2025
 - **Hours Worked**: 3 hours
@@ -446,54 +488,69 @@ Ensured all steps (upload, ML callback, deletion, invalid inputs) behave identic
   - changed App spec to explain init screen 
   - test connecttion looks in svg/fields and not field/svg (corrected)
 
+</details>
 
 ---
 
+<details>
+<summary>
+Week 6 
+</summary>
 
-##  Week 6 Dates from April 14 to Avril 20 2025
+## Dates from April 14 to Avril 20 2025
+
+---
 
 ###  April 14 2025
 - **Hours Worked**: 6 hours
 - **Tasks**:
   - modified SVG filed to be compatible with our Android App designed. 
-  - Django : SVG changed in Django. Change Shortname not unique in ROW. modified Test, migration and sbapshot- propagate JSON locations to App
+  - Django : SVG changed in Django. Change Shortname not unique in ROW. modified Test, migration and snapshot- propagate JSON locations to App
   - Docs : Docs_Test.md to explain github pages, APP User Manuel
   - Docs : Re-render mermaid graphs after inserting the HTML
 
 
 
+###  April 15 2025
+- **Hours Worked**: 3 hours
+- **Tasks**:
+  - App : Sync cloud : retrieve locations.json fruits.json all SVG and all background in location
+
+
+
+  
+
 ---
-  - TO DO bug correction : 
-  - Problem SVG : Field :  raw values like CxR should be renamed to Row.... + 2, 3 should be like 4...adapt 5 to be like structure 4... if all ok save in django (locations.json + svg) 
-  - Test API + Media
-  - Problem:  Task: Check if the error logs are readable from the debug environment.
+
+</details>
+
+
+---
+
+
+<details>
+<summary>
+PENDING
+</summary>
 
 ----
-SettingsScreen responds dynamically to sync mode, and so that:
-- When in cloud mode, API/media fields and test connection are shown.
-- When in local mode, they’re hidden.
 
-The “Sync Now” button calls either the local or cloud sync function (even if cloud sync isn’t ready yet — we’ll add a TODO).
-
-to do :so in the settingsscreen we canswitch beteween local and cloud . id we are local, we do not need to see API Endpoint, media endpoint and test connection. if we are CLOUND then we need to see them....so if we make a test connection we wilkl always be cloud and acess URL like http://192..1.1.1.:800/api . and media.  if we are local, this is not happening. "sync now"  should in cloud (retu´ieve data like ML version , locations and fruits and store answer as json in config , it should also retriev all SVG necessary that are defined in the location fields from the media### we can not developp al of once so we should let place holder to comment what we intend to do )###"syn now" should at the end for both cloud and local : read the fruits and location from json (pay attention we already have function which can do that) and refresh the cache###so let start with the settinsg scren and function to be called depending on local/cloud and composable to display depending on local/cloud
-
+  - App : Sync cloud : send pending image, manage image status in app (store image id, store in json image send, read json in cache at app startup) 
+ 
 
 ---
 rqiase error to fix in views.py:
 ⚠️ Views With Hidden Risks
 These are okay-ish, but could fail in edge cases (e.g., filesystem issues, malformed request data, etc.)
-
 🧠 ImageView.post(...)
 Risk areas:
-
 default_storage.save(...) → may fail if disk full or permission denied
-
 os.rename(...) → raises FileNotFoundError, PermissionError, etc.
-
 image_file.name may be weird if it's manually crafted
 
  
-  
+
+</details>
  
  
 ---

@@ -338,14 +338,14 @@ The app now shows the selected field and row.
 
  
 🔹 ** `SvgMapScreen` logic**
-- When loading the field’s map, it gets the field’s `.svg_map_url` (e.g. `/media/svg/fields/C1_map.svg`)
+- When loading the field’s map, it gets the field’s `.svg_map_url` (e.g. `/media/fields/svg/C1_map.svg`)
 - You map that to:
   ```kotlin
-  File("/sdcard/PomoloBee/media/svg/fields/C1_map.svg")
+  File("/sdcard/PomoloBee/media/fields/svg/C1_map.svg")
   ```
-- If this file contains an `<image xlink:href="/media/svg/backgrounds/C1.jpeg" ... />`, you **do not change the href** — because the app will also look up:
+- If this file contains an `<image xlink:href="/media/fields/background/C1.jpeg" ... />`, you **do not change the href** — because the app will also look up:
   ```kotlin
-  File("/sdcard/PomoloBee/media/svg/backgrounds/C1.jpeg")
+  File("/sdcard/PomoloBee/media/fields/background/C1.jpeg")
   ```
 
 
@@ -511,7 +511,7 @@ This screen enables users to:
 📌 The **Test Connection** button verifies both endpoints:
 
 - Sends a `GET /api/ml/version/` to `DJANGO_API_URL`
-- Sends a `HEAD` or `GET` to `{DJANGO_MEDIA_URL}/media/svg/fields/default_map.svg`
+- Sends a `HEAD` or `GET` to `{DJANGO_MEDIA_URL}/media/fields/svg/default_map.svg`
 
 ✅ **Success:**  
 → Show green check: `"Connection OK"`
@@ -606,7 +606,7 @@ Shown when local config is selected
 | `Sync Mode = Local` | _none_ | Load from local config JSON files |
 | `Sync Mode = Cloud` | `GET /api/fruits/`, `GET /api/locations/` | Save JSONs locally |
 | `🔌 Test Connection` | `GET /api/ml/version/` | Verifies API endpoint |
-|                      | `HEAD /media/svg/fields/default_map.svg` | Verifies media access |
+|                      | `HEAD /media/fields/svg/default_map.svg` | Verifies media access |
 | `🛠 Debug Mode`      | `GET /api/ml/version/` | Show model version |
 | `💾 Save`            | _none_ | Locally stores settings in DataStore |
 

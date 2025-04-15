@@ -13,8 +13,7 @@ import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import de.nathabee.pomolobee.util.ErrorLogger
-import de.nathabee.pomolobee.util.hasAccessToUri
-import de.nathabee.pomolobee.util.resolveSubDirectory
+import de.nathabee.pomolobee.util.StorageUtils
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
 import androidx.datastore.preferences.core.edit
@@ -103,7 +102,7 @@ class SettingsViewModel(
         val rawPath = runBlocking {
             prefs.getRawStorageRoot().first() // <== direct read of latest value
         }
-        return rawPath?.let { Uri.parse(it) }?.takeIf { hasAccessToUri(context, it) }
+        return rawPath?.let { Uri.parse(it) }?.takeIf { StorageUtils.hasAccessToUri(context, it) }
     }
 
 
@@ -148,53 +147,56 @@ class SettingsViewModel(
 
 
     fun performLocalSync(context: Context, onResult: (String) -> Unit) = viewModelScope.launch {
-            try {
-                val root = storageRootUri.value ?: throw IllegalStateException("❌ Storage root not set")
-                ConnectionRepository.syncOrchard(context, root)
-                onResult("✅ Orchard configuration synced")
-            } catch (e: Exception) {
-                ErrorLogger.logError(context, storageRootUri.value, e.message ?: "❌ Sync failed", e)
-                onResult(e.message ?: "❌ Unknown sync error")
+        try {
+            val rootUri = storageRootUri.value ?: throw IllegalStateException("❌ Storage root not set")
+            val success = OrchardRepository.loadAllConfigFromUri(context, rootUri)
+            if (!success) {
+                onResult("❌ Failed to load configuration after sync")
+                return@launch
             }
+            updateLastSync(System.currentTimeMillis())
+
+            onResult("✅ Orchard configuration synced")
+        } catch (e: Exception) {
+            ErrorLogger.logError(context, storageRootUri.value, e.message ?: "❌ Sync failed", e)
+            onResult(e.message ?: "❌ Unknown sync error")
         }
+    }
+
 
     fun performCloudSync(context: Context, onComplete: (String) -> Unit) = viewModelScope.launch {
-        val api = apiEndpoint.value
-        val media = mediaEndpoint.value
+        val apiUrl = apiEndpoint.value
+        val mediaUrl = mediaEndpoint.value
         val rootUri = storageRootUri.value
 
-        if (api.isNullOrBlank() || media.isNullOrBlank() || rootUri == null) {
+        if (apiUrl.isNullOrBlank() || mediaUrl.isNullOrBlank() || rootUri == null) {
             onComplete("❌ Missing API, media endpoint, or storage location")
             return@launch
         }
 
         try {
-            // STEP 1: 🔗 Fetch JSON config from API
-            // TODO: Replace with actual network fetch
-            // Example: val locationsJson = fetch("$api/locations.json")
-            //          val fruitsJson = fetch("$api/fruits.json")
+            // ✅ Run the connection test first
+            val connected = ConnectionRepository.testConnection(apiUrl, mediaUrl) { version ->
+                updateApiVersion(version)
+            }
 
-            // STEP 2: 💾 Save them into /config/
-            // TODO: Save both JSON responses as "locations.json" and "fruits.json"
-            // val configDir = resolveSubDirectory(context, rootUri, "config")
-            // writeFile(configDir, "locations.json", locationsJson)
-            // writeFile(configDir, "fruits.json", fruitsJson)
+            if (!connected) {
+                onComplete("❌ Connection test failed — cloud sync aborted")
+                return@launch
+            }
 
-            // STEP 3: 📥 Download and save SVGs mentioned in locations
-            // TODO: Parse locationsJson into model → loop over fields → get SVG filenames
-            //       For each, fetch from "$media/svg/fields/$svgName" and save into /fields/svg/
+            // ✅ Proceed with cloud sync
+            val result = ConnectionRepository.performCloudSync(context, rootUri, apiUrl, mediaUrl)
 
-            // STEP 4: 🧠 Update cache using already existing sync logic
-            //OrchardRepository.syncOrchard(context, rootUri)
+            updateLastSync(System.currentTimeMillis())
+            onComplete(result)
 
-            // STEP 5: ✅ All done
-            onComplete("✅ Cloud sync completed")
-            //updateLastSyncTime()
         } catch (e: Exception) {
             onComplete("❌ Cloud sync failed: ${e.message}")
-            e.printStackTrace()
+            ErrorLogger.logError(context, rootUri, "Cloud sync error", e)
         }
     }
+
 
 
 

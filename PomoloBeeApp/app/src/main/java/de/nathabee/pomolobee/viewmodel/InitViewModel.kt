@@ -5,7 +5,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.ViewModel
-import de.nathabee.pomolobee.util.hasAccessToUri
+import de.nathabee.pomolobee.util.StorageUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
  import androidx.lifecycle.ViewModelProvider
@@ -61,7 +61,7 @@ class InitViewModel : ViewModel() {
             return StartupStatus.MissingUri
         }
 
-        if (!hasAccessToUri(context, uri)) {
+        if (!StorageUtils.hasAccessToUri(context, uri)) {
             Log.e("InitViewModel", "❌ No access to URI: $uri")
             return StartupStatus.InvalidUri
         }

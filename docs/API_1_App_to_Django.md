@@ -82,8 +82,8 @@ GET /api/fields/
             "name": "North Orchard",
             "description": "Main orchard section for fruit.",
             "orientation": "N",
-            "svg_map_url": "/media/svg/fields/North_Field_map.svg",
-            "background_image_url": "/media/backgrounds/North_Field_background.jpg"
+            "svg_map_url": "/media/fields/svg/North_Field_map.svg",
+            "background_image_url": "/media/fields/background//North_Field_background.jpg"
         },
         {
             "field_id": 2,
@@ -91,7 +91,7 @@ GET /api/fields/
             "name": "South Orchard",
             "description": "Smaller orchard with mixed fruit trees.",
             "orientation": "S",
-            "svg_map_url": "/media/svg/fields/default_map.svg",
+            "svg_map_url": "/media/fields/svg/default_map.svg",
             "background_image_url": null
         }
     ]
@@ -799,8 +799,8 @@ Explain how the **app retrieves SVG maps and background images** for orchard fie
   "field_id": 1,
   "short_name": "North_Field",
   "name": "North Orchard",
-  "svg_map_url": "/media/svg/fields/North_Field_map.svg",
-  "background_image_url": "/media/backgrounds/North_Field_background.jpg"
+  "svg_map_url": "/media/fields/svg/North_Field_map.svg",
+  "background_image_url": "/media/fields/background//North_Field_background.jpg"
 }
 ```
 
@@ -855,10 +855,10 @@ Split `DJANGO_API_URL` and `DJANGO_MEDIA_URL`
  
 #### Media access
 - Actual value from API:
-/media/svg/fields/C1_map.svg
+/media/fields/svg/C1_map.svg
 
 - App must convert to:
-{DJANGO_MEDIA_URL}/media/svg/fields/C1_map.svg
+{DJANGO_MEDIA_URL}/media/fields/svg/C1_map.svg
  
 #### Service access
 - ActuAcess to API:

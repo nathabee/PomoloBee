@@ -14,8 +14,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.model.Row
 import de.nathabee.pomolobee.model.Fruit
-import de.nathabee.pomolobee.util.getBackgroundUriForLocation
-import de.nathabee.pomolobee.util.getSvgUriForLocation
+import de.nathabee.pomolobee.util.StorageUtils
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 
@@ -59,7 +58,7 @@ fun SvgMapScreen(
 
 
     val svgUri = remember(storageRootUri, location) {
-        storageRootUri?.let { getSvgUriForLocation(context, it, location) }
+        storageRootUri?.let { StorageUtils.getSvgUriForLocation(context, it, location) }
     }
 
     val svgContent = remember(svgUri) {
@@ -70,7 +69,7 @@ fun SvgMapScreen(
 
                     // Inject image based on shortName like "C1"
                     // val shortName = location.field.shortName
-                    val backgroundUri = getBackgroundUriForLocation(context, storageRootUri!!, location)
+                    val backgroundUri = StorageUtils.getBackgroundUriForLocation(context, storageRootUri!!, location)
                     if (backgroundUri != null) {
                         val base64Image = context.contentResolver.openInputStream(backgroundUri)?.use { input ->
                             android.util.Base64.encodeToString(input.readBytes(), android.util.Base64.NO_WRAP)

@@ -18,8 +18,8 @@ import de.nathabee.pomolobee.navigation.Screen
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.ui.components.FolderPicker
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
-import de.nathabee.pomolobee.util.copyAssetsIfNotExists
-import de.nathabee.pomolobee.util.getFriendlyFolderName
+import de.nathabee.pomolobee.util.StorageUtils
+import de.nathabee.pomolobee.util.TimeUtils
 import de.nathabee.pomolobee.util.safeLaunch
 
 
@@ -55,7 +55,7 @@ fun SettingsScreen(
             scope.launch {
                 safeLaunch(context, settingsViewModel.storageRootUri.value) {
                     settingsViewModel.setStorageRoot(selectedUri)
-                    copyAssetsIfNotExists(context, selectedUri)
+                    StorageUtils.copyAssetsIfNotExists(context, selectedUri)
                     orchardViewModel.loadLocalConfig(selectedUri, context)
                     settingsViewModel.invalidate()
                 }
@@ -76,7 +76,8 @@ fun SettingsScreen(
 
 
     // Last sync display
-        Text("🕒 Last sync: ${lastSyncDate?.let { Date(it).toLocaleString() } ?: "Never"}")
+        Text("🕒 Last config sync: ${TimeUtils.formatTimestamp(lastSyncDate)}")
+
         Spacer(modifier = Modifier.height(8.dp))
 
         // Cached fields and fruits
@@ -167,10 +168,14 @@ fun SettingsScreen(
         Button(onClick = {
             safeLaunch(context, settingsViewModel.storageRootUri.value) {
                 if (selectedSyncMode == "local") {
+                    syncMessage = "⏳ Local config sync..."
                     settingsViewModel.performLocalSync(context) { msg -> syncMessage = msg }
+                    //syncMessage = "Local sync completed"
                 } else {
                     // 🔧 Placeholder: implement cloud sync (download + save config + SVGs)
-                    syncMessage = "⏳ Cloud sync not yet implemented"
+                    syncMessage = "⏳ Cloud config sync..."
+                    settingsViewModel.performCloudSync(context) { msg -> syncMessage = msg }
+                    //syncMessage = "Cloud sync completed"
                 }
             }
         }) {
@@ -194,7 +199,7 @@ fun SettingsScreen(
         }
 
 
-        Text("📂 Storage Location: ${storageRootUri?.let { getFriendlyFolderName(context, it) } ?: "Not set"}")
+        Text("📂 Storage Location: ${storageRootUri?.let { StorageUtils.getFriendlyFolderName(context, it) } ?: "Not set"}")
 
 
         Divider(modifier = Modifier.padding(vertical = 16.dp))
