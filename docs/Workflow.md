@@ -192,8 +192,8 @@ App retrieves ML version (get from ML by Django).
 
 ## **3. Explanation of Calculation**
 
-- `plant_fruit = nb_fruit`
-- `plant_kg = plant_fruit * fruit_avg_kg`
+- `fruit_plant = nb_fruit`
+- `plant_kg = fruit_plant * fruit_avg_kg`
 - `row_kg = plant_kg * row.nb_plant`
 
 ---
@@ -249,8 +249,8 @@ App retrieves ML version (get from ML by Django).
    - ML analyzes the image and returns `nb_fruit` (number of fruit detected).  
 
 2. **Django calculates expected yield**  
-   - **`plant_fruit = nb_fruit`** (ML-detected fruit per plant).  
-   - **`plant_kg = plant_fruit * fruit_avg_kg`** (expected weight per plant).  
+   - **`fruit_plant = nb_fruit`** (ML-detected fruit per plant).  
+   - **`plant_kg = fruit_plant * fruit_avg_kg`** (expected weight per plant).  
    - **`row_kg = plant_kg * row.nb_plant`** (expected total weight for the row).  
 
 ---

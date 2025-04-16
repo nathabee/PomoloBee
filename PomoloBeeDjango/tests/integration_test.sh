@@ -182,6 +182,69 @@ case "$MODE" in
 esac 
 
 # 📸 STEP 1 — Upload Image
+
+
+echo ""
+echo "✍️ Step 1b: Manual estimation WITHOUT image"
+
+MANUAL_NO_IMAGE=$(curl -s -X POST "$API_URL/manual_estimation/" \
+  -F "row_id=1" \
+  -F "date=2024-04-15" \
+  -F "fruit_plant=9" \
+  -F "confidence_score=0.6")
+
+# 🧪 Validate JSON
+if ! echo "$MANUAL_NO_IMAGE" | jq -e . >/dev/null 2>&1; then
+  echo -e "${RED}❌ Invalid response (not JSON) for manual estimation without image${NC}"
+  echo "$MANUAL_NO_IMAGE" > /tmp/manual_no_image_error.html
+  echo -e "${RED}🔍 Saved to /tmp/manual_no_image_error.html${NC}"
+  exit 1
+fi
+
+# ✅ Parse image_id
+MANUAL_NO_IMAGE_ID=$(echo "$MANUAL_NO_IMAGE" | jq -r .data.image_id)
+
+if [[ -z "$MANUAL_NO_IMAGE_ID" || "$MANUAL_NO_IMAGE_ID" == "null" ]]; then
+  echo -e "${RED}❌ Could not extract image_id from manual estimation without image${NC}"
+  echo "$MANUAL_NO_IMAGE" | jq .
+  exit 1
+fi
+
+echo "✅ Manual estimation without image created with image_id: $MANUAL_NO_IMAGE_ID"
+
+# Save or compare snapshot
+if [[ "$MODE" == "snapshot" ]]; then
+  save_snapshot "step_01_manual_estimation_no_img" "$MANUAL_NO_IMAGE"
+elif [[ "$MODE" == "nonreg" ]]; then
+  compare_snapshot "step_01_manual_estimation_no_img" "$MANUAL_NO_IMAGE" || HAS_ERRORS=1
+fi
+
+echo ""
+echo "✍️ Step 1c: Manual estimation WITH image"
+
+MANUAL_WITH_IMAGE=$(curl -s -X POST "$API_URL/manual_estimation/" \
+  -F "row_id=1" \
+  -F "date=2024-04-15" \
+  -F "fruit_plant=8" \
+  -F "confidence_score=0.7" \
+  -F "image=@$IMAGE_PATH")
+MANUAL_NO_IMAGE_ID=$(echo "$MANUAL_NO_IMAGE" | jq .data.image_id)
+
+echo "$MANUAL_WITH_IMAGE" | jq .
+
+MANUAL_IMAGE_ID=$(echo "$MANUAL_WITH_IMAGE" | jq .data.image_id)
+
+if [[ "$MODE" == "snapshot" ]]; then
+  save_snapshot "step_01_manual_estimation_with_img" "$MANUAL_WITH_IMAGE"
+elif [[ "$MODE" == "nonreg" ]]; then
+  compare_snapshot "step_01_manual_estimation_with_img" "$MANUAL_WITH_IMAGE" || HAS_ERRORS=1
+fi
+
+# Again, check estimation exists
+ESTIMATION=$(curl -s "$API_URL/images/$MANUAL_IMAGE_ID/estimations/")
+echo "$ESTIMATION" | jq .
+
+
 echo ""
 echo "🖼️ Step 1: Uploading image"
 UPLOAD_RESPONSE=$(curl -s -F "image=@$IMAGE_PATH" -F "row_id=1" -F "date=2024-03-14" "$API_URL/images/")
@@ -205,6 +268,7 @@ fi
 echo "✅ Image uploaded with ID: $IMAGE_ID"
 
 
+
 # 🧠 STEP 2 — Wait for ML (mock delay or real)
 echo ""
 echo "⏳ Step 2: Waiting for ML to process (4s delay)"
@@ -218,9 +282,10 @@ sleep 4
 #   -d '{"nb_fruit": 10, "confidence_score": 0.95}')
 
 
+
 # 🔍 STEP 3 — Poll for status
 echo ""
-echo "🔁 Step 3: Polling image metadata"
+echo "🔁 Step 3: Polling image metadata for image ${IMAGE_ID}"
 IMAGE_META=$(curl -s "$API_URL/images/$IMAGE_ID/details/")
 
 case "$MODE" in
@@ -256,7 +321,7 @@ fi
 
 # 📊 STEP 4 — Fetch Estimation
 echo ""
-echo "📈 Step 4: Getting Estimation"
+echo "📈 Step 4: Getting Estimation for image ${IMAGE_ID}"
 ESTIMATION=$(curl -s "$API_URL/images/$IMAGE_ID/estimations/")
 
 case "$MODE" in
@@ -270,6 +335,7 @@ case "$MODE" in
     echo "$ESTIMATION" | jq .
     ;;
 esac
+ 
 
 
 # 🗂️ STEP 5 — Get Estimation History for Field
@@ -384,10 +450,72 @@ case "$MODE" in
 esac
 
 
-
+ 
 #############################
+# 📸 STEP 9 — Upload 3 Images and test image list
+echo ""
+echo "🖼️ Step 9: Uploading 3 images"
+
+declare -a IMAGE_IDS=()
+
+IMAGE_IDS=()
+for ROW_ID in 1 15 25; do
+  echo "🔹 Uploading image for row_id=$ROW_ID"
+  UPLOAD_RESPONSE=$(curl -s -F "image=@$IMAGE_PATH" -F "row_id=$ROW_ID" -F "date=2024-03-14" "$API_URL/images/")
+  
+  IMAGE_ID=$(echo "$UPLOAD_RESPONSE" | jq .data.image_id)
+  if [[ "$IMAGE_ID" == "null" || -z "$IMAGE_ID" ]]; then
+    echo -e "${RED}❌ Could not upload image for row_id=$ROW_ID${NC}"
+    exit 1
+  fi
+
+  echo "✅ Uploaded image ID: $IMAGE_ID"
+  IMAGE_IDS+=($IMAGE_ID)
+
+# Let ML process at least 2 of them
+  # 👇 Insert delay after uploading image for row_id=15
+  if [[ "$ROW_ID" == "15" ]]; then
+    echo "⏳ Sleeping 4s to allow ML time to process first two images..."
+    sleep 4
+  fi
+done
+
+ 
+
+# 📂 STEP 9b — Get image list
+echo ""
+echo "📂 Step 9b: Listing all images"
+IMAGE_LIST=$(curl -s "$API_URL/images/list/")
+
+case "$MODE" in
+  snapshot)
+    save_snapshot "step_09_image_list" "$IMAGE_LIST"
+    ;;
+  nonreg)
+    compare_snapshot "step_09_image_list" "$IMAGE_LIST" || HAS_ERRORS=1
+    ;;
+  *)
+    echo "$IMAGE_LIST" | jq .
+    ;;
+esac
 
 
+# 🗑️ STEP 9c — Clean up uploaded images
+echo ""
+echo "🗑️ Step 9c: Cleaning up uploaded test images"
+
+for ID in "${IMAGE_IDS[@]}"; do
+  DELETE_RESPONSE=$(curl -s -X DELETE "$API_URL/images/$ID/")
+  if ! echo "$DELETE_RESPONSE" | jq -e . >/dev/null 2>&1; then
+    echo "$DELETE_RESPONSE" > /tmp/delete_debug_$ID.html
+    echo -e "${RED}⚠️ Invalid JSON for delete response of image $ID${NC}"
+  else
+    echo "🧹 Deleted image $ID"
+  fi
+done
+
+
+########################
  
 
 echo ""

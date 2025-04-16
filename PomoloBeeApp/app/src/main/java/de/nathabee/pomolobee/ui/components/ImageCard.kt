@@ -1,0 +1,1 @@
+//ImageCard.kt	Reusable composable for showing a picture + actions (e.g. "Analyze", "Preview", "Delete"). Used in ProcessingScreen and maybe HistoryScreen.

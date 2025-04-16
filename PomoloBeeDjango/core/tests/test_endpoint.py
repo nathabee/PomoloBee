@@ -69,7 +69,42 @@ class APITest(TestCase):
         response = self.client.delete(reverse("image-delete", args=[image.id]))
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Image.objects.filter(id=image.id).exists())
-        
+
+    def test_get_image_list(self):
+        # Create 3 images with different dates and rows
+        Image.objects.create(row=self.row, date="2024-03-20", upload_date="2024-03-21", processed=True)
+        Image.objects.create(row=self.row, date="2024-03-22", upload_date="2024-03-22", processed=False)
+        Image.objects.create(row=self.row, date="2024-03-23", upload_date="2024-03-23", processed=True)
+
+        response = self.client.get(reverse("image-list"))  # No filter
+        self.assertEqual(response.status_code, 200)
+        data = response.json()["data"]
+        self.assertIn("images", data)
+        self.assertEqual(len(data["images"]), 3)
+        self.assertEqual(data["total"], 3)
+
+        # Test filter by row_id
+        response = self.client.get(reverse("image-list"), {"row_id": self.row.id})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()["data"]
+        self.assertEqual(data["total"], 3)
+
+        # Test filter by date
+        response = self.client.get(reverse("image-list"), {"date": "2024-03-20"})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()["data"]
+        self.assertEqual(data["total"], 1)
+        self.assertEqual(data["images"][0]["date"], "2024-03-20")
+
+        # Test pagination
+        response = self.client.get(reverse("image-list"), {"limit": 2, "offset": 0})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()["data"]
+        self.assertEqual(len(data["images"]), 2)
+        self.assertEqual(data["total"], 3)
+
+
+
     def test_post_retry_processing(self):
         # Generate a dummy image file
         image_file = BytesIO()
@@ -81,7 +116,8 @@ class APITest(TestCase):
         upload_response = self.client.post(reverse("image-upload"), {
             "image": uploaded_file,
             "row_id": self.row.id,
-            "date": "2024-03-25"
+            "date": "2024-03-25",
+            "xy_location": "12.34,56.78" 
         })
 
         self.assertEqual(upload_response.status_code, 201)
@@ -99,7 +135,7 @@ class APITest(TestCase):
         image = Image.objects.create(row=self.row, date="2024-03-25", processed=True)
         Estimation.objects.create(
             image=image, row=self.row, date="2024-03-25",
-            plant_fruit=10, estimated_yield_kg=50, plant_kg=3.0, row_kg=150.0,
+            fruit_plant=10,  plant_kg=3.0, row_kg=150.0,
             confidence_score=0.9, source="MLI"
         )
         response = self.client.get(reverse("image-estimations", args=[image.id]))
@@ -109,7 +145,7 @@ class APITest(TestCase):
         image = Image.objects.create(row=self.row, date="2024-03-25", processed=True)
         Estimation.objects.create(
             image=image, row=self.row, date="2024-03-25",
-            plant_fruit=10, estimated_yield_kg=50, plant_kg=3.0, row_kg=150.0,
+            fruit_plant=10,  plant_kg=3.0, row_kg=150.0,
             confidence_score=0.9, source="MLI"
         )
         response = self.client.get(reverse("field-estimations", args=[self.field.id]))
@@ -120,7 +156,7 @@ class APITest(TestCase):
         response = self.client.post(
             reverse("ml-result", args=[image.id]),
             {
-                "nb_fruit": 15,
+                "fruit_plant": 15,
                 "confidence_score": 0.88,
                 "processed": True
             },

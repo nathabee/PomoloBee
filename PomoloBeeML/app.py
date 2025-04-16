@@ -103,9 +103,9 @@ def detect_fruit(image_path):
     img = cv2.imread(image_path)
     if img is None:
         return None, None
-    nb_fruit = np.random.randint(5, 20)
+    fruit_plant = np.random.randint(5, 20)
     confidence_score = round(np.random.uniform(0.7, 0.95), 2)
-    return nb_fruit, confidence_score
+    return fruit_plant, confidence_score
 
 # ------------------------------
 # 🔁 API HELPERS
@@ -238,18 +238,18 @@ def background_process_images():
                     "image_id": image_id,
                     **FLASK_CONFIG.get("MOK_MLRESULT", {})
                 }
-                nb_fruit = payload.get("nb_fruit") 
+                fruit_plant = payload.get("fruit_plant") 
 
             elif status == "processing":
                 logging.debug(f"🔄 Processing image {image_id}...")
-                nb_fruit, confidence_score = detect_fruit(data["image_path"])
-                if nb_fruit is None:
+                fruit_plant, confidence_score = detect_fruit(data["image_path"])
+                if fruit_plant is None:
                     processing_queue[image_id]["status"] = "failed"
                     logging.debug(f"❌ Failed to read image {image_id}")
                     continue
                 payload = {
                     "image_id": image_id,
-                    "nb_fruit": nb_fruit,
+                    "fruit_plant": fruit_plant,
                     "confidence_score": confidence_score,
                     "processed": True
                 }
@@ -265,7 +265,7 @@ def background_process_images():
                     logging.debug(f"✅ ML Result sent for {image_id}")
                 else:
                     processing_queue[image_id]["status"] = "failed"
-                    logging.debug(f"❌ Django rejected ML result: {res.status_code} for {image_id}")
+                    logging.debug(f"❌ Django rejected ML result: {res.status_code} for {image_id} for payload {payload}")
             except Exception as e:
                 processing_queue[image_id]["status"] = "failed"
                 logging.debug(f"❌ Exception posting to Django: {e}")

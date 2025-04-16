@@ -78,23 +78,23 @@ class Row(models.Model):
         ]
 
 
-# Image storage for estimation analysis
+# Image storage for estimation analysis, it stores the exact location of the estimation in a field
 class Image(models.Model):
     STATUS_CHOICES = [
         ("processing", "Processing"),
         ("done", "Done"),
         ("failed", "Failed"),
         ("badjpg", "Invalid Image"),
+        ("manual", "Manual Only (No ML)"),  # in this case the image will be created but it will not trigger ML. is just used to locate an estimation
     ]
     row = models.ForeignKey('Row', on_delete=models.CASCADE, related_name='images')
     date = models.DateField(null=True, blank=True)  # Date of capture (from app) (no time)
     upload_date =  models.DateField(null=True, blank=True)  # Date of upload in django (no time)
     image_file = models.ImageField(upload_to='images/')  # Stores uploaded image
     original_filename = models.CharField(max_length=255, blank=True, null=True) 
+    xy_location = models.CharField(max_length=50, blank=True, null=True)
 
-    # ML result
-    nb_fruit = models.FloatField(null=True, blank=True)
-    confidence_score = models.FloatField(null=True, blank=True)
+    # ML result 
     processed = models.BooleanField(default=False)
     status = models.CharField(
         max_length=20,
@@ -112,11 +112,14 @@ class Estimation(models.Model):
     image = models.ForeignKey(Image, on_delete=models.SET_NULL, null=True, related_name='estimations')
     row = models.ForeignKey('Row', on_delete=models.CASCADE, related_name='estimations')
     date = models.DateField()  # From user/app
-    timestamp = models.DateTimeField(auto_now_add=True)
-    plant_fruit = models.FloatField()
+
+    # ML or User result
+    fruit_plant = models.FloatField(null=True, blank=True)  #fruit_plant number of fruit per plant
+    confidence_score = models.FloatField(null=True, blank=True)
+ 
+    timestamp = models.DateTimeField(auto_now_add=True) 
     plant_kg = models.FloatField()
     row_kg = models.FloatField()
-    estimated_yield_kg = models.FloatField()
     maturation_grade = models.FloatField(default=0)
     confidence_score = models.FloatField(null=True, blank=True)
 
@@ -133,7 +136,7 @@ class Estimation(models.Model):
 
     def save(self, *args, **kwargs):
         if self.row and self.row.fruit:
-            self.plant_kg = self.plant_fruit * self.row.fruit.fruit_avg_kg
+            self.plant_kg = self.fruit_plant * self.row.fruit.fruit_avg_kg
             self.row_kg = self.plant_kg * self.row.nb_plant
         super().save(*args, **kwargs)
 

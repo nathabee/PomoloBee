@@ -45,7 +45,7 @@ class DjangoWorkflowTest(TestCase):
         self.assertEqual(Farm.objects.count(), 1, "Expected 1 farm in the database.")
         self.assertEqual(Field.objects.count(), 6, "Expected 6 fields in the database.")
         self.assertEqual(Fruit.objects.count(), 6, "Expected 6 fruits in the database.")
-        self.assertEqual(Row.objects.count(), 28, "Expected 28 rows in the database.")
+        self.assertEqual(Row.objects.count(), 70, "Expected 70 rows in the database.")
 
     def test_002_check_example_data(self):
         """Check that specific row, fruit, and field exist with correct values."""
@@ -161,7 +161,7 @@ class DjangoWorkflowTest(TestCase):
         self.assertEqual(upload_response.status_code, 201)
         image_id = upload_response.json()["data"]["image_id"]
 
-        payload = {"nb_fruit": 15, "confidence_score": 0.85, "processed": True}
+        payload = {"fruit_plant": 15, "confidence_score": 0.85, "processed": True}
         response = self.client.post(
             reverse("ml-result", args=[image_id]),
             data=payload,
@@ -175,7 +175,9 @@ class DjangoWorkflowTest(TestCase):
 
         img_obj = Image.objects.get(id=image_id)
         self.assertTrue(Estimation.objects.filter(image=img_obj).exists())
-        self.assertEqual(img_obj.nb_fruit, 15)
+        estimation = Estimation.objects.get(image=img_obj)
+        self.assertEqual(estimation.fruit_plant, 15)
+ 
         self.assertTrue(img_obj.processed)
 
 
@@ -198,16 +200,19 @@ class DjangoWorkflowTest(TestCase):
         # Simulate ML result
         self.client.post(
             reverse("ml-result", args=[image_id]),
-            data={"nb_fruit": 10, "confidence_score": 0.9, "processed": True},
+            data={"fruit_plant": 10, "confidence_score": 0.9, "processed": True},
             content_type="application/json"
         )
 
-        response = self.client.get(reverse("ml-result", args=[image_id]))
+        response = self.client.get(reverse("image-estimations", args=[image_id]))
+
         logger.debug("LOG - Upload response: %s %s", response.status_code, response.json())
 
         self.assertEqual(response.status_code, 200) 
-        self.assertEqual(response.json()["data"]["nb_fruit"], 10)
-        self.assertEqual(response.json()["data"]["confidence_score"], 0.9)
+        data = response.json()["data"]
+        self.assertEqual(data["fruit_plant"], 10)
+        self.assertEqual(data["confidence_score"], 0.9)
+ 
  
 
 
@@ -226,14 +231,59 @@ class DjangoWorkflowTest(TestCase):
         # Simulate ML result
         self.client.post(
             reverse("ml-result", args=[image_id]),
-            data={"nb_fruit": 12, "confidence_score": 0.88, "processed": True},
+            data={"fruit_plant": 12, "confidence_score": 0.88, "processed": True},
             content_type="application/json"
         )
 
         # Fetch estimation
         response = self.client.get(reverse("image-estimations", args=[image_id]))
         self.assertEqual(response.status_code, 200)
-        self.assertIn("plant_fruit", response.json()["data"])
+        self.assertIn("fruit_plant", response.json()["data"])
+
+
+    def test_011_list_uploaded_images(self):
+        """Upload images via API and fetch them with GET /api/images/list/"""
+
+        # Upload first image
+        with open("media/images/orchard.jpg", "rb") as img1:
+            upload_response1 = self.client.post(
+                reverse("image-upload"),
+                {"image": img1, "row_id": 1, "date": "2024-03-14"},
+                format="multipart"
+            )
+        self.assertEqual(upload_response1.status_code, 201)
+        id1 = upload_response1.json()["data"]["image_id"]
+
+        # Upload second image
+        with open("media/images/orchard.jpg", "rb") as img2:
+            upload_response2 = self.client.post(
+                reverse("image-upload"),
+                {"image": img2, "row_id": 1, "date": "2024-03-15"},
+                format="multipart"
+            )
+        self.assertEqual(upload_response2.status_code, 201)
+        id2 = upload_response2.json()["data"]["image_id"]
+
+        # Now call image list endpoint
+        list_url = reverse("image-list")
+        list_response = self.client.get(list_url)
+        self.assertEqual(list_response.status_code, 200)
+
+        images = list_response.json()["data"]["images"]
+        ids = [img["image_id"] for img in images]
+        self.assertIn(id1, ids)
+        self.assertIn(id2, ids)
+
+        # Check pagination keys
+        self.assertIn("total", list_response.json()["data"])
+        self.assertIn("limit", list_response.json()["data"])
+        self.assertIn("offset", list_response.json()["data"])
+
+        # Optional: filter by date
+        filter_response = self.client.get(list_url, {"date": "2024-03-14"})
+        self.assertEqual(filter_response.status_code, 200)
+        self.assertEqual(filter_response.json()["data"]["total"], 1)
+        self.assertEqual(filter_response.json()["data"]["images"][0]["date"], "2024-03-14")
 
 
 
@@ -254,7 +304,7 @@ class DjangoWorkflowTest(TestCase):
 
         # 2️⃣ Simulate ML posting result
         ml_result_payload = {
-            "nb_fruit": 12,
+            "fruit_plant": 12,
             "confidence_score": 0.88,
             "processed": True
         }
@@ -265,15 +315,13 @@ class DjangoWorkflowTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-        # 3️⃣ Get ML result from Django
-        response = self.client.get(reverse("ml-result", args=[image_id]))
-        self.assertEqual(response.status_code, 200) 
-        self.assertEqual(response.json()["data"]["nb_fruit"], 12)
-        self.assertEqual(response.json()["data"]["confidence_score"], 0.88)
-
-        # 4️⃣ Check Estimation endpoint
+        # 3️⃣ Get ML result from Django 
         response = self.client.get(reverse("image-estimations", args=[image_id]))
-        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response.status_code, 200) 
+        self.assertEqual(response.json()["data"]["fruit_plant"], 12)
+        self.assertEqual(response.json()["data"]["confidence_score"], 0.88)
+  
         self.assertIn("plant_kg", response.json()["data"])
 
 
@@ -296,7 +344,7 @@ class DjangoWorkflowTest(TestCase):
         # Simulate ML result
         self.client.post(
             reverse("ml-result", args=[image_id]),
-            data={"nb_fruit": 12, "confidence_score": 0.88, "processed": True},
+            data={"fruit_plant": 12, "confidence_score": 0.88, "processed": True},
             content_type="application/json"
         )
 
@@ -441,7 +489,7 @@ class DjangoWorkflowRobustnessTest(TestCase):
         image_id = upload_response.json()["data"]["image_id"]
 
         # Simulate ML POSTing result with invalid data
-        bad_payload = {"nb_fruit": None, "processed": True}  # invalid missing score
+        bad_payload = {"fruit_plant": None, "processed": True}  # invalid missing score
         post_response = self.client.post(
             reverse("ml-result", args=[image_id]),
             data=bad_payload,

@@ -55,7 +55,7 @@ class MLIntegrationTest(TestCase):
     def test_ml_sends_results_back_to_django(self):
         """Test if Flask successfully sends ML results back to Django."""
         payload = {
-            "nb_fruit": 15,
+            "fruit_plant": 15,
             "confidence_score": 0.85,
             "processed": True
         }
@@ -66,23 +66,52 @@ class MLIntegrationTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("message", response.json().get("data", {}))
 
-        # Ensure image history is updated
+        # Ensure image is updated
         self.image.refresh_from_db()
-        self.assertEqual(self.image.nb_fruit, 15)
-        self.assertEqual(self.image.confidence_score, 0.85)
         self.assertTrue(self.image.processed)
+
+        # ✅ Ensure estimation was created
+        from core.models import Estimation
+        estimations = Estimation.objects.filter(image=self.image)
+        self.assertEqual(estimations.count(), 1)
+
+        estimation = estimations.first()
+        expected_plant_kg = 15 * self.fruit.fruit_avg_kg
+        expected_row_kg = expected_plant_kg * self.row.nb_plant
+
+        self.assertEqual(estimation.fruit_plant, 15)
+        self.assertEqual(estimation.confidence_score, 0.85)
+        self.assertAlmostEqual(estimation.plant_kg, expected_plant_kg, places=3)
+        self.assertAlmostEqual(estimation.row_kg, expected_row_kg, places=3) 
+
 
     def test_django_fetches_ml_results(self):
         """Test if Django correctly retrieves ML results after processing."""
-        self.image.nb_fruit = 10
-        self.image.confidence_score = 0.9
+        from core.models import Estimation
+
+        # Create estimation manually (as if ML had processed)
+        estimation = Estimation.objects.create(
+            image=self.image,
+            row=self.row,
+            date=self.image.date,
+            fruit_plant=10,
+            confidence_score=0.9,
+            maturation_grade=0.2,
+            plant_kg=10 * self.fruit.fruit_avg_kg,
+            row_kg=10 * self.fruit.fruit_avg_kg * self.row.nb_plant, 
+            source="MLI"
+        )
+
         self.image.processed = True
         self.image.save()
+ 
+        response = self.client.get(reverse("image-estimations", args=[self.image.id]))
 
-        response = self.client.get(reverse("ml-result", args=[self.image.id]))
 
-        self.assertEqual(response.status_code, 200) 
+        self.assertEqual(response.status_code, 200)
 
         data = response.json()["data"]
-        self.assertEqual(data["nb_fruit"], 10)
+        self.assertEqual(data["fruit_plant"], 10)
         self.assertEqual(data["confidence_score"], 0.9)
+        self.assertEqual(data["image_id"], self.image.id)
+        self.assertEqual(data["source"], "Machine Learning (Image)")

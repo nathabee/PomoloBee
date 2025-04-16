@@ -101,6 +101,8 @@ Since **video processing is not in scope right now**, we will focus only on **im
   - [Debug Mode Features STADE 2](#debug-mode-features-stade-2)
   - [API Response Handling](#api-response-handling)
   - [What If...?](#what-if)
+- [Image management](#image-management)
+  - [Image flowchart](#image-flowchart)
 <!-- TOC END -->
  
 </details>
@@ -649,15 +651,6 @@ The "Visualize" button allows users to preview the layout of a field. Unlike the
 ---
 
  
- -
-
-  Absolutely! Here's the updated **`InitScreen`** section for your App Config, reflecting:
-
-- 🔐 **Permission handling**
-- 📦 **Smart status-based logic**
-- 🧠 **Startup scenarios**
-- ✅ **Behavior improvements**
----
 
 ## **`InitScreen`**
 
@@ -1146,12 +1139,27 @@ If storage is low, show a popup with:
   "pending_images": [
     {
       "id": 1,
-      "image_path": "/sdcard/PomoloBee/images/pomolobee_001.jpg",
+      "image_path": "/sdcard/PomoloBee/images/C1_R3_20220412101010.jpg",
       "row_id": 3,
       "date": "2024-03-15"
     }
   ]
 }
+
+
+data class PendingImage(
+    val fileName: String,              // e.g., C1_R1_1713190000000.jpg
+    val uri: Uri,                      // Optional: full SAF uri for rendering
+    val fieldId: Int,
+    val rowId: Int,
+    val imageId: String?,              // Set after upload
+    val date: String,
+    val isSynced: Boolean = false,
+    val failedSync: Boolean = false
+)
+
+
+
 ```
 
 This reflects the indexed list of unsynced images. Results and metadata will be mirrored in `/results/` once processed.
@@ -1181,8 +1189,7 @@ Users select the sync mode in the **Settings screen**. Both modes generate or re
 Regardless of mode, the app uses the same local files (JSON) to cache orchard structure:
 
 | File              | Description                       |
-|-------------------|-----------------------------------|
-| `fields.json`     | List of orchard fields            |
+|-------------------|-----------------------------------| 
 | `locations.json`  | Combined field + row structure    |
 | `fruits.json`     | List of available fruit types     |
 
@@ -1358,3 +1365,23 @@ if (bytesAvailable < 50 * 1024 * 1024) { // Less than 50MB left
 
 - **What if the backend API response format changes?**  
   → The app should **handle JSON parsing errors gracefully and retry if necessary**.  
+
+# Image management
+
+## Image flowchart
+
+
+```mermaid 
+  
+flowchart TD
+    A[CameraScreen] --> B[SharedViewModel (temp selected image)]
+    B --> C[LocationScreen]
+    C -->|Confirm row/field| D[Save image locally]
+    D -->|Compress + rename| E[ImageRepository.save()]
+    E -->|Add to DataStore| F[ImageListViewModel.unsentImages]
+    F --> G[ProcessingScreen]
+    G -->|User triggers| H[ImageRepository.upload()]
+    H --> I[ImageApiService.upload()]
+    I --> J[Save image_id in local metadata]
+    J --> K[Poll status]
+```

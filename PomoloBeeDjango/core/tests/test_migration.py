@@ -83,7 +83,7 @@ class LoadFixtureDataTest(TestCase):
     def test_svg_map_field_properties(self):
         field = Field._meta.get_field("svg_map")
         self.assertTrue(field.null)
-        self.assertEqual(field.default, '/fields/svg/default_map.svg')
+        self.assertEqual(field.default, 'fields/svg/default_map.svg')
 
 
  
@@ -140,13 +140,12 @@ class ModelTableExistenceTest(TestCase):
         # Create a test image for linkage (optional, but model allows null)
         image = Image.objects.create(image_file="test.jpg", row=self.row, date=date.today())
 
-        # Create estimation with only row, image, plant_fruit — the rest should be auto-calculated
+        # Create estimation with only row, image, fruit_plant — the rest should be auto-calculated
         estimation = Estimation.objects.create(
             image=image,
             row=self.row,
             date=date.today(),
-            plant_fruit=12,  # 👈 Set fruit count per plant
-            estimated_yield_kg=0,  # will override in save()
+            fruit_plant=12,  # 👈 Set fruit count per plant
             maturation_grade=0.5,
             confidence_score=0.9,
             source=Estimation.EstimationSource.IMAGE
@@ -200,12 +199,12 @@ class SchemaColumnCheckTest(TestCase):
 
     def test_image_model_columns(self):
         self.assertColumnsExactly(Image, {
-            "id", "row_id", "date", "upload_date", "image_file", "original_filename",
-            "nb_fruit", "confidence_score", "processed", "status", "processed_at"
+            "id", "row_id", "date", "xy_location","upload_date", "image_file", "original_filename",
+             "processed", "status", "processed_at"
         })
 
     def test_estimation_model_columns(self):
         self.assertColumnsExactly(Estimation, {
-            "id", "image_id", "row_id", "date", "timestamp", "plant_fruit", "plant_kg",
-            "row_kg", "estimated_yield_kg", "maturation_grade", "confidence_score", "source"
+            "id", "image_id", "row_id", "date", "timestamp", "fruit_plant", "plant_kg",
+            "row_kg",  "maturation_grade", "confidence_score", "source"
         })

@@ -1,8 +1,8 @@
 {
   "DEBUG": true,
   "UPLOAD_FOLDER": "./uploads",
-  "ML_MODEL_VERSION": "v1.2.5",
-  "LAST_UPDATED": "2024-03-10T14:00:00",
+  "ML_MODEL_VERSION": "v1.4.16",
+  "LAST_UPDATED": "2024-04-16T14:00:00",
   "DJANGO_API_URL": "http://localhost:8000",
   "DJANGO_MEDIA_URL": "http://localhost:8000/",
   "LOG_FILE": "logs/flask.log",
@@ -12,7 +12,7 @@
   "MOK_RETURN": { "message": "Mock OK" },
   "MOK_DELAY": 3,
   "MOK_MLRESULT": {
-    "nb_fruit": 10,
+    "fruit_plant": 100,
     "confidence_score": 0.85,
     "processed": true
   }

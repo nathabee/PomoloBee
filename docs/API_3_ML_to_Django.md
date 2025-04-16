@@ -55,7 +55,7 @@ POST /api/images/{image_id}/ml_result
 
 ```json
 {
-  "nb_fruit": 12,
+  "fruit_plant": 12,
   "confidence_score": 0.89,
   "processed": true
 }

@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _147 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _153 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -42,6 +42,7 @@
   - [Dates from April 14 to Avril 20 2025](#dates-from-april-14-to-avril-20-2025)
     - [April 14 2025](#april-14-2025)
     - [April 15 2025](#april-15-2025)
+    - [April 16 2025](#april-16-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -515,6 +516,19 @@ Week 6
 - **Hours Worked**: 3 hours
 - **Tasks**:
   - App : Sync cloud : retrieve locations.json fruits.json all SVG and all background in location
+
+
+
+
+###  April 16 2025
+- **Hours Worked**: 6 hours
+- **Tasks**:
+  - App : analyse solution for image, estimation in case of manual only or mix manual cloud
+  - post an image always trigger ML, post a manual estimation will trigger creation of image and estimation with self coounted nb_fruit
+  - Django add concept of image use to locate the estimation (location_xy) and removed estimation data from image (nb_fruit,...)
+  - Django add new endpoint to trigger estimation base on counting in the App : POST /api/manual_estimation/ (image optional)
+  - API App to Django add this new endpoint
+  - Django changed URL, views and modele => impact in migration, unit test , integration , non regresssion test
 
 
 

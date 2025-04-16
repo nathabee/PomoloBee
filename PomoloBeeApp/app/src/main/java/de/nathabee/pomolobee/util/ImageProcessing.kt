@@ -4,6 +4,9 @@ import org.opencv.core.Mat
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 
+
+
+
 fun detectApple(image: Mat): Mat {
     val gray = Mat()
     Imgproc.cvtColor(image, gray, Imgproc.COLOR_RGBA2GRAY)

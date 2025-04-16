@@ -72,7 +72,7 @@ class ImageSerializer(serializers.ModelSerializer):
     fruit_type = serializers.CharField(source='row.fruit.name', read_only=True)
     image_url = serializers.SerializerMethodField()
     status = serializers.CharField(source='get_status_display', read_only=True)  # 🧠 This is the key line
-
+    xy_location =  serializers.CharField(  read_only=True)
     date = serializers.DateField(read_only=True, format="%Y-%m-%d")
     upload_date = serializers.DateField(read_only=True, format="%Y-%m-%d")
     processed_at = serializers.DateTimeField(read_only=True, format="%Y-%m-%dT%H:%M:%S")
@@ -89,9 +89,9 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = [
-            'image_id', 'row_id', 'field_id', 'fruit_type',
+            'image_id', 'row_id', 'field_id', 'xy_location', 'fruit_type',
             'upload_date', 'date', 'image_url', 'original_filename',
-            'processed', 'processed_at', 'nb_fruit', 'confidence_score', 'status'
+            'processed', 'processed_at', 'status'
         ]
 
 
@@ -102,6 +102,8 @@ class ImageUploadSerializer(serializers.Serializer):
     image = serializers.ImageField()
     row_id = serializers.IntegerField()
     date = serializers.DateField()
+    xy_location = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
 
 
 # ESTIMATION (History)
@@ -129,16 +131,16 @@ class EstimationSerializer(serializers.ModelSerializer):
         fields = [
             'estimation_id', 'image_id', 'date', 'timestamp',
             'row_id', 'row_name', 'field_id', 'field_name', 'fruit_type',
-            'plant_fruit', 'plant_kg', 'row_kg', 'estimated_yield_kg',
-            'maturation_grade', 'confidence_score', 'source', 'status'
+            'plant_kg', 'row_kg', 
+            'maturation_grade', 'confidence_score', 'source',  'fruit_plant', 'confidence_score','status'
         ]
 
 
 
-# ML RESULT (Simplified)
-class MLResultSerializer(serializers.ModelSerializer):
+# ML Status (Simplified)
+class MLStatusSerializer(serializers.ModelSerializer):
     image_id = serializers.IntegerField(source='id', read_only=True)
 
     class Meta:
         model = Image
-        fields = ['image_id', 'nb_fruit', 'confidence_score', 'processed']
+        fields = ['image_id',   'processed']

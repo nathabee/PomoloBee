@@ -32,7 +32,7 @@ class FruitAdmin(admin.ModelAdmin):
 
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ('image_file', 'row', 'date', 'nb_fruit', 'confidence_score', 'processed', 'processed_at')
+    list_display = ('image_file', 'row', 'date', 'xy_location', 'processed', 'processed_at')
     search_fields = ('image_file',)
     list_filter = ('processed', 'row')
 
@@ -40,8 +40,8 @@ class ImageAdmin(admin.ModelAdmin):
 @admin.register(Estimation)
 class EstimationAdmin(admin.ModelAdmin):
     list_display = (
-        'image', 'date', 'row', 'plant_fruit', 'plant_kg', 'row_kg',
-        'maturation_grade', 'estimated_yield_kg', 'confidence_score', 'source'
+        'image', 'date', 'row', 'plant_kg', 'row_kg',
+        'maturation_grade',    'fruit_plant', 'confidence_score','source'
     )
     search_fields = ('row__name',)
     list_filter = ('date', 'row', 'source')

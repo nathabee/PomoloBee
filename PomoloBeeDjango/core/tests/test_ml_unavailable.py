@@ -60,14 +60,17 @@ class MLUnavailableIntegrationTest(TestCase):
 
         image_file = SimpleUploadedFile("test.jpg", image_file.read(), content_type="image/jpeg")
 
+
         response = self.client.post(
             "/api/images/",
             data={
                 "image": image_file,
                 "row_id": 3,
-                "date": "2024-03-14"
+                "date": "2024-03-14",
+                "xy_location": "12.34,56.78"  # optional now
             }
         )
+
 
         logger.debug("LOG - Upload response: %s %s", response.status_code, response.json())
 
