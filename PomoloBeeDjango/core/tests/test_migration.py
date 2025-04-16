@@ -200,7 +200,7 @@ class SchemaColumnCheckTest(TestCase):
     def test_image_model_columns(self):
         self.assertColumnsExactly(Image, {
             "id", "row_id", "date", "xy_location","upload_date", "image_file", "original_filename",
-             "processed", "status", "processed_at"
+             "processed", "status", "processed_at", 'user_fruit_plant'
         })
 
     def test_estimation_model_columns(self):

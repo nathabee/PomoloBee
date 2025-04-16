@@ -93,6 +93,7 @@ class Image(models.Model):
     image_file = models.ImageField(upload_to='images/')  # Stores uploaded image
     original_filename = models.CharField(max_length=255, blank=True, null=True) 
     xy_location = models.CharField(max_length=50, blank=True, null=True)
+    user_fruit_plant  = models.FloatField(null=True, blank=True)  #fruit_plant number of fruit per plant estimated by user
 
     # ML result 
     processed = models.BooleanField(default=False)

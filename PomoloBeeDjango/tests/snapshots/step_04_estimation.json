@@ -1,21 +1,21 @@
 {
   "status": "success",
   "data": {
-    "estimation_id": 13,
-    "image_id": 16,
+    "estimation_id": 8,
+    "image_id": 9,
     "date": "2024-03-14",
-    "timestamp": "2025-04-16T13:00:07",
+    "timestamp": "2025-04-16T20:16:07",
     "row_id": 1,
     "row_name": "Rang 1 cote maison Swing 1",
     "field_id": 1,
     "field_name": "ChampMaison",
     "fruit_type": "Cultivar Swing on CG1",
-    "plant_kg": 2,
-    "row_kg": 76,
+    "plant_kg": 20,
+    "row_kg": 760,
     "maturation_grade": 0,
     "confidence_score": 0.85,
     "source": "Machine Learning (Image)",
-    "fruit_plant": 10,
+    "fruit_plant": 100,
     "status": "done"
   }
 }

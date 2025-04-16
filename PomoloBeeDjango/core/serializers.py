@@ -73,11 +73,10 @@ class ImageSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
     status = serializers.CharField(source='get_status_display', read_only=True)  # 🧠 This is the key line
     xy_location =  serializers.CharField(  read_only=True)
+    user_fruit_plant = serializers.FloatField(read_only=True)
     date = serializers.DateField(read_only=True, format="%Y-%m-%d")
     upload_date = serializers.DateField(read_only=True, format="%Y-%m-%d")
     processed_at = serializers.DateTimeField(read_only=True, format="%Y-%m-%dT%H:%M:%S")
-
-
     original_filename = serializers.CharField(read_only=True)
     
     def get_image_url(self, obj):
@@ -89,7 +88,7 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = [
-            'image_id', 'row_id', 'field_id', 'xy_location', 'fruit_type',
+            'image_id', 'row_id', 'field_id', 'xy_location', 'fruit_type','user_fruit_plant',
             'upload_date', 'date', 'image_url', 'original_filename',
             'processed', 'processed_at', 'status'
         ]
@@ -103,6 +102,7 @@ class ImageUploadSerializer(serializers.Serializer):
     row_id = serializers.IntegerField()
     date = serializers.DateField()
     xy_location = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    user_fruit_plant = serializers.FloatField(required=False)
 
 
 
@@ -116,6 +116,7 @@ class EstimationSerializer(serializers.ModelSerializer):
     fruit_type = serializers.CharField(source='row.fruit.name', read_only=True)
     image_id = serializers.IntegerField(source='image.id', read_only=True)
     confidence_score = serializers.FloatField()
+    fruit_plant = serializers.FloatField()
     source = serializers.CharField(source='get_source_display', read_only=True)
     status = serializers.SerializerMethodField()
     timestamp = serializers.DateTimeField(read_only=True, format="%Y-%m-%dT%H:%M:%S")

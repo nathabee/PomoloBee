@@ -7,9 +7,9 @@
 - [**PomoloBee Workflow Document**](#pomolobee-workflow-document)
   - [**Data Flow**](#data-flow)
   - [**1. Workflow Summary**](#1-workflow-summary)
-    - [**Case App Initializes Data**](#case-app-initializes-data)
-    - [**Case App Requests Estimation Based on a Picture**](#case-app-requests-estimation-based-on-a-picture)
-    - [**Case App Displays Data**](#case-app-displays-data)
+    - [App Synchronization Initial or Periodic](#app-synchronization-initial-or-periodic)
+    - [Upload + Estimation Flow](#upload-estimation-flow)
+    - [Displaying or Using the Data](#displaying-or-using-the-data)
   - [**1. API DJANGO to APP**](#1-api-django-to-app)
     - [Image Upload Result](#image-upload-result)
     - [Estimations](#estimations)
@@ -76,56 +76,75 @@ graph TD
 
 ## **1. Workflow Summary**
 
-### **Case App Initializes Data**
-- `GET /api/fields/`
-- `GET /api/fruits/`
-- `GET /api/locations/`
+### App Synchronization Initial or Periodic
 
-App stores the orchard structure offline.
-
-- `GET /api/ml/version/`
-App retrieves ML version (get from ML by Django).
-
----
-
-### **Case App Requests Estimation Based on a Picture**
-
-#### Step 1 Upload Image
-- `POST /api/images/`  
-  → Returns `image_id`
-
-#### Step 2 Django Sends to ML
-- `POST /process-image/` (internal)
-
-#### Step 3 ML Sends Results
-- `POST /api/images/{image_id}/ml_result/`
-
-#### Step 4 App Polls for Metadata Completion
-- if processed = true and status = done
-- `GET /api/images/{image_id}`  
-  → Contains `processed`, `confidence_score`, `nb_fruit`
- 
-#### Step 5 App Gets Full Estimation
-- `GET /api/images/{image_id}/estimations/` 
-
-
-#### option step if processed failed App can retry processing
-- if  status = failed
-  - `POST /api/retry_processing/`  
+| Purpose | Endpoint |
+|--------|----------|
+| Sync all fruit types | `GET /api/fruits/` |
+| Sync fields and their rows | `GET /api/locations/` |
+| Sync ML version for compatibility | `GET /api/ml/version/` |
+| Sync all images | `GET /api/images/list/` |
+| Sync all estimations per field | `GET /api/fields/{field_id}/estimations/` |
 
 ---
 
-### **Case App Displays Data**
-- Static data is shown from local DB (synced from API).
-- For estimations associated to a field :
-  - `GET /api/fields/{field_id}/estimations/`  
-  - Displays previous yield predictions and image data if necessary
+### Upload + Estimation Flow
 
- 
+#### A. **ML-Based Estimation**
 
- 
+1. **Upload Image**
+   - `POST /api/images/`
+   - Creates an image with optional `xy_location`
+   - Triggers ML processing automatically
 
+2. **Django Sends Image to ML**
+   - `POST /ml/process-image/`
 
+3. **ML Responds with Results**
+   - `POST /api/images/{image_id}/ml_result/`
+   - Contains: `fruit_plant`, `confidence_score`, `processed`
+
+4. **Django Stores Estimation**
+   - Computes: `plant_kg = fruit_plant * fruit_avg_kg`
+   - Then: `row_kg = plant_kg * nb_plant`
+
+5. **App Polls for Result**
+   - `GET /api/images/{image_id}/details`
+   - or `GET /api/images/{image_id}/estimations/`
+
+#### Retry ML
+- If `status = failed`
+- `POST /api/retry_processing/`
+
+---
+
+#### B. **Manual Estimation App User Counts Fruits**
+
+1. **Send Estimation + Optional Image**
+   - `POST /api/manual_estimation/`
+   - Required: `row_id`, `date`, `fruit_plant`
+   - Optional: `confidence_score`, `maturation_grade`, `xy_location`, image
+
+2. **Django Creates Image** (status = manual)
+   - Image is created even without file (placeholder used)
+   - `xy_location` is saved in the Image model
+
+3. **Estimation Stored** with:
+   - `source = USER`
+   - `fruit_plant = manual count` (used as-is for calculations)
+
+---
+
+### Displaying or Using the Data
+
+| Goal | Endpoint |
+|------|----------|
+| Poll image processing | `GET /api/images/{image_id}/details` |
+| Get final estimation (ML or Manual) | `GET /api/images/{image_id}/estimations/` |
+| View field estimation history | `GET /api/fields/{field_id}/estimations/` |
+| List images | `GET /api/images/list/?row_id=...&date=...` |
+
+--- 
 
 ---
 
@@ -138,6 +157,7 @@ App retrieves ML version (get from ML by Django).
 | `GET` | `/api/images/{image_id}` | Get image metadata and status |
 | `POST` | `/api/retry_processing/` | retry processing images |
 | `DELETE` | `/api/images/{image_id}/` | delete a picture from storage
+| `POST` | `/api/manual_estimation/` | Upload new image with manual count to trigger a manual estimation |
 
 ### Estimations
 | Method | Endpoint | Description |
@@ -148,7 +168,6 @@ App retrieves ML version (get from ML by Django).
 ### Orchard Data
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/fields/` | List all fields |
 | `GET` | `/api/fruits/` | List all fruits |
 | `GET` | `/api/locations/` | All fields with row rows |
 
@@ -181,7 +200,7 @@ App retrieves ML version (get from ML by Django).
 
 ### ML Model Requirements
 - Accept image + ID
-- Return `nb_fruit`, `confidence_score`
+- Return `fruit_plant`, `confidence_score`
 
 ### Django Requirements
 - Store and track image
@@ -202,14 +221,14 @@ App retrieves ML version (get from ML by Django).
 
 | Type | Endpoint | Purpose |
 |------|----------|---------|
-| `GET` | `/api/fields/` | All fields |
 | `GET` | `/api/fruits/` | All fruits |
 | `GET` | `/api/locations/` | Fields + rows |
 | `GET` | `/api/fields/{field_id}/estimations/` | Estimations for a field ✅ |
 | `GET` | `/api/images/{image_id}/details` | Image metadata/status ✅ |
 | `DELETE` | `/api/images/{image_id}` | Delete Image from storage |
-| `POST` | `/api/images/` | Upload new image |
+| `POST` | `/api/images/` | Upload new image (optionally location,user_fruit_plant) and trigger ML |
 | `POST` | `/api/retry_processing/` | Retry ML |
+| `POST` | `/api/manual_estimation/` | Create an image to store (optionally location,picture) trigger estimation based on  user_fruit_plant  |
 | `GET` | `/api/images/{image_id}/estimations/` | Estimation from one image ✅ |
 | `POST` | `/api/images/{image_id}/ml_result/` | ML sends results ✅ |
 | `GET` | `/api/ml/version/` | Get ML version |
@@ -249,7 +268,7 @@ App retrieves ML version (get from ML by Django).
    - ML analyzes the image and returns `nb_fruit` (number of fruit detected).  
 
 2. **Django calculates expected yield**  
-   - **`fruit_plant = nb_fruit`** (ML-detected fruit per plant).  
+   - **`fruit_plant = nb_fruit`** (ML-detected fruit per plant or manual count).  
    - **`plant_kg = fruit_plant * fruit_avg_kg`** (expected weight per plant).  
    - **`row_kg = plant_kg * row.nb_plant`** (expected total weight for the row).  
 

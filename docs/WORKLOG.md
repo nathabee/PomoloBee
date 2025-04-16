@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _153 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _154 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -521,7 +521,7 @@ Week 6
 
 
 ###  April 16 2025
-- **Hours Worked**: 6 hours
+- **Hours Worked**: 7 hours
 - **Tasks**:
   - App : analyse solution for image, estimation in case of manual only or mix manual cloud
   - post an image always trigger ML, post a manual estimation will trigger creation of image and estimation with self coounted nb_fruit
@@ -529,6 +529,7 @@ Week 6
   - Django add new endpoint to trigger estimation base on counting in the App : POST /api/manual_estimation/ (image optional)
   - API App to Django add this new endpoint
   - Django changed URL, views and modele => impact in migration, unit test , integration , non regresssion test
+  - Django modele add image.user_fruit_plant to save nb fruit per plant in an image (manually counted fruit)
 
 
 

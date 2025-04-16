@@ -115,6 +115,7 @@ class ImageView(BaseAPIView):
             row_id = serializer.validated_data['row_id']
             date = serializer.validated_data['date']
             # Save original name (optional, for dedup or trace)
+            user_fruit_plant  = serializer.validated_data.get('user_fruit_plant', None)
             original_filename = image_file.name
             xy_location = serializer.validated_data.get('xy_location', None)
 
@@ -139,6 +140,7 @@ class ImageView(BaseAPIView):
                 image_file=file_path,
                 row_id=row_id,
                 xy_location=xy_location,
+                user_fruit_plant=user_fruit_plant,
                 date=date,
                 upload_date=timezone.now().date(),
                 processed=False,
@@ -334,6 +336,7 @@ class ManualEstimationView(BaseAPIView):
                 upload_date=timezone.now().date(),
                 processed=True,
                 processed_at = timezone.now(),
+                user_fruit_plant=fruit_plant,
                 status="manual",
                 original_filename=None,
                 xy_location=xy_location
@@ -350,6 +353,7 @@ class ManualEstimationView(BaseAPIView):
                 upload_date=timezone.now().date(),
                 processed=True,
                 processed_at = timezone.now(),
+                user_fruit_plant=fruit_plant,
                 status="manual",
                 original_filename=None,
                 image_file="images/image_default.jpg",  # This must exist in media/

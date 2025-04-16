@@ -461,7 +461,7 @@ declare -a IMAGE_IDS=()
 IMAGE_IDS=()
 for ROW_ID in 1 15 25; do
   echo "🔹 Uploading image for row_id=$ROW_ID"
-  UPLOAD_RESPONSE=$(curl -s -F "image=@$IMAGE_PATH" -F "row_id=$ROW_ID" -F "date=2024-03-14" "$API_URL/images/")
+  UPLOAD_RESPONSE=$(curl -s -F "image=@$IMAGE_PATH" -F "row_id=$ROW_ID" -F "date=2024-03-14" -F "user_fruit_plant=105" "$API_URL/images/")
   
   IMAGE_ID=$(echo "$UPLOAD_RESPONSE" | jq .data.image_id)
   if [[ "$IMAGE_ID" == "null" || -z "$IMAGE_ID" ]]; then
