@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _154 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _158 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -43,6 +43,7 @@
     - [April 14 2025](#april-14-2025)
     - [April 15 2025](#april-15-2025)
     - [April 16 2025](#april-16-2025)
+    - [April 17 2025](#april-17-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -532,6 +533,10 @@ Week 6
   - Django modele add image.user_fruit_plant to save nb fruit per plant in an image (manually counted fruit)
 
 
+###  April 17 2025
+- **Hours Worked**: 4 hours
+- **Tasks**:
+  - Django : API1 cleaning + Integration tests : solved pb on non regression tests, view and modele for manual estimation and estimations  
 
   
 

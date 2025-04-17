@@ -235,6 +235,7 @@ graph TD
 
 ---
 
+
 ## **2. Detailed Requirements**
 
 ### **App Requirements**

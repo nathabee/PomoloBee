@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
+import logging 
+
+
+logger = logging.getLogger(__name__)
 
 
 # Defines a Fruit Type
@@ -80,28 +84,33 @@ class Row(models.Model):
 
 # Image storage for estimation analysis, it stores the exact location of the estimation in a field
 class Image(models.Model):
-    STATUS_CHOICES = [
-        ("processing", "Processing"),
-        ("done", "Done"),
-        ("failed", "Failed"),
-        ("badjpg", "Invalid Image"),
-        ("manual", "Manual Only (No ML)"),  # in this case the image will be created but it will not trigger ML. is just used to locate an estimation
-    ]
+ 
+
+
     row = models.ForeignKey('Row', on_delete=models.CASCADE, related_name='images')
     date = models.DateField(null=True, blank=True)  # Date of capture (from app) (no time)
     upload_date =  models.DateField(null=True, blank=True)  # Date of upload in django (no time)
     image_file = models.ImageField(upload_to='images/')  # Stores uploaded image
     original_filename = models.CharField(max_length=255, blank=True, null=True) 
-    xy_location = models.CharField(max_length=50, blank=True, null=True)
+    xy_location = models.CharField(max_length=100, blank=True, null=True)
     user_fruit_plant  = models.FloatField(null=True, blank=True)  #fruit_plant number of fruit per plant estimated by user
 
     # ML result 
     processed = models.BooleanField(default=False)
+
+    class ImageStatus(models.TextChoices):
+        PROCESSING ="processing", "Processing"
+        DONE = "done", "Done"
+        FAILED = "failed", "Failed"
+        #INVALID = "badjpg", "Invalid Image"
+        DEFAULT = "default", "Invalid status"
+
     status = models.CharField(
         max_length=20,
-        choices=STATUS_CHOICES,
-        default="processing"
+        choices=ImageStatus.choices,
+        default=ImageStatus.DEFAULT
     )
+ 
     processed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
@@ -136,10 +145,22 @@ class Estimation(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        if self.row and self.row.fruit:
-            self.plant_kg = self.fruit_plant * self.row.fruit.fruit_avg_kg
-            self.row_kg = self.plant_kg * self.row.nb_plant
-        super().save(*args, **kwargs)
+        try:
+            if not self.row or not self.row.fruit:
+                raise ValueError("Missing row or row.fruit when saving estimation")
 
-    def __str__(self):
-        return f"Estimation {self.id} - {self.row.name} on {self.date}"
+            if self.fruit_plant is None:
+                raise ValueError("fruit_plant is required for estimation")
+
+            fruit_avg_kg = self.row.fruit.fruit_avg_kg
+            if fruit_avg_kg is None:
+                raise ValueError("row.fruit.fruit_avg_kg is missing")
+
+            self.plant_kg = round(self.fruit_plant * fruit_avg_kg, 1) 
+            self.row_kg = round(self.plant_kg * self.row.nb_plant, 1) 
+
+        except Exception as e:
+            logger.error(f"💥 Error during Estimation.save(): {e}", exc_info=True)
+            raise
+
+        super().save(*args, **kwargs)

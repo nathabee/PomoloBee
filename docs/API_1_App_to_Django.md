@@ -23,23 +23,21 @@ Example of Django json response (snapshots made during Django integration or non
 <!-- TOC -->
 - [**App -> Django API Interface Definition**](#app-django-api-interface-definition)
   - [**Overview**](#overview)
-  - [Section A Orchard Tree Data Fields Fruits Locations](#section-a-orchard-tree-data-fields-fruits-locations)
-    - [**Fetch All Available Fruit Types**](#fetch-all-available-fruit-types)
-    - [**Fetch All Fields Their Row Data Location Selection**](#fetch-all-fields-their-row-data-location-selection)
+  - [Section A Fetch Orchard configuration Fruits Locations](#section-a-fetch-orchard-configuration-fruits-locations)
+    - [Fetch All Available Fruit Types](#fetch-all-available-fruit-types)
+    - [Fetch All Fields Their Row Data Location Selection](#fetch-all-fields-their-row-data-location-selection)
+    - [Fetch the Current ML Model Version](#fetch-the-current-ml-model-version)
   - [Section B Image Upload ML Processing](#section-b-image-upload-ml-processing)
     - [**Upload an Image for Processing**](#upload-an-image-for-processing)
     - [**Request Retry for ML Processing**](#request-retry-for-ml-processing)
-    - [**Fetch the Current ML Model Version**](#fetch-the-current-ml-model-version)
     - [**Check Image Processing Details and Status**](#check-image-processing-details-and-status)
-    - [**List All Uploaded Images**](#list-all-uploaded-images)
-  - [Section C Estimations Yield Results](#section-c-estimations-yield-results)
-    - [**MANUAL Estimation**](#manual-estimation)
-    - [**Fetch fruit Detection Results**](#fetch-fruit-detection-results)
-    - [**Fetch Latest Completed Estimations**](#fetch-latest-completed-estimations)
     - [**Delete an Image**](#delete-an-image)
+  - [Section C Estimations Yield Results](#section-c-estimations-yield-results)
+    - [MANUAL Estimation](#manual-estimation)
+    - [Fetch fruit Detection Results](#fetch-fruit-detection-results)
   - [Section D History Analytics](#section-d-history-analytics)
-    - [**Fetching all Estimation Records**](#fetching-all-estimation-records)
-    - [**Fetching a Estimation Record for an image**](#fetching-a-estimation-record-for-an-image)
+    - [List All Uploaded Images](#list-all-uploaded-images)
+    - [Fetching all Estimation Records in a field](#fetching-all-estimation-records-in-a-field)
   - [Section E Media Asset Usage](#section-e-media-asset-usage)
     - [**Fetch Media Assets for Each Field**](#fetch-media-assets-for-each-field)
   - [**4. API Design**](#4-api-design)
@@ -56,11 +54,11 @@ Example of Django json response (snapshots made during Django integration or non
 ---
  
 
-## Section A Orchard Tree Data Fields Fruits Locations
+## Section A Fetch Orchard configuration Fruits Locations
  
 📌 **Purpose:** Sync orchard and tree data used for mapping & selection in the app.
  
-### **Fetch All Available Fruit Types**
+### Fetch All Available Fruit Types
 📌 **Purpose:** Retrieve a list of all available fruit types.
 
 ✅ **Endpoint:**  
@@ -104,7 +102,7 @@ GET /api/fruits/
  
 --- 
 
-### **Fetch All Fields Their Row Data Location Selection**
+### Fetch All Fields Their Row Data Location Selection
 📌 **Purpose:** Retrieve **all fields** and their respective **tree rows (Rows)** in a single request.
 
 ✅ **Endpoint:**  
@@ -179,6 +177,39 @@ GET /api/locations/
 
 ---
 
+### Fetch the Current ML Model Version
+📌 **Purpose:** Django fetches the ML version from the ML server and exposes it to the app.
+
+✅ **Endpoint:**  
+```
+GET /api/ml/version/
+```
+✅ **Caller → Receiver:**  
+- **App → Django Backend**
+
+✅ **Response (Success - 200 OK)**
+```json
+{
+  "status": "success",
+  "data": {
+      "last_updated": "2024-04-16T14:00:00",
+      "model_version": "v1.4.16",
+      "status": "active"
+  }
+}
+```
+
+✅ **Response (Error - 500 Internal Server Error)**
+```json
+{
+  "error": {
+    "code": "ML_UNAVAILABLE",
+    "message": "ML service unavailable"
+  }
+}
+```
+
+---
 
 ## Section B Image Upload ML Processing
 📌 **Purpose:** Upload image, send to ML, track progress, and fetch detection results.
@@ -296,47 +327,6 @@ or
 
 ---
 
----
-
-### **Fetch the Current ML Model Version**
-📌 **Purpose:** Django fetches the ML version from the ML server and exposes it to the app.
-
-✅ **Endpoint:**  
-```
-GET /api/ml/version/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Response (Success - 200 OK)**
-```json
-{
-  "status": "success",
-  "data": 
-        {
-            "model_version": "v1.2.5",
-            "status": "active",
-            "last_updated": "2024-03-10T14:00:00"
-        }
-  }
-```
-
-✅ **Response (Error - 500 Internal Server Error)**
-```json
-{
-  "error": {
-    "code": "ML_UNAVAILABLE",
-    "message": "ML service unavailable"
-  }
-}
-```
-
----
-
-   
-
-
-
 
 ### **Check Image Processing Details and Status**
 📌 **Purpose:** Retrieve the **status** of an uploaded image (whether processing is complete or still ongoing) and other details.
@@ -360,19 +350,19 @@ GET /api/images/{image_id}/details
 
   "status": "success",
   "data": {
-    "image_id": 24,
-    "row_id": 3,
-    "date":  "2024-03-05",    
+    "image_id": 3,
+    "row_id": 1,
     "field_id": 1,
-    "fruit_type": "Golden fruit",
-    "upload_date": "2024-03-10",
-    "image_url": "/media/images/images-24.jpg",
-    "original_filename": "orchard20251201.jpg",
-    "status": "Done",
+    "xy_location": null,
+    "fruit_type": "Cultivar Swing on CG1",
+    "user_fruit_plant": null,
+    "upload_date": "2025-04-17",
+    "date": "2024-03-14",
+    "image_url": "/media/images/image-3.jpg",
+    "original_filename": "orchard.jpg",
     "processed": true,
-    "processed_at": "2024-03-10T13:01:00",
-    "fruit_plant": 15,
-    "confidence_score": 0.87
+    "processed_at": "2025-04-17T08:12:45",
+    "status": "Done"
 }
 }
 ```
@@ -429,119 +419,55 @@ GET /api/images/{image_id}/details
   }
 }
 ```
+---
+
 
 ---
 
-### **List All Uploaded Images**
-📌 **Purpose:** Retrieve a **paginated list of all uploaded images**, optionally filtered by field, row, or date.
+### **Delete an Image**
+📌 **Purpose:** Remove an uploaded image from the server.
 
 ✅ **Endpoint:**  
 ```
-GET /api/images/list/
+DELETE /api/images/{image_id}/
 ```
-
 ✅ **Caller → Receiver:**  
 - **App → Django Backend**
 
-✅ **Query Parameters   for `/api/images/list/`**
+✅ **Response (Success - 200 OK)**
+```json
+{
 
-| **Parameter** | **Type** | **Description** |
-|--------------|----------|-----------------|
-| `field_id`   | `integer` | ✅ Optional. Get all images for this field (ignores row_id if not set). |
-| `row_id`     | `integer` | ✅ Optional. Get all images for this specific row (more specific than field). |
-| `date`       | `YYYY-MM-DD` | ✅ Optional. Filter by capture date (can be used with `row_id` or `field_id`). |
-| `limit`      | `integer` | ✅ Optional. Default: 100 |
-| `offset`     | `integer` | ✅ Optional. Default: 0 |
-
-🧠 **Note:** `row_id` is more specific than `field_id`, so if both are provided, the filter narrows to just the row.
-
----
-
-#### Example Query URLs
-
-- All images (default):
-  ```
-  GET /api/images/list/
-  ```
-
-- All images for field `C1`:
-  ```
-  GET /api/images/list/?field_id=1
-  ```
-
-- All images for row `R3` in field C1:
-  ```
-  GET /api/images/list/?row_id=3
-  ```
-
-- Images for row `C1-R3` on March 14:
-  ```
-  GET /api/images/list/?row_id=3&date=2024-03-14
-  ```
-
-- Paginated results:
-  ```
-  GET /api/images/list/?limit=50&offset=100
-  ```
-
----
-
-
+  "status": "success",
+    "data": {
+        "message": "Image deleted successfully."
+    }
+}
+```
 ✅ **Response (Success - 200 OK)**
 ```json
 {
   "status": "success",
   "data": {
-    "total": 2,
-    "limit": 100,
-    "offset": 0,
-    "images": [
-      {
-        "image_id": 24,
-        "row_id": 3,
-        "field_id": 1,
-        "fruit_type": "Golden fruit",
-        "upload_date": "2024-03-10",
-        "date": "2024-03-05",
-        "image_url": "/media/images/image-24.jpg",
-        "original_filename": "orchard20240305.jpg",
-        "processed": true,
-        "processed_at": "2024-03-10T13:01:00",
-        "fruit_plant": 15,
-        "confidence_score": 0.87,
-        "status": "Done"
-      },
-      {
-        "image_id": 25,
-        "row_id": 3,
-        "field_id": 1,
-        "fruit_type": "Golden fruit",
-        "upload_date": "2024-03-10",
-        "date": "2024-03-06",
-        "image_url": "/media/images/image-25.jpg",
-        "original_filename": "orchard20240306.jpg",
-        "processed": false,
-        "processed_at": null,
-        "fruit_plant": null,
-        "confidence_score": null,
-        "status": "Processing"
-      }
-    ]
+    "message": "Image deleted successfully.",
+    "warning": "Could not delete file: [Errno 2] No such file or directory"
   }
 }
+
 ```
 
-✅ **Response (Error - Invalid Query Param)**
+✅ **Response (Error - 404 Not Found)**
 ```json
 {
   "error": {
-    "code": "INVALID_INPUT",
-    "message": "Invalid date format. Expected YYYY-MM-DD."
+    "code": "404_NOT_FOUND",
+    "message": "Image not found."
   }
 }
 ```
-
+ 
 ---
+
 ## Section C Estimations Yield Results
 📌 **Purpose:** Fetch estimation/yield results computed by Django based on ML or manual fruit counting 
 
@@ -549,7 +475,7 @@ GET /api/images/list/
 ---
 
 
-### **MANUAL Estimation**
+### MANUAL Estimation
 ```
 POST /api/manual_estimation/
 ```
@@ -651,7 +577,7 @@ curl -X POST http://localhost:8000/api/manual_estimation/ \
 --- 
 
 ---
-### **Fetch fruit Detection Results**
+### Fetch fruit Detection Results
 📌 **Purpose:** Retrieve the **fruit count, confidence score, and estimated yield** for a processed image.
 
 ✅ **Endpoint:**  
@@ -702,129 +628,143 @@ GET /api/images/{image_id}/estimations/
 
 ---
 
+ 
 
+## Section D History Analytics
+📌 **Purpose:**  Retrieve previously estimated yields and details.  Synchronize image and estimation
 
-### **Fetch Latest Completed Estimations**
-📌 **Purpose:** Retrieve the estimations associated to a field.
+ 
+
+### List All Uploaded Images
+📌 **Purpose:** Retrieve a **paginated list of all uploaded images**, optionally filtered by field, row, or date.
 
 ✅ **Endpoint:**  
 ```
-GET /api/fields/{field_id}/estimations/
+GET /api/images/list/
 ```
+
 ✅ **Caller → Receiver:**  
 - **App → Django Backend**
 
-✅ **Response (Success - 200 OK)**
-```json
-{
+✅ **Query Parameters   for `/api/images/list/`**
 
-  "status": "success",
-    "data": {
-        "estimations": [
-            {
-            "image_id": 24,
-            "field_id": 1,
-            "field_name": "ChampMaison",
-            "row_id": 3,
-            "row_name": "C1-R3",
-            "fruit_type": "Swing on CG1",
-            "date": "2024-03-01",
-            "fruit_plant": 12,
-            "plant_kg": 2.4,
-            "row_kg": 48.0,
-            "confidence_score": 0.85,
-            "maturation_grade": 0.4,
-            "source": "Machine Learning (Image)",
-            "status": "Done"
+| **Parameter** | **Type** | **Description** |
+|--------------|----------|-----------------|
+| `field_id`   | `integer` | ✅ Optional. Get all images for this field (ignores row_id if not set). |
+| `row_id`     | `integer` | ✅ Optional. Get all images for this specific row (more specific than field). |
+| `date`       | `YYYY-MM-DD` | ✅ Optional. Filter by capture date (can be used with `row_id` or `field_id`). |
+| `limit`      | `integer` | ✅ Optional. Default: 100 |
+| `offset`     | `integer` | ✅ Optional. Default: 0 |
 
-            },
-            {
-            "image_id": 25,
-            "field_id": 1,
-            "field_name": "ChampMaison",
-            "row_id": 4,
-            "row_name": "C1-R4",
-            "fruit_type": "Swing on CG1",
-            "date": "2024-03-01",
-            "fruit_plant": 10,
-            "plant_kg": 2.0,
-            "row_kg": 40.0, 
-            "confidence_score": 0.85,
-            "maturation_grade": 0.4,
-            "source": "Machine Learning (Image)",
-            "status": "Done"
-            }
-        ]
-    }
-}
-```
-
-✅ **Response (Error - 404 Not Found)**
-```json
-{
-  "error": {
-    "code": "404_NOT_FOUND",
-    "message": "No estimation found."
-  }
-}
-```
- 
- 
+🧠 **Note:** `row_id` is more specific than `field_id`, so if both are provided, the filter narrows to just the row.
 
 ---
 
-### **Delete an Image**
-📌 **Purpose:** Remove an uploaded image from the server.
+#### Example Query URLs
 
-✅ **Endpoint:**  
-```
-DELETE /api/images/{image_id}/
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
+- All images (default):
+  ```
+  GET /api/images/list/
+  ```
 
-✅ **Response (Success - 200 OK)**
-```json
-{
+- All images for field `C1`:
+  ```
+  GET /api/images/list/?field_id=1
+  ```
 
-  "status": "success",
-    "data": {
-        "message": "Image deleted successfully."
-    }
-}
-```
+- All images for row `R3` in field C1:
+  ```
+  GET /api/images/list/?row_id=3
+  ```
+
+- Images for row `C1-R3` on March 14:
+  ```
+  GET /api/images/list/?row_id=3&date=2024-03-14
+  ```
+
+- Paginated results:
+  ```
+  GET /api/images/list/?limit=50&offset=100
+  ```
+
+---
+
+
 ✅ **Response (Success - 200 OK)**
 ```json
 {
   "status": "success",
   "data": {
-    "message": "Image deleted successfully.",
-    "warning": "Could not delete file: [Errno 2] No such file or directory"
+    "total": 9,
+    "limit": 100,
+    "offset": 0,
+    "images": [
+
+      {
+        "image_id": 1,
+        "row_id": 1,
+        "field_id": 1,
+        "xy_location": "",
+        "fruit_type": "Cultivar Swing on CG1",
+        "user_fruit_plant": 9,
+        "upload_date": "2025-04-17",
+        "date": "2024-04-15",
+        "image_url": "/media/images/image_default.jpg",
+        "original_filename": null,
+        "processed": true,
+        "processed_at": "2025-04-17T08:12:42",
+        "status": "Done"
+      }, 
+      {
+        "image_id": 4,
+        "row_id": 15,
+        "field_id": 1,
+        "xy_location": null,
+        "fruit_type": "Cultivar Pitch on M9",
+        "user_fruit_plant": 105,
+        "upload_date": "2025-04-17",
+        "date": "2024-03-14",
+        "image_url": "/media/images/image-4.jpg",
+        "original_filename": "orchard.jpg",
+        "processed": true,
+        "processed_at": "2025-04-17T08:12:50",
+        "status": "Done"
+      },
+      {
+        "image_id": 5,
+        "row_id": 25,
+        "field_id": 1,
+        "xy_location": null,
+        "fruit_type": "Cultivar Early Crunch on M9 Nakab",
+        "user_fruit_plant": 105,
+        "upload_date": "2025-04-17",
+        "date": "2024-03-14",
+        "image_url": "/media/images/image-5.jpg",
+        "original_filename": "orchard.jpg",
+        "processed": false,
+        "processed_at": null,
+        "status": "Processing"
+      }
+    ]
   }
 }
 
 ```
 
-✅ **Response (Error - 404 Not Found)**
+✅ **Response (Error - Invalid Query Param)**
 ```json
 {
   "error": {
-    "code": "404_NOT_FOUND",
-    "message": "Image not found."
+    "code": "INVALID_INPUT",
+    "message": "Invalid date format. Expected YYYY-MM-DD."
   }
 }
 ```
 ---
 
- 
---- 
- 
-
-## Section D History Analytics
-📌 **Purpose:**  Retrieve previously estimated yields and details.
 
 
-### **Fetching all Estimation Records**
+### Fetching all Estimation Records in a field
 📌 **Purpose:** Retrieve the **detailed results of all past yield estimation for a field**  
 ✅ **Endpoint:**  
 ```
@@ -839,39 +779,42 @@ GET /api/fields/{field_id}/estimations/
   "status": "success",
   "data": {
         "estimations": [
-            {
-            "image_id": 24,
-            "field_id": 1,
-            "field_name": "ChampMaison",
-            "row_id": 3,
-            "row_name": "C1-R3",
-            "fruit_type": "Swing on CG1",
-            "date": "2024-03-01",
-            "fruit_plant": 12,
-            "plant_kg": 2.4,
-            "row_kg": 48.0,
-            "confidence_score": 0.85,
-            "maturation_grade": 0.4,
-            "source": "Machine Learning (Image)",
-            "status": "Done"
-
-            },
-            {
-            "image_id": 25,
-            "field_id": 1,
-            "field_name": "ChampMaison",
-            "row_id": 4,
-            "row_name": "C1-R4",
-            "fruit_type": "Swing on CG1",
-            "date": "2024-03-01",
-            "fruit_plant": 10,
-            "plant_kg": 2.0,
-            "row_kg": 40.0, 
-            "confidence_score": 0.85,
-            "maturation_grade": 0.4,
-            "source": "Machine Learning (Image)",
-            "status": "Done"
-            }
+                  {
+                  "estimation_id": 3,
+                  "image_id": 3,
+                  "date": "2024-03-14",
+                  "timestamp": "2025-04-17T08:12:45",
+                  "row_id": 1,
+                  "row_name": "Rang 1 cote maison Swing 1",
+                  "field_id": 1,
+                  "field_name": "ChampMaison",
+                  "fruit_type": "Cultivar Swing on CG1",
+                  "plant_kg": 20,
+                  "row_kg": 760,
+                  "maturation_grade": 0,
+                  "confidence_score": 0.85,
+                  "source": "Machine Learning (Image)",
+                  "fruit_plant": 100,
+                  "status": "done"
+                },
+                {
+                  "estimation_id": 2,
+                  "image_id": 2,
+                  "date": "2024-04-15",
+                  "timestamp": "2025-04-17T08:12:42",
+                  "row_id": 1,
+                  "row_name": "Rang 1 cote maison Swing 1",
+                  "field_id": 1,
+                  "field_name": "ChampMaison",
+                  "fruit_type": "Cultivar Swing on CG1",
+                  "plant_kg": 1.6,
+                  "row_kg": 60.8,
+                  "maturation_grade": 0,
+                  "confidence_score": 0.7,
+                  "source": "User manual estimation",
+                  "fruit_plant": 8,
+                  "status": "done"
+                } 
         ]
   }
 }
@@ -889,57 +832,6 @@ GET /api/fields/{field_id}/estimations/
 
 
  
----
-
-### **Fetching a Estimation Record for an image**
-📌 **Purpose:** Retrieve the **detailed results of a past yield estimation** for a specific record.
-
-✅ **Endpoint:**  
-```
-GET /api/images/{image_id}/estimations
-```
-✅ **Caller → Receiver:**  
-- **App → Django Backend**
-
-✅ **Path Parameters:**
-| **Parameter** | **Type** | **Required?** | **Description** |
-|--------------|---------|-------------|---------------|
-| `image_id` | `integer` | ✅ Yes | ID of the image used for estimation record. |
-
-✅ **Response (Success - 200 OK)**
-```json
-
-{
-  "status": "success",
-  "data": {
-            "image_id": 25,
-            "field_id": 1,
-            "field_name": "ChampMaison",
-            "row_id": 4,
-            "row_name": "C1-R4",
-            "fruit_type": "Swing on CG1",
-            "date": "2024-03-01",
-            "fruit_plant": 10,
-            "plant_kg": 2.0,
-            "row_kg": 40.0, 
-            "confidence_score": 0.85,
-            "maturation_grade": 0.4,
-            "source": "Machine Learning (Image)",
-            "status": "Done"
-    }
-}
-```
-
-✅ **Response (Error - 404 Not Found)**  
-```json
-
- {
-  "error": {
-    "code": "404_NOT_FOUND",
-    "message": "Estimation not found for this image."
-  }
-}
-```
 
 ---
  
@@ -955,8 +847,7 @@ Explain how the **app retrieves SVG maps and background images** for orchard fie
 
 ✅ **Media is NOT embedded** in any endpoint. The API provides **URLs to static assets**, and the **frontend must download them manually** when needed.
 
-✅ **These URLs are returned in**:
-- `GET /api/fields/`
+✅ **These URLs are returned in**: 
 - `GET /api/locations/`
 - `GET /api/images/{image_id}/details/`
 

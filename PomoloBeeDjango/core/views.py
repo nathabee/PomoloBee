@@ -16,6 +16,7 @@ from .serializers import (
 )
 from .utils import BaseAPIView, BaseReadOnlyViewSet
 from rest_framework.parsers import MultiPartParser
+from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +145,7 @@ class ImageView(BaseAPIView):
                 date=date,
                 upload_date=timezone.now().date(),
                 processed=False,
-                status="processing",
+                status=Image.ImageStatus.PROCESSING,
                 original_filename=original_filename
             )
 
@@ -222,14 +223,18 @@ class MLVersionView(BaseAPIView):
 
 
 
-# ---------- ESTIMATION ----------
+# ---------- ESTIMATION ----------  
+
 class FieldEstimationListView(BaseAPIView):
     def get(self, request, field_id):
         estimations = Estimation.objects.filter(row__field_id=field_id).order_by('-timestamp')
+        
         if not estimations.exists():
             raise APIError("404_NOT_FOUND", "No estimation found.", status.HTTP_404_NOT_FOUND)
+        
         serializer = EstimationSerializer(estimations, many=True)
         return self.success({"estimations": serializer.data})
+
 
 
 
@@ -275,7 +280,7 @@ class MLResultView(BaseAPIView):
 
         image.processed = processed
         image.processed_at = timezone.now()
-        image.status = "done" if processed else "failed"  
+        image.status = Image.ImageStatus.DONE if processed else Image.ImageStatus.FAILED  
         image.save()
 
         logger.info(f"✅ Updated image {image_id} with processed={processed}")
@@ -298,10 +303,10 @@ class MLResultView(BaseAPIView):
 
         return self.success({"message": "ML result successfully received."})
 
-
+ 
 
 class ManualEstimationView(BaseAPIView):
-    parser_classes = [MultiPartParser]  # Allow file upload (optional)
+    parser_classes = [MultiPartParser]
 
     def post(self, request):
         data = request.data
@@ -309,70 +314,87 @@ class ManualEstimationView(BaseAPIView):
         row_id = data.get("row_id")
         date = data.get("date")
         xy_location = data.get("xy_location")
+
+        if not all([row_id, date]):
+            return self.error("MISSING_FIELDS", "Required fields: row_id, date, fruit_plant")
+
         try:
-            fruit_plant = float(request.data.get("fruit_plant"))
+            fruit_plant = float(data.get("fruit_plant"))
         except (TypeError, ValueError):
             raise APIError("INVALID_PARAMETER", "fruit_plant must be a numeric value.", status.HTTP_400_BAD_REQUEST)
 
-        confidence_score = data.get("confidence_score", None)
-        maturation_grade = data.get("maturation_grade", 0.0)
-        image_file = request.FILES.get("image", None)
+        try:
+            maturation_grade = float(data.get("maturation_grade", 0.0))
+        except (TypeError, ValueError):
+            maturation_grade = 0.0
 
-        # Validation
-        if not all([row_id, date, fruit_plant]):
-            return self.error("MISSING_FIELDS", "Required fields: row_id, date, fruit_plant")
+        confidence_score_raw = data.get("confidence_score")
+        try:
+            confidence_score = float(confidence_score_raw) if confidence_score_raw is not None else None
+        except (TypeError, ValueError):
+            confidence_score = None
+
+        image_file = request.FILES.get("image", None)
+        logger.info(f"🟡 ManualEstimationView row {row_id} xy_location {xy_location}")
 
         row = get_object_or_error(Row, id=row_id)
         fruit = row.fruit
+        image = None
 
-        # 1. Handle image: uploaded or default
-        if image_file:
-            original_filename = image_file.name
-            temp_path = default_storage.save(f'images/temp_manual_{original_filename}', image_file)
-            ext = os.path.splitext(original_filename)[1]
-            image = Image.objects.create(
-                row=row,
-                date=date,
-                upload_date=timezone.now().date(),
-                processed=True,
-                processed_at = timezone.now(),
-                user_fruit_plant=fruit_plant,
-                status="manual",
-                original_filename=None,
-                xy_location=xy_location
-            )
-            final_path = f"images/image-{image.id}{ext}"
-            os.rename(os.path.join(settings.MEDIA_ROOT, temp_path), os.path.join(settings.MEDIA_ROOT, final_path))
-            image.image_file.name = final_path
-            image.save()
-        else:
-            # Use default placeholder
-            image = Image.objects.create(
-                row=row,
-                date=date,
-                upload_date=timezone.now().date(),
-                processed=True,
-                processed_at = timezone.now(),
-                user_fruit_plant=fruit_plant,
-                status="manual",
-                original_filename=None,
-                image_file="images/image_default.jpg",  # This must exist in media/
-                xy_location=xy_location
-            )
+        try:
+            with transaction.atomic():
+                if image_file:
+                    original_filename = image_file.name
+                    temp_path = default_storage.save(f'images/temp_manual_{original_filename}', image_file)
+                    ext = os.path.splitext(original_filename)[1]
+                    image = Image.objects.create(
+                        row=row,
+                        date=date,
+                        upload_date=timezone.now().date(),
+                        processed=True,
+                        processed_at=timezone.now(),
+                        user_fruit_plant=fruit_plant,
+                        status=Image.ImageStatus.DONE,
+                        original_filename=original_filename,
+                        xy_location=xy_location
+                    )
+                    final_path = f"images/image-{image.id}{ext}"
+                    os.rename(
+                        os.path.join(settings.MEDIA_ROOT, temp_path),
+                        os.path.join(settings.MEDIA_ROOT, final_path)
+                    )
+                    image.image_file.name = final_path
+                else:
+                    image = Image.objects.create(
+                        row=row,
+                        date=date,
+                        upload_date=timezone.now().date(),
+                        processed=True,
+                        processed_at=timezone.now(),
+                        user_fruit_plant=fruit_plant,
+                        status=Image.ImageStatus.DONE,
+                        original_filename=None,
+                        image_file="images/image_default.jpg",
+                        xy_location=xy_location
+                    )
 
-        # 2. Create estimation calculated in modele after save 
-        #plant_kg = float(fruit_plant) * fruit.fruit_avg_kg
-        #row_kg =  plant_kg * float(row.nb_plant)
+                image.save()  # Commit after image is finalized
 
-        estimation = Estimation.objects.create(
-            image=image,
-            row=row,
-            date=date,
-            fruit_plant=fruit_plant,
-            confidence_score=confidence_score,  
-            maturation_grade=maturation_grade,
-            source=Estimation.EstimationSource.USER
-        )
+                estimation = Estimation.objects.create(
+                    image=image,
+                    row=row,
+                    date=date,
+                    fruit_plant=fruit_plant,
+                    confidence_score=confidence_score,
+                    maturation_grade=maturation_grade,
+                    source=Estimation.EstimationSource.USER
+                )
+                estimation.save()
+
+        except Exception as e:
+            if image:
+                image.delete()
+            raise APIError("ESTIMATION_FAILED", f"Failed to save estimation: {str(e)}", status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         serializer = EstimationSerializer(estimation, context={'request': request})
         return self.success({

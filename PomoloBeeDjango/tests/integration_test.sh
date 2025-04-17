@@ -3,10 +3,30 @@ set -e  # Stop on error
 
 #sudo apt update
 #sudo apt install jq 
+
+################################################################
+# CONSTANT
+#################################################################
 GREEN="\033[0;32m"
 RED="\033[0;31m"
 NC="\033[0m" # No Color
+#################################################################
 HAS_ERRORS=0
+API_URL="http://127.0.0.1:8000/api"
+IMAGE_PATH="./media/images/orchard.jpg"
+export IGNORE_VOLATILE=true
+MODE="default"
+#################################################################
+SNAPSHOT_DIR="./tests/snapshots/example"
+SNAPSHOT_NORMALIZED_DIR="./tests/snapshots/normalized"
+NB_IMAGE_LIST_NORMALIZED=3
+NB_ESTIMATION_LIST_NORMALIZED=3
+#################################################################
+
+
+
+
+
 
 echo -e "${GREEN}Integration test.${NC}"
 
@@ -22,9 +42,6 @@ fi
 command -v jq >/dev/null 2>&1 || { echo >&2 "❌ jq is required but not installed."; exit 1; }
 
 
-API_URL="http://127.0.0.1:8000/api"
-IMAGE_PATH="./media/images/orchard.jpg"
-export IGNORE_VOLATILE=true
 
 
 # Optionally: check image exists
@@ -33,9 +50,8 @@ if [ ! -f "$IMAGE_PATH" ]; then
   exit 1
 fi
 
-MODE="default"
-SNAPSHOT_DIR="./tests/snapshots"
 mkdir -p "$SNAPSHOT_DIR"
+mkdir -p "$SNAPSHOT_NORMALIZED_DIR"
 
 # Parse mode flag
 if [[ "$1" == "--snapshot" ]]; then
@@ -71,51 +87,56 @@ fi
 }
 
 
-
-# Function: save snapshot
+ 
+# Function: save snapshot (raw + normalized)
 save_snapshot() {
   local name="$1"
   local content="$2"
-  echo "$content" | jq . > "$SNAPSHOT_DIR/$name.json"
+  
+  # Save raw (for app team or visual inspection)
+  echo "$content" | jq . > "$SNAPSHOT_DIR/${name}.json"
+
+  # Save normalized version (for nonreg test comparison)
+  echo "$content" | normalize_json > "$SNAPSHOT_NORMALIZED_DIR/${name}_normalized.json"
 }
 
-# Function: compare to snapshot
+ 
+# Function: compare to snapshot (uses normalized version)
 compare_snapshot() {
   local name="$1"
   local content="$2"
 
-  expected="$SNAPSHOT_DIR/$name.json"
+  expected="$SNAPSHOT_NORMALIZED_DIR/${name}_normalized.json"
   if [ ! -f "$expected" ]; then 
-    echo -e "${RED}❌ No snapshot found for $name" >&2
+    echo -e "${RED}❌ No normalized snapshot found for $name${NC}" >&2
     return 1
   fi
 
-
-  # Normalize both JSONs and compare
-  diff_output=$(diff -u <(echo "$content" | normalize_json) <(cat "$expected" | normalize_json))
+  diff_output=$(diff -u <(echo "$content" | normalize_json) <(cat "$expected"))
   if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Regression detected in $name:${NC}" >&2
     echo -e "${RED}$diff_output" >&2
-    echo -e  "${RED}❌❌❌DEBUG❌❌❌ $name:${content}" >&2
-    echo -e  "${RED}❌❌❌DEBUG ❌❌❌ expected:${expected}" >&2
     HAS_ERRORS=1
-    #return 1
   else
-    echo  "${GREEN}✅ $name OK${NC}"
+    echo "${GREEN}✅ $name OK${NC}"
   fi
 }
 
 
 
 
-
+############################################################################
 
 
 echo "-------------------------------"
 echo "🍃 Integration Test: PomoloBee"
 echo "-------------------------------"
 
+
+
+############################################################################
 # 🌱 STEP 0 — Load Static Data
+############################################################################
 echo "🔹 Step 0: App initializes orchard structure"
 
 echo "📡 GET /fields/"
@@ -181,17 +202,21 @@ case "$MODE" in
     ;;
 esac 
 
-# 📸 STEP 1 — Upload Image
 
+
+############################################################################
+# 📸 STEP 1 — make manual estimation
+############################################################################
 
 echo ""
-echo "✍️ Step 1b: Manual estimation WITHOUT image"
+echo "✍️ Step 1: Manual estimation WITHOUT image with xy_location"
 
 MANUAL_NO_IMAGE=$(curl -s -X POST "$API_URL/manual_estimation/" \
   -F "row_id=1" \
   -F "date=2024-04-15" \
   -F "fruit_plant=9" \
-  -F "confidence_score=0.6")
+  -F "confidence_score=0.6"\
+  -F "xy_location=")
 
 # 🧪 Validate JSON
 if ! echo "$MANUAL_NO_IMAGE" | jq -e . >/dev/null 2>&1; then
@@ -220,7 +245,7 @@ elif [[ "$MODE" == "nonreg" ]]; then
 fi
 
 echo ""
-echo "✍️ Step 1c: Manual estimation WITH image"
+echo "✍️ Step 1: Manual estimation WITH image"
 
 MANUAL_WITH_IMAGE=$(curl -s -X POST "$API_URL/manual_estimation/" \
   -F "row_id=1" \
@@ -245,16 +270,20 @@ ESTIMATION=$(curl -s "$API_URL/images/$MANUAL_IMAGE_ID/estimations/")
 echo "$ESTIMATION" | jq .
 
 
+
+############################################################################
+# 📸 STEP 2 — Upload Image  
+############################################################################
 echo ""
-echo "🖼️ Step 1: Uploading image"
+echo "🖼️ Step 2: Uploading image"
 UPLOAD_RESPONSE=$(curl -s -F "image=@$IMAGE_PATH" -F "row_id=1" -F "date=2024-03-14" "$API_URL/images/")
 
 # Try to parse JSON
 if echo "$UPLOAD_RESPONSE" | jq -e . >/dev/null 2>&1; then
   echo "$UPLOAD_RESPONSE" | jq .
 
-  IMAGE_ID=$(echo "$UPLOAD_RESPONSE" | jq .data.image_id)
-  if [[ "$IMAGE_ID" == "null" || -z "$IMAGE_ID" ]]; then
+  IMAGE_ID_001=$(echo "$UPLOAD_RESPONSE" | jq .data.image_id)
+  if [[ "$IMAGE_ID_001" == "null" || -z "$IMAGE_ID_001" ]]; then
     echo "❌ Failed to get image ID from JSON. Aborting."
     exit 1
   fi
@@ -265,35 +294,40 @@ else
   exit 1 
 fi
 
-echo "✅ Image uploaded with ID: $IMAGE_ID"
+echo "✅ Image uploaded with ID: $IMAGE_ID_001"
 
 
 
-# 🧠 STEP 2 — Wait for ML (mock delay or real)
+
+############################################################################
+# 🧠 STEP 3 - Wait for ML (mock delay or real)
+############################################################################
 echo ""
-echo "⏳ Step 2: Waiting for ML to process (4s delay)"
+echo "⏳ Step 3 END : Waiting for ML to process (4s delay)"
 sleep 4
 
 # You can skip this if ML is already responding for real during the test
 # echo ""
-# echo "🧠 Step 2: Simulating ML result (for manual test)"
+# echo "🧠 Step 3: Simulating ML result (for manual test)"
 # ML_RESPONSE=$(curl -s -X POST "$API_URL/images/$IMAGE_ID/ml_result" \
 #   -H "Content-Type: application/json" \
 #   -d '{"nb_fruit": 10, "confidence_score": 0.95}')
 
 
 
-# 🔍 STEP 3 — Poll for status
+############################################################################
+# 🔍 STEP 4 — Poll for status
+############################################################################
 echo ""
-echo "🔁 Step 3: Polling image metadata for image ${IMAGE_ID}"
-IMAGE_META=$(curl -s "$API_URL/images/$IMAGE_ID/details/")
+echo "🔁 Step 4 : Polling image metadata for image ${IMAGE_ID_001}"
+IMAGE_META=$(curl -s "$API_URL/images/$IMAGE_ID_001/details/")
 
 case "$MODE" in
   snapshot)
-    save_snapshot "step_03_image_meta" "$IMAGE_META"
+    save_snapshot "step_02_image_details" "$IMAGE_META"
     ;;
   nonreg)
-    compare_snapshot "step_03_image_meta" "$IMAGE_META"  || HAS_ERRORS=1 
+    compare_snapshot "step_02_image_details" "$IMAGE_META"  || HAS_ERRORS=1 
     ;;
   *)
     echo "$IMAGE_META" | jq .
@@ -311,18 +345,21 @@ if [ "$PROCESSED" != "true" ]; then
   echo "$RETRY" | jq .
 
   if [[ "$MODE" == "snapshot" ]]; then
-    save_snapshot "step_06_retry_response" "$RETRY"
+    save_snapshot "step_02_retry_response" "$RETRY"
   elif [[ "$MODE" == "nonreg" ]]; then
-    compare_snapshot "step_06_retry_response" "$RETRY"  || HAS_ERRORS=1
+    compare_snapshot "step_02_retry_response" "$RETRY"  || HAS_ERRORS=1
   fi
 fi
 
 
 
-# 📊 STEP 4 — Fetch Estimation
+
+############################################################################
+# 📊 STEP 4 — Fetch Estimation for image
+############################################################################
 echo ""
-echo "📈 Step 4: Getting Estimation for image ${IMAGE_ID}"
-ESTIMATION=$(curl -s "$API_URL/images/$IMAGE_ID/estimations/")
+echo "📈 Step 4: Getting Estimation for image ${IMAGE_ID_001}"
+ESTIMATION=$(curl -s "$API_URL/images/$IMAGE_ID_001/estimations/")
 
 case "$MODE" in
   snapshot)
@@ -337,48 +374,158 @@ case "$MODE" in
 esac
  
 
-
-# 🗂️ STEP 5 — Get Estimation History for Field
+ 
+############################################################################
+# 📸 STEP 5 — Upload 3 Images and test image list
+############################################################################
 echo ""
-echo "📚 Step 5: Getting field estimation history"
-FIELD_ID=1
-FIELD_HISTORY_RAW=$(curl -s "$API_URL/fields/$FIELD_ID/estimations/")
+echo "🖼️ Step 5: Uploading 3 images"
 
-# Normalize field history: only keep the most recent one (first in list)
-FIELD_HISTORY=$(echo "$FIELD_HISTORY_RAW" | jq '{status, data: {estimations: [.data.estimations[0]]}}')
+declare -a IMAGE_IDS=()
+
+IMAGE_IDS=()
+for ROW_ID in 1 15 25; do
+  echo "🔹 Uploading image for row_id=$ROW_ID"
+  UPLOAD_RESPONSE=$(curl -s -F "image=@$IMAGE_PATH" -F "row_id=$ROW_ID" -F "date=2024-03-14" -F "user_fruit_plant=105" "$API_URL/images/")
+  
+  IMAGE_ID=$(echo "$UPLOAD_RESPONSE" | jq .data.image_id)
+  if [[ "$IMAGE_ID" == "null" || -z "$IMAGE_ID" ]]; then
+    echo -e "${RED}❌ Could not upload image for row_id=$ROW_ID${NC}"
+    exit 1
+  fi
+
+  echo "✅ Uploaded image ID: $IMAGE_ID"
+  IMAGE_IDS+=($IMAGE_ID)
+
+# Let ML process at least 2 of them
+  # 👇 Insert delay after uploading image for row_id=15
+  if [[ "$ROW_ID" == "15" ]]; then
+    echo "⏳ Sleeping 4s to allow ML time to process first two images..."
+    sleep 4
+  fi
+done
+
+
+for IMAGE_ID in "${IMAGE_IDS[@]}"; do
+  echo "📈 Checking estimation for image $IMAGE_ID"
+  IMAGE_ESTIMATION=$(curl -s "$API_URL/images/$IMAGE_ID/estimations/")
+  echo "$IMAGE_ESTIMATION" | jq .
+
+  # JUST FOR DEBUG...WE DO NOT NEED WHEN IT WORKS
+  #if [[ "$MODE" == "snapshot" ]]; then
+  #  save_snapshot "step_05_image_${IMAGE_ID}_estimation" "$IMAGE_ESTIMATION"
+  #elif [[ "$MODE" == "nonreg" ]]; then
+  #  compare_snapshot "step_05_image_${IMAGE_ID}_estimation" "$IMAGE_ESTIMATION" || HAS_ERRORS=1
+  #fi
+done
+
+
+# 📂 STEP 5 — Get image list
+echo ""
+echo "📂 Step 5: Listing all images"
+IMAGE_LIST_RAW=$(curl -s "$API_URL/images/list/")
+
+# Extract just the last NB_IMAGE_LIST_NORMALIZED processed images (ordered by processed_at DESC)
+ 
+IMAGE_LIST_TOP=$(echo "$IMAGE_LIST_RAW" | jq --argjson N "$NB_IMAGE_LIST_NORMALIZED" '
+  {
+    status,
+    data: {
+      images: (
+        .data.images
+        | map(select(.processed == true))
+        | sort_by(.processed_at)
+        | reverse
+        | .[0:$N]
+      )
+    }
+  }
+')
+
+
+
 
 case "$MODE" in
   snapshot)
-    save_snapshot "step_05_field_history" "$FIELD_HISTORY"
+    save_snapshot "step_05_image_list" "$IMAGE_LIST_RAW"
+    echo "$IMAGE_LIST_TOP" | normalize_json > "$SNAPSHOT_NORMALIZED_DIR/step_05_image_list_normalized.json"
     ;;
   nonreg)
-    compare_snapshot "step_05_field_history" "$FIELD_HISTORY" || HAS_ERRORS=1
+    compare_snapshot "step_05_image_list" "$IMAGE_LIST_TOP" || HAS_ERRORS=1
     ;;
   *)
-    echo "$FIELD_HISTORY" | jq .
+    echo "$IMAGE_LIST_RAW" | jq .
+    ;;
+esac
+
+ 
+############################################################################
+# 🗂️ STEP 6 — Get Estimation History for Field
+############################################################################
+echo ""
+echo "📚 Step 6: Getting field estimation history"
+FIELD_ID=1
+FIELD_HISTORY_RAW=$(curl -s "$API_URL/fields/$FIELD_ID/estimations/")
+
+# Full data (for visual inspection)
+FIELD_HISTORY_ALL=$(echo "$FIELD_HISTORY_RAW" | jq '{status, data: {estimations: .data.estimations}}')
+
+# Most recent 3 estimations (normalized version)
+FIELD_HISTORY_TOP=$(echo "$FIELD_HISTORY_ALL" | jq --argjson N "$NB_ESTIMATION_LIST_NORMALIZED" '
+  {
+    status,
+    data: {
+      estimations: (
+        .data.estimations
+        | sort_by(.timestamp)
+        | reverse
+        | .[0:$N]
+      )
+    }
+  }
+')
+
+
+case "$MODE" in
+  snapshot)
+    save_snapshot "step_06_field_estimations" "$FIELD_HISTORY_ALL"
+    # Normalized file will only contain top 3
+    echo "$FIELD_HISTORY_TOP" | normalize_json > "$SNAPSHOT_NORMALIZED_DIR/step_06_field_estimations_normalized.json"
+    ;;
+  nonreg)
+    compare_snapshot "step_06_field_estimations" "$FIELD_HISTORY_TOP" || HAS_ERRORS=1
+    ;;
+  *)
+    echo "$FIELD_HISTORY_ALL" | jq .
     ;;
 esac
 
 
-# ♻️ STEP 6 - OPTIONAL: Retry if not processed
+
+
+############################################################################
+# ♻️ STEP 7 - OPTIONAL: Retry if not processed
+############################################################################
 if [ "$PROCESSED" != "true" ]; then
   echo ""
   echo "🔁 Retrying processing (optional fallback)"
   curl -s -X POST "$API_URL/retry_processing/" \
     -H "Content-Type: application/json" \
-    -d "{\"image_id\": $IMAGE_ID}" | jq .
+    -d "{\"image_id\": $IMAGE_ID_001}" | jq .
 fi
 
 
 if [ "$MODE" == "snapshot" ]; then
-  echo "$IMAGE_ID" > "$SNAPSHOT_DIR/image_id.txt"
+  echo "$IMAGE_ID_001" > "$SNAPSHOT_DIR/image_id.txt"
 fi
 
  
+############################################################################
 # 🗑️ STEP 7 — Delete the Image
+############################################################################
 echo ""
 echo "🗑️ Step 7: Deleting the uploaded image"
-DELETE_RESPONSE=$(curl -s -X DELETE "$API_URL/images/$IMAGE_ID/")
+DELETE_RESPONSE=$(curl -s -X DELETE "$API_URL/images/$IMAGE_ID_001/")
 
 
 if ! echo "$DELETE_RESPONSE" | jq -e . >/dev/null 2>&1; then
@@ -408,7 +555,7 @@ esac
 # 🔍 Verify image deletion
 echo ""
 echo "🔍 Verifying deletion (should error or show missing):"
-DELETE_VERIFY=$(curl -s "$API_URL/images/$IMAGE_ID/details/")
+DELETE_VERIFY=$(curl -s "$API_URL/images/$IMAGE_ID_001/details/")
 
 if echo "$DELETE_VERIFY" | jq -e . >/dev/null 2>&1; then
   echo "$DELETE_VERIFY" | jq .
@@ -416,8 +563,9 @@ else
   echo "$DELETE_VERIFY"
 fi
 
-##########################
+############################################################################
 # 🧠 STEP 8 — Simulate ML Result on Non-Existing Image
+############################################################################
 echo ""
 echo "🧠 Step 8: Simulating ML result on a non-existing image (should fail)"
 HTTP_STATUS=$(curl -s -o /tmp/ml_invalid_resp.json -w "%{http_code}" -X POST "$API_URL/images/999999/ml_result/" \
@@ -435,7 +583,8 @@ COMBINED_ML_RESULT=$(jq -n \
 
 case "$MODE" in
   snapshot)
-    echo "$COMBINED_ML_RESULT" | jq . > "$SNAPSHOT_DIR/step_08_invalid_ml_result.json"
+    save_snapshot "step_08_invalid_ml_result" "$COMBINED_ML_RESULT"
+    #echo "$COMBINED_ML_RESULT" | jq . > "$SNAPSHOT_DIR/step_08_invalid_ml_result.json"
     ;;
   nonreg)
     compare_snapshot "step_08_invalid_ml_result" "$COMBINED_ML_RESULT" || HAS_ERRORS=1
@@ -450,59 +599,12 @@ case "$MODE" in
 esac
 
 
- 
-#############################
-# 📸 STEP 9 — Upload 3 Images and test image list
+
+
+############################################################################
+# 🗑️ STEP LAST   — Clean up uploaded images
 echo ""
-echo "🖼️ Step 9: Uploading 3 images"
-
-declare -a IMAGE_IDS=()
-
-IMAGE_IDS=()
-for ROW_ID in 1 15 25; do
-  echo "🔹 Uploading image for row_id=$ROW_ID"
-  UPLOAD_RESPONSE=$(curl -s -F "image=@$IMAGE_PATH" -F "row_id=$ROW_ID" -F "date=2024-03-14" -F "user_fruit_plant=105" "$API_URL/images/")
-  
-  IMAGE_ID=$(echo "$UPLOAD_RESPONSE" | jq .data.image_id)
-  if [[ "$IMAGE_ID" == "null" || -z "$IMAGE_ID" ]]; then
-    echo -e "${RED}❌ Could not upload image for row_id=$ROW_ID${NC}"
-    exit 1
-  fi
-
-  echo "✅ Uploaded image ID: $IMAGE_ID"
-  IMAGE_IDS+=($IMAGE_ID)
-
-# Let ML process at least 2 of them
-  # 👇 Insert delay after uploading image for row_id=15
-  if [[ "$ROW_ID" == "15" ]]; then
-    echo "⏳ Sleeping 4s to allow ML time to process first two images..."
-    sleep 4
-  fi
-done
-
- 
-
-# 📂 STEP 9b — Get image list
-echo ""
-echo "📂 Step 9b: Listing all images"
-IMAGE_LIST=$(curl -s "$API_URL/images/list/")
-
-case "$MODE" in
-  snapshot)
-    save_snapshot "step_09_image_list" "$IMAGE_LIST"
-    ;;
-  nonreg)
-    compare_snapshot "step_09_image_list" "$IMAGE_LIST" || HAS_ERRORS=1
-    ;;
-  *)
-    echo "$IMAGE_LIST" | jq .
-    ;;
-esac
-
-
-# 🗑️ STEP 9c — Clean up uploaded images
-echo ""
-echo "🗑️ Step 9c: Cleaning up uploaded test images"
+echo "🗑️ Step LAST : Cleaning up uploaded test images"
 
 for ID in "${IMAGE_IDS[@]}"; do
   DELETE_RESPONSE=$(curl -s -X DELETE "$API_URL/images/$ID/")
@@ -515,7 +617,7 @@ for ID in "${IMAGE_IDS[@]}"; do
 done
 
 
-########################
+############################################################################
  
 
 echo ""
