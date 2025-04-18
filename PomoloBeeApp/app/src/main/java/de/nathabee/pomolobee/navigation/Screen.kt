@@ -9,6 +9,7 @@ sealed class Screen(val route: String, val title: String) {
     object About : Screen("about", "About")
     object Location : Screen("location", "Location")
     object Init : Screen("init", "Initialisation")
+    object ImageHistory : Screen("imagehistory", "Image History")
 
     // Parametrized screen
 

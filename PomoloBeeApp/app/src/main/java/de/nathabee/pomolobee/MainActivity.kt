@@ -26,6 +26,8 @@ import de.nathabee.pomolobee.ui.components.DrawerMenu
 import de.nathabee.pomolobee.ui.theme.PomoloBeeTheme
 import de.nathabee.pomolobee.ui.screens.InitScreen
 import de.nathabee.pomolobee.ui.components.PermissionManager
+import de.nathabee.pomolobee.viewmodel.ImageViewModel
+import de.nathabee.pomolobee.viewmodel.ImageViewModelFactory
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
@@ -84,6 +86,7 @@ import de.nathabee.pomolobee.viewmodel.OrchardViewModelFactory
 fun AppScaffold(
     navController: NavHostController,
     orchardViewModel: OrchardViewModel,
+    imageViewModel: ImageViewModel,
     settingsViewModel: SettingsViewModel
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -111,6 +114,7 @@ fun AppScaffold(
                 NavGraph(
                     navController = navController,
                     orchardViewModel = orchardViewModel,
+                    imageViewModel = imageViewModel,
                     settingsViewModel = settingsViewModel
                 )
             }
@@ -130,6 +134,10 @@ fun AppScaffold(
         val settingsViewModel: SettingsViewModel =
             viewModel(factory = SettingsViewModelFactory(context))
         val orchardViewModel: OrchardViewModel = viewModel(factory = OrchardViewModelFactory(context))
+
+        val imageViewModel: ImageViewModel= viewModel(factory = ImageViewModelFactory(context))
+
+
         val initViewModel: InitViewModel = viewModel(factory = InitViewModelFactory(context))
 
         val initDone by initViewModel.initDone.collectAsState()
@@ -150,7 +158,8 @@ fun AppScaffold(
             AppScaffold(
                 navController = navController,
                 orchardViewModel = orchardViewModel,
-                settingsViewModel = settingsViewModel
+                settingsViewModel = settingsViewModel,
+                imageViewModel = imageViewModel
             )
         }
     }

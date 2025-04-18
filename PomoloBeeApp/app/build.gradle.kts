@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
+    kotlin("plugin.serialization") version "1.9.22"
 }
 
 
@@ -88,6 +89,9 @@ dependencies {
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+
+
+    implementation(libs.kotlinx.serialization.json)
 
     // Coil for SVG support
     implementation(libs.coil)

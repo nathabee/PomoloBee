@@ -12,6 +12,7 @@ import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.model.Row
 import de.nathabee.pomolobee.navigation.Screen
 import de.nathabee.pomolobee.ui.components.ExposedDropdownMenuBoxWithLabel
+import de.nathabee.pomolobee.viewmodel.ImageViewModel
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 
@@ -19,13 +20,24 @@ import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 fun LocationScreen(
     navController: NavController,
     settingsViewModel: SettingsViewModel,
-    orchardViewModel: OrchardViewModel
+    orchardViewModel: OrchardViewModel,
+    imageViewModel: ImageViewModel
 )
 {
     val context = LocalContext.current
 
     val locations by orchardViewModel.locations.collectAsState()
     val fruits by orchardViewModel.fruits.collectAsState()
+
+    // ✅ To receive data from SvgMapScreen
+    val svgReturnKey = "fromSvg_Location"
+    val receiveHandle = navController.currentBackStackEntry?.savedStateHandle
+
+// ✅ To return data to CameraScreen
+    val cameraReturnKey = "fromLocation"
+    val sendHandle = navController.previousBackStackEntry?.savedStateHandle
+
+
 
 
     var selectedLocation by remember { mutableStateOf<Location?>(null) }
@@ -51,6 +63,45 @@ fun LocationScreen(
         fruits.forEach { f ->
             println("  🍏 Fruit ID=${f.fruitId}, Name=${f.name}")
         }
+    }
+
+
+    // Handle row coming from SVG Map
+    LaunchedEffect(receiveHandle?.get<Int>("${svgReturnKey}_rowId")) {
+        val rowId = receiveHandle?.get<Int>("${svgReturnKey}_rowId")
+        val xy = receiveHandle?.get<String>("${svgReturnKey}_xy")
+
+        if (rowId != null) {
+            selectedLocation = locations.find { it.rows.any { row -> row.rowId == rowId } }
+            selectedRow = selectedLocation?.rows?.find { it.rowId == rowId }
+
+            settingsViewModel.updateSelectedRow(rowId)
+            selectedLocation?.field?.fieldId?.let {
+                settingsViewModel.updateSelectedField(it)
+            }
+
+            // Optionally store XY
+            xy?.let { imageViewModel.setPendingXYLocation(it) }
+
+            // Clean up
+            receiveHandle.remove<Int>("${svgReturnKey}_rowId")
+            receiveHandle.remove<String>("${svgReturnKey}_xy")
+        }
+
+    }
+
+    // Send row back to CameraScreen
+    Button(
+        onClick = {
+            selectedRow?.let { sendHandle?.set("${cameraReturnKey}_rowId", it) }
+            imageViewModel.pendingXYLocation.value?.let { xy ->
+                sendHandle?.set("${cameraReturnKey}_xy", xy)
+            }
+            navController.popBackStack()
+        },
+        enabled = selectedLocation != null && selectedRow != null
+    ) {
+        Text("✅ Confirm & Continue")
     }
 
 
@@ -127,8 +178,12 @@ fun LocationScreen(
             Button(onClick = {
                 // navController.navigate(Screen.SvgMap.createRoute(selectedLocation!!.field.fieldId))
                 navController.navigate(
-                    Screen.SvgMap.withArgs("fieldId" to selectedLocation!!.field.fieldId.toString())
+                    Screen.SvgMap.withArgs(
+                        "fieldId" to selectedLocation!!.field.fieldId.toString(),
+                        "returnKey" to svgReturnKey
+                    )
                 )
+
 
 
             }) {

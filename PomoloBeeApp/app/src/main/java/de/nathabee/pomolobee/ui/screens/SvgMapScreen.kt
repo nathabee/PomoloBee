@@ -11,51 +11,42 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.navigation.NavController
 import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.model.Row
-import de.nathabee.pomolobee.model.Fruit
 import de.nathabee.pomolobee.util.StorageUtils
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 
-
 fun injectBase64Image(svg: String, base64Image: String): String {
-    val base64Tag = """
-        <image x="0" y="0" width="100%" height="100%"
-               opacity="0.4" preserveAspectRatio="none"
-               xlink:href="data:image/jpeg;base64,$base64Image"
-               style="pointer-events: none;"
-               xmlns:xlink="http://www.w3.org/1999/xlink" />
+    val tag = """
+        <image x="0" y="0" width="100%" height="100%" opacity="0.4"
+               preserveAspectRatio="none" xlink:href="data:image/jpeg;base64,$base64Image"
+               style="pointer-events: none;" xmlns:xlink="http://www.w3.org/1999/xlink" />
     """.trimIndent()
 
-    // Regex to find the end of the opening <svg ...> tag
     val svgTagEnd = Regex("""<svg[^>]*>""").find(svg)?.range?.lastOrNull()
     return if (svgTagEnd != null) {
         val insertPos = svgTagEnd + 1
-        svg.substring(0, insertPos) + base64Tag + svg.substring(insertPos)
-    } else {
-        // fallback: just append at end if somehow <svg> isn't matched
-        svg.replace("</svg>", "$base64Tag</svg>")
-    }
+        svg.substring(0, insertPos) + tag + svg.substring(insertPos)
+    } else svg.replace("</svg>", "$tag</svg>")
 }
-
-
-
 
 @Composable
 fun SvgMapScreen(
     location: Location,
     settingsViewModel: SettingsViewModel,
     orchardViewModel: OrchardViewModel,
-    onRawSelected: (String) -> Unit,
-    onBack: () -> Unit
+    navController: NavController,
+    returnKey: String
 ) {
     val context = LocalContext.current
-
     val storageRootUri by settingsViewModel.storageRootUri.collectAsState()
-    //val fruits by orchardViewModel.fruits.collectAsState()
+    val fruits by orchardViewModel.fruits.collectAsState()
 
-
+    var xySelected by remember { mutableStateOf<String?>(null) }
+    var selectedRowInfo by remember { mutableStateOf<Row?>(null) }
+    var showFruitInfo by remember { mutableStateOf(false) }
 
     val svgUri = remember(storageRootUri, location) {
         storageRootUri?.let { StorageUtils.getSvgUriForLocation(context, it, location) }
@@ -63,79 +54,37 @@ fun SvgMapScreen(
 
     val svgContent = remember(svgUri) {
         svgUri?.let {
-            try {
-                context.contentResolver.openInputStream(it)?.use { inputStream ->
-                    var rawSvg = inputStream.bufferedReader().readText()
+            runCatching {
+                context.contentResolver.openInputStream(it)?.use { stream ->
+                    var rawSvg = stream.bufferedReader().readText()
 
-                    // Inject image based on shortName like "C1"
-                    // val shortName = location.field.shortName
-                    val backgroundUri = StorageUtils.getBackgroundUriForLocation(context, storageRootUri!!, location)
-                    if (backgroundUri != null) {
-                        val base64Image = context.contentResolver.openInputStream(backgroundUri)?.use { input ->
-                            android.util.Base64.encodeToString(input.readBytes(), android.util.Base64.NO_WRAP)
-                        }
-
-                        if (base64Image != null) {
-                            rawSvg = injectBase64Image( rawSvg, base64Image)
-                        }
+                    val bgUri = StorageUtils.getBackgroundUriForLocation(context, storageRootUri!!, location)
+                    val base64 = bgUri?.let { uri ->
+                        context.contentResolver.openInputStream(uri)?.readBytes()
+                            ?.let { bytes -> android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP) }
                     }
 
+                    if (base64 != null) {
+                        rawSvg = injectBase64Image(rawSvg, base64)
+                    }
 
                     rawSvg
                 }
-            } catch (e: Exception) {
-                Log.e("SvgMapScreen", "❌ Error reading SVG file: ${e.message}")
+            }.getOrElse {
+                Log.e("SvgMapScreen", "❌ Error reading SVG: ${it.message}")
                 null
             }
         }
     }
 
-
-
-
-    var showFruitInfo by remember { mutableStateOf(false) }
-    var selectedRowInfo by remember { mutableStateOf<Row?>(null) }
-
-    val fruits by orchardViewModel.fruits.collectAsState()
-
-
-
     val selectedFruit by remember(selectedRowInfo, fruits) {
         derivedStateOf {
-            selectedRowInfo?.let { row ->
-                fruits.find { it.fruitId == row.fruitId }
-            }
+            selectedRowInfo?.let { row -> fruits.find { it.fruitId == row.fruitId } }
         }
     }
 
-
-
-
-    LaunchedEffect(selectedRowInfo, fruits) {
-        if (selectedRowInfo != null) {
-            Log.d("SvgMapScreen", "🍏 Row selected: ID=${selectedRowInfo!!.rowId}, fruitId=${selectedRowInfo!!.fruitId}")
-
-            Log.d("SvgMapScreen", "🍎 All available fruits (${fruits.size}):")
-            fruits.forEach { fruit ->
-                Log.d("SvgMapScreen", "  • ID=${fruit.fruitId}, Name=${fruit.name}")
-            }
-
-            val matchedFruit = fruits.find { it.fruitId == selectedRowInfo!!.fruitId }
-            Log.d("SvgMapScreen", "✅ Match result: ${matchedFruit?.name ?: "❌ No match found!"}")
-        } else {
-            Log.d("SvgMapScreen", "ℹ️ No row selected yet.")
-            Log.d("SvgMapScreen", "🍎 Fruits at this point (${fruits.size}):")
-            fruits.forEach { fruit ->
-                Log.d("SvgMapScreen", "  • ID=${fruit.fruitId}, Name=${fruit.name}")
-            }
-        }
-    }
-
-
-
-
-
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxSize()) {
+        // 🖼️ SVG + image background
         if (svgContent != null) {
             AndroidView(
                 modifier = Modifier
@@ -153,64 +102,47 @@ fun SvgMapScreen(
 
                         addJavascriptInterface(object {
                             @JavascriptInterface
-                            fun onRowClicked(rowId: String) {
-                                Log.d("SvgMapScreen", "🖱️ Row clicked: $rowId")
-
-
-                                // Extract the numeric part regardless of "_hit" suffix
+                            fun onRowClickedWithXY(rowId: String, xyLocation: String) {
                                 val normalizedId = rowId.removePrefix("row_").removeSuffix("_hit")
                                 val id = normalizedId.toIntOrNull()
-                                Log.d("SvgMapScreen", "🖱️ Row clicked: $rowId, resolved to ID = $id")
-                                Log.d("SvgMapScreen", "📋 Rows in location: ${location.rows.map { it.rowId }}")
-
                                 val row = location.rows.find { it.rowId == id }
+
                                 if (row != null) {
                                     this@apply.post {
                                         selectedRowInfo = row
-                                        Log.d("SvgMapScreen", "📦 set selectedRowInfo: rowId=${row.rowId}, fruitId=${row.fruitId}")
+                                        xySelected = xyLocation
+                                        Log.d("SvgMapScreen", "✅ Selected row=${row.rowId} at $xyLocation")
                                     }
-                                } else {
-                                    Log.w("SvgMapScreen", "❌ Row not found for id: $id")
                                 }
                             }
                         }, "Android")
 
-                        val htmlContent = """
-<html>
-<head>
-    <style>
-        svg {
-            width: 100vw;
-            height: auto;
-            max-width: 100%;
-            display: block;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: scroll;
-        }
-    </style>
-</head>
-<body>
-    $svgContent
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const paths = document.querySelectorAll("path[id^='row_']");
-            paths.forEach(function(p) {
-                p.style.stroke = "blue";
-                p.addEventListener("click", function() {
-                    Android.onRowClicked(p.id);
-                });
-            });
-        });
-    </script>
-</body>
-</html>
-""".trimIndent()
+                        val html = """
+                            <html><head><style>
+                                svg { width: 100vw; height: auto; max-width: 100%; display: block; }
+                                body { margin: 0; padding: 0; overflow: scroll; }
+                            </style></head>
+                            <body>$svgContent
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function() {
+                                        const paths = document.querySelectorAll("path[id^='row_']");
+                                        paths.forEach(function(p) {
+                                            p.style.stroke = "blue";
+                                            p.addEventListener("click", function(event) {
+                                                const svg = event.target.ownerSVGElement;
+                                                const rect = svg.getBoundingClientRect();
+                                                const x = (event.clientX - rect.left) / rect.width;
+                                                const y = (event.clientY - rect.top) / rect.height;
+                                                const xy = JSON.stringify({ x: x, y: y });
+                                                Android.onRowClickedWithXY(p.id, xy);
+                                            });
+                                        });
+                                    });
+                                </script>
+                            </body></html>
+                        """.trimIndent()
 
-
-                        loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+                        loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
                     }
                 }
             )
@@ -225,7 +157,7 @@ fun SvgMapScreen(
             }
         }
 
-        Log.d("SvgMapScreen", "🔍 Button state → selectedFruit=${selectedFruit?.name}")
+        // 📋 Row Info Dialog
         selectedRowInfo?.let { row ->
             AlertDialog(
                 onDismissRequest = { selectedRowInfo = null },
@@ -240,8 +172,12 @@ fun SvgMapScreen(
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        onRawSelected("row_${row.rowId}")
-                        selectedRowInfo = null
+                        navController.previousBackStackEntry?.savedStateHandle?.apply {
+                            set("${returnKey}_rowId", row.rowId)
+                            set("${returnKey}_xy", xySelected)
+
+                        }
+                        navController.popBackStack()
                     }) {
                         Text("✅ OK")
                     }
@@ -253,57 +189,42 @@ fun SvgMapScreen(
                         }
                         TextButton(
                             onClick = { showFruitInfo = true },
-                            enabled = selectedFruit != null && fruits.isNotEmpty()
-
+                            enabled = selectedFruit != null
                         ) {
                             Text("🍏 Info Fruit")
                         }
-
                     }
                 }
             )
         }
 
+        // 🍏 Fruit Info Dialog
+        if (showFruitInfo) {
+            selectedFruit?.let { fruit ->
+                AlertDialog(
+                    onDismissRequest = { showFruitInfo = false },
+                    title = { Text("🍏 ${fruit.name}") },
+                    text = {
+                        Column {
+                            Text("📄 ${fruit.description}")
+                            Text("📅 Harvest: ${fruit.yieldStartDate} to ${fruit.yieldEndDate}")
+                            Text("📦 Avg Yield: ${fruit.yieldAvgKg} kg")
+                            Text("🍎 Avg Fruit: ${fruit.fruitAvgKg} kg")
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showFruitInfo = false }) {
+                            Text("✅ Close")
+                        }
+                    }
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
-    }
 
-
-
-    if (showFruitInfo) {
-        selectedFruit?.let { fruit ->
-            AlertDialog(
-                onDismissRequest = { showFruitInfo = false },
-                title = { Text("🍏 ${fruit.name}") },
-                text = {
-                    Column {
-                        Text("📄 ${fruit.description}")
-                        Text("📅 Harvest: ${fruit.yieldStartDate} to ${fruit.yieldEndDate}")
-                        Text("📦 Avg Yield: ${fruit.yieldAvgKg} kg")
-                        Text("🍎 Avg Fruit: ${fruit.fruitAvgKg} kg")
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showFruitInfo = false }) {
-                        Text("✅ Close")
-                    }
-                }
-            )
+        Button(onClick = { navController.popBackStack() }) {
+            Text("⬅ Back")
         }
     }
-
-
-
-
-
-
-
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-    Button(onClick = onBack) {
-        Text("⬅ Back")
-    }
-
-
 }

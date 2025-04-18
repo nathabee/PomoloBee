@@ -1,9 +1,7 @@
+/*
 package de.nathabee.pomolobee.model
 
 import android.net.Uri
-
-
-import json
 
 def upload_image(request):
 xy_location = request.POST.get('xy_location')
@@ -24,7 +22,7 @@ pass
 
 
 
-data class PendingImage(
+data class `ToDOData.kt`(
     val fileName: String,              // e.g., C1_R1_1713190000000.jpg
     val uri: Uri,                      // Optional: full SAF uri for rendering
     val fieldId: Int,
@@ -34,3 +32,5 @@ data class PendingImage(
     val isSynced: Boolean = false,
     val failedSync: Boolean = false
 )
+
+ */

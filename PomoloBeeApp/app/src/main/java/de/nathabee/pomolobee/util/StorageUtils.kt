@@ -6,7 +6,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import de.nathabee.pomolobee.model.Location
-
+import kotlinx.serialization.json.*
 /*
 Function	                Purpose
 resolveSubDirectory	        Creates or returns a folder (used for navigation/setup)
@@ -141,23 +141,31 @@ object StorageUtils {
     //==================
 // 📖 File Reading
 //==================
-    /* DOES NOT SEEM TO BE CALLEd OR IS TESTED????*/
-    fun readAssetFromStorage(context: Context, rootUri: Uri, relativePath: String): String? {
+
+
+    private fun resolveFile(context: Context, baseUri: Uri, relativePath: String): DocumentFile? {
         val parts = relativePath.split("/")
         val fileName = parts.last()
         val subDirs = parts.dropLast(1)
 
-        var currentDoc = DocumentFile.fromTreeUri(context, rootUri)
+        var currentDir = DocumentFile.fromTreeUri(context, baseUri)
         for (dir in subDirs) {
-            currentDoc = currentDoc?.findFile(dir)?.takeIf { it.isDirectory }
+            currentDir = currentDir?.findFile(dir)?.takeIf { it.isDirectory }
+                ?: return null
         }
 
-        val targetFile = currentDoc?.findFile(fileName)
-
-        return targetFile?.uri?.let { uri ->
-            context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
-        }
+        return currentDir?.findFile(fileName)
     }
+
+
+    fun readJsonFileFromStorage(context: Context, baseUri: Uri, path: String): String? {
+        val file = resolveFile(context, baseUri, path) ?: return null
+        return context.contentResolver.openInputStream(file.uri)
+            ?.bufferedReader()
+            ?.use { it.readText() }
+    }
+
+
 
     //==================
 // 🧳 Asset Copy (Initial Bootstrap)
@@ -205,7 +213,10 @@ object StorageUtils {
 
         val staticAssets = listOf(
             "config/fruits.json",
-            "config/locations.json"
+            "config/locations.json",
+            "image_data/estimations.json",
+            "image_data/images.json",
+            "image_data/pending_images.json"
         )
 
         val assetFoldersToCopy = listOf(
@@ -285,5 +296,10 @@ object StorageUtils {
 
         return target?.uri ?: svgDir?.findFile("default_map.svg")?.uri
     }
+
+
+
+
+
 
 }

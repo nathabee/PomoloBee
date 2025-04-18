@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _158 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _164 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -43,6 +43,7 @@
     - [April 14 2025](#april-14-2025)
     - [April 15 2025](#april-15-2025)
     - [April 16 2025](#april-16-2025)
+    - [April 17 2025](#april-17-2025)
     - [April 17 2025](#april-17-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
@@ -534,11 +535,22 @@ Week 6
 
 
 ###  April 17 2025
-- **Hours Worked**: 4 hours
+- **Hours Worked**: 6 hours
 - **Tasks**:
-  - Django : API1 cleaning + Integration tests : solved pb on non regression tests, view and modele for manual estimation and estimations  
+  - Django : API1 cleaning + Integration tests : solved pb on non regression tests, view and modele for manual estimation and estimations 
+  - APP : add image  storage,views,repository ,card , imagehistoryscreen,  
+  - APP : add notion xy_location to be return from svgmapscreen to location and from location to camera
+  - APP : create image_data/estimations.json and image_data/estimations.json handle images in cloud mode (fater syncronisation or to add exemple for initailisation)
+  - APP : add image_data/pending_images.json to be able to handle images in local (before syncronisation or in case local mode only)
+  - APP : modifiy camerascreen to handle missing data necessary to create a pending image : xy_location,date
+  - APP : add code to download images and estimations from cloud in case of synchronisation (clean is not been done already)
 
   
+###  April 17 2025
+- **Hours Worked**: 4 hours
+- **Tasks**:
+  - APP : debug code added yesterday, installation : new asset files are copied , 
+
 
 ---
 

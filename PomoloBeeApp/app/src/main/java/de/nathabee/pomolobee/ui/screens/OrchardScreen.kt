@@ -26,8 +26,12 @@ fun OrchardScreen(
             FieldCard(location = location, onVisualize = {
                 // navController.navigate(Screen.SvgMap.createRoute(location.field.fieldId))
                 navController.navigate(
-                    Screen.SvgMap.withArgs("fieldId" to location.field.fieldId.toString())
+                    Screen.SvgMap.withArgs(
+                        "fieldId" to location.field.fieldId.toString(),
+                        "returnKey" to "unused"
+                    )
                 )
+
 
             })
 

@@ -25,6 +25,7 @@ fun DrawerMenu(
         Screen.Processing,
         Screen.Settings,
         Screen.Orchard,
+        Screen.ImageHistory,
         Screen.About
     )
 
