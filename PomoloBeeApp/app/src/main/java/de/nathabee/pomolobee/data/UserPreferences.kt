@@ -1,9 +1,11 @@
 package de.nathabee.pomolobee.data
 
 import android.content.Context
+import android.net.Uri
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import de.nathabee.pomolobee.cache.OrchardCache
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -65,6 +67,9 @@ class UserPreferences(private val context: Context) {
 
     suspend fun setStorageRoot(path: String) {
         context.dataStore.edit { it[STORAGE_ROOT_PATH_KEY] = path }
+
+        // 🌱 Immediately update in-memory cache
+        OrchardCache.currentRootUri = Uri.parse(path)
     }
 
 

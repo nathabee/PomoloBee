@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _164 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _173 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -44,7 +44,12 @@
     - [April 15 2025](#april-15-2025)
     - [April 16 2025](#april-16-2025)
     - [April 17 2025](#april-17-2025)
-    - [April 17 2025](#april-17-2025)
+    - [April 18 2025](#april-18-2025)
+    - [April 19 2025](#april-19-2025)
+  - [Dates from April 21 to Avril 27 2025](#dates-from-april-21-to-avril-27-2025)
+    - [April 21 2025](#april-21-2025)
+    - [April 21 2025](#april-21-2025)
+    - [April 21 2025](#april-21-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -546,18 +551,65 @@ Week 6
   - APP : add code to download images and estimations from cloud in case of synchronisation (clean is not been done already)
 
   
-###  April 17 2025
+###  April 18 2025
 - **Hours Worked**: 4 hours
 - **Tasks**:
   - APP : debug code added yesterday, installation : new asset files are copied , 
+  
+###  April 19 2025
+- **Hours Worked**: 2 hours
+- **Tasks**:
+  - APP : debug code : add dispatcher in camera screen, save JSON for pending image from camera, tested OK
+  - DOCS : created Android App dev Note document 
+  - APP Image History test : nothing shown, BUG we should use the field and row to restrict selectionbut per default all pending and non pending are shown
 
 
 ---
 
 </details>
 
+ 
+---
+
+<details>
+<summary>
+Week 7
+</summary>
+
+## Dates from April 21 to Avril 27 2025
 
 ---
+
+###  April 21 2025
+- **Hours Worked**: 1 hours
+- **Tasks**:
+  - App - synchronistaion image and pending images
+
+
+
+---
+
+###  April 21 2025
+- **Hours Worked**: 3 hours
+- **Tasks**:
+Here’s a polished and grammatically improved version of your worklog:
+
+---
+
+### April 21 2025
+- **Hours Worked**: 3 hours  
+- **Tasks Completed**:  
+  - ✅ **App** – Ensured naming consistency for synchronization-related components: image files, pending images, and other local configuration data.  
+  - ✅ **App** – Refactored error logging to access the URI directly from the cache, removing dependency on the view layer.  
+  - ✅ **App** – Standardized error logging: detailed messages are written to the log at the point of failure, while only boolean success/failure is propagated back to the screen level.  
+  - ✅ **App** – Implemented the `sharedViewModels` concept so screens can work with a unified view model container, reducing boilerplate.  
+  - 🐞 **BUG 1 (Pending)** – In `HistoryImageScreen`, images display correctly initially, but selecting a field results in no images shown. Needs investigation: likely a filtering issue by ID or description. Consider adding an "All Fields / All Rows" option.  
+  - 🐞 **BUG 2 (Pending)** – `LocationScreen` shows two “Save and Continue” buttons. Needs cleanup.  
+ 
+---
+
+</details>
+
 
 
 <details>

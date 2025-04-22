@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee.ui.screens
 
+import PomolobeeViewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -21,15 +22,19 @@ import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.util.StorageUtils
 import de.nathabee.pomolobee.util.TimeUtils
 import de.nathabee.pomolobee.util.safeLaunch
+import de.nathabee.pomolobee.viewmodel.ImageViewModel
 
 
 @Composable
 fun SettingsScreen(
     navController: NavController? = null,
-    orchardViewModel: OrchardViewModel,
-    settingsViewModel: SettingsViewModel
+    sharedViewModels: PomolobeeViewModels
 ) {
     val context = LocalContext.current
+    val orchardViewModel = sharedViewModels.orchard
+    val imageViewModel = sharedViewModels.image
+    val settingsViewModel = sharedViewModels.settings
+
     val scope = rememberCoroutineScope()
 
     val lastSyncDate by settingsViewModel.lastSyncDate.collectAsState()
@@ -56,7 +61,8 @@ fun SettingsScreen(
                 safeLaunch(context, settingsViewModel.storageRootUri.value) {
                     settingsViewModel.setStorageRoot(selectedUri)
                     StorageUtils.copyAssetsIfNotExists(context, selectedUri)
-                    orchardViewModel.loadLocalConfig(selectedUri, context)
+                    orchardViewModel.loadConfigFromStorage(selectedUri, context)
+                    imageViewModel.loadImageCacheFromStorage(selectedUri)
                     settingsViewModel.invalidate()
                 }
             }
@@ -169,13 +175,19 @@ fun SettingsScreen(
             safeLaunch(context, settingsViewModel.storageRootUri.value) {
                 if (selectedSyncMode == "local") {
                     syncMessage = "⏳ Local config sync..."
-                    settingsViewModel.performLocalSync(context) { msg -> syncMessage = msg }
-                    //syncMessage = "Local sync completed"
+                    settingsViewModel.performLocalSync(context, sharedViewModels) { success ->
+                        syncMessage = if (success) "✅ Local sync complete"
+                        else "❌ Sync failed. See error log for details"
+                    }
+
                 } else {
                     // 🔧 Placeholder: implement cloud sync (download + save config + SVGs)
                     syncMessage = "⏳ Cloud config sync..."
-                    settingsViewModel.performCloudSync(context) { msg -> syncMessage = msg }
-                    //syncMessage = "Cloud sync completed"
+                    settingsViewModel.performCloudSync(context, sharedViewModels) { success ->
+                        syncMessage = if (success) "✅ Local sync complete"
+                        else "❌ Sync failed. See error log for details"
+                    }
+
                 }
             }
         }) {

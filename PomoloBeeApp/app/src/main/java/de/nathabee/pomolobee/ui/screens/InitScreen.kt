@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee.ui.screens
 
+import PomolobeeViewModels
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
@@ -19,9 +20,6 @@ import de.nathabee.pomolobee.util.PermissionManager
 import de.nathabee.pomolobee.util.StorageUtils
 import de.nathabee.pomolobee.viewmodel.StartupStatus
 
-import de.nathabee.pomolobee.viewmodel.InitViewModel
-import de.nathabee.pomolobee.viewmodel.OrchardViewModel
-import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,12 +27,16 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InitScreen(
-    settingsViewModel: SettingsViewModel,
-    orchardViewModel: OrchardViewModel,
-    initViewModel: InitViewModel,
+    sharedViewModels: PomolobeeViewModels,
     onInitFinished: () -> Unit
 ) {
     val context = LocalContext.current
+    val orchardViewModel = sharedViewModels.orchard
+    val imageViewModel = sharedViewModels.image
+    val settingsViewModel = sharedViewModels.settings
+    val initViewModel = sharedViewModels.init
+
+
     val coroutineScope = rememberCoroutineScope()
     val storageRootUri by settingsViewModel.storageRootUri.collectAsState()
 
@@ -106,8 +108,21 @@ fun InitScreen(
         withContext(Dispatchers.IO) {
             settingsViewModel.setStorageRoot(uri)
             StorageUtils.copyAssetsIfNotExists(context, uri)
-            orchardViewModel.loadLocalConfig(uri, context)
-            Log.d("InitScreen", "🧠 Orchard config loaded")
+            val orchardSuccess = orchardViewModel.loadConfigFromStorage(uri, context)
+            if (orchardSuccess) {
+                Log.d("InitScreen", "🧠 Orchard config loaded")
+            } else {
+                Log.e("InitScreen", "❌ Orchard config failed to load")
+            }
+
+            val imageSuccess = imageViewModel.loadImageCacheFromStorage(uri)
+            if (imageSuccess) {
+                Log.d("InitScreen", "📸 Image load success")
+            } else {
+                Log.e("InitScreen", "❌ Image load failed")
+            }
+
+
         }
         Log.d("InitScreen", "📦 Initial config load complete, now marking Ready")
         initViewModel.markInitDone() // ✅ explicitly after config load

@@ -1,10 +1,12 @@
 package de.nathabee.pomolobee.ui.screens
 
+import PomolobeeViewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import de.nathabee.pomolobee.ui.component.ImageCard
 import de.nathabee.pomolobee.ui.components.ExposedDropdownMenuBoxWithLabel
@@ -12,15 +14,19 @@ import de.nathabee.pomolobee.viewmodel.ImageViewModel
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 
-
 @Composable
 fun ImageHistoryScreen(
-    imageViewModel: ImageViewModel,
-    orchardViewModel: OrchardViewModel,
-    settingsViewModel: SettingsViewModel
+    sharedViewModels: PomolobeeViewModels
 ) {
+    val context = LocalContext.current
+    val orchardViewModel = sharedViewModels.orchard
+    val imageViewModel = sharedViewModels.image
+    val settingsViewModel = sharedViewModels.settings
+
+
     val locations by orchardViewModel.locations.collectAsState()
-    val images by imageViewModel.filteredImages.collectAsState()
+    val processedImages by imageViewModel.filteredImages.collectAsState()
+    val pendingImages by imageViewModel.filteredPendingImages.collectAsState()
 
     val selectedFieldId by imageViewModel.selectedFieldId.collectAsState()
     val selectedRowId by imageViewModel.selectedRowId.collectAsState()
@@ -29,7 +35,7 @@ fun ImageHistoryScreen(
         locations.find { it.field.fieldId == selectedFieldId }
     }
 
-    val rows = selectedLocation?.rows ?: emptyList()
+    val rows = selectedLocation?.rows.orEmpty()
     val selectedRow = rows.find { it.rowId == selectedRowId }
 
     Column(
@@ -37,7 +43,7 @@ fun ImageHistoryScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // 🌱 Field Dropdown
+        // 🌱 Field selector
         ExposedDropdownMenuBoxWithLabel(
             label = "🌱 Field",
             items = locations.map { it.field.name },
@@ -49,7 +55,7 @@ fun ImageHistoryScreen(
             }
         )
 
-        // 🌿 Row Dropdown
+        // 🌿 Row selector
         if (selectedLocation != null) {
             Spacer(Modifier.height(12.dp))
             ExposedDropdownMenuBoxWithLabel(
@@ -66,16 +72,34 @@ fun ImageHistoryScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        if (images.isEmpty()) {
-            Text("❌ No images found for this selection.")
+        // 🕒 Pending images
+        if (pendingImages.isNotEmpty()) {
+            Text("🕒 Pending Images", style = MaterialTheme.typography.titleMedium)
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(pendingImages.size) { idx ->
+                    ImageCard(
+                        image = pendingImages[idx],
+                        onPreview = { /* TODO: Preview image */ },
+                        onAnalyze = { /* TODO: Trigger analysis */ },
+                        onDelete = { /* TODO: Delete pending */ }
+                    )
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+        }
+
+        // ✅ Processed images
+        Text("✅ Processed Images", style = MaterialTheme.typography.titleMedium)
+        if (processedImages.isEmpty()) {
+            Text("❌ No processed images found for this selection.")
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(images.size) { idx ->
+                items(processedImages.size) { idx ->
                     ImageCard(
-                        image = images[idx],
-                        onPreview = { /* TODO: handle preview */ },
-                        onAnalyze = { /* TODO: handle analysis */ },
-                        onDelete = { /* TODO: handle delete */ }
+                        image = processedImages[idx],
+                        onPreview = { /* TODO: Preview image */ },
+                        onAnalyze = { /* TODO: Re-analyze */ },
+                        onDelete = { /* TODO: Delete processed */ }
                     )
                 }
             }

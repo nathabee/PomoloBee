@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
+import de.nathabee.pomolobee.cache.OrchardCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,15 +19,26 @@ import java.util.*
 
 object ErrorLogger {
 
-    fun logError(context: Context, storageRoot: Uri?, message: String, throwable: Throwable? = null) {
-        Log.d("ErrorLogger", "📌 Entered logError() with message: $message")
 
-        if (storageRoot == null) {
-            Log.w("ErrorLogger", "⚠️ No storageRoot provided, cannot write error.")
+    fun logError(context: Context, message: String, throwable: Throwable? = null) {
+        val rootUri = OrchardCache.currentRootUri
+        if (rootUri != null) {
+            logError(context, rootUri, message, throwable)
+        } else {
+            Log.e("ErrorLogger", "⚠️ No rootUri available in cache")
+            Log.e("ErrorLogger", message, throwable)
+        }
+    }
+
+    fun logError(context: Context, rootUri: Uri?, message: String, throwable: Throwable? = null) {
+            Log.d("ErrorLogger", "📌 Entered logError() with message: $message")
+
+        if (rootUri == null) {
+            Log.w("ErrorLogger", "⚠️ No rootUri provided, cannot write error.")
             return
         }
 
-        val rootDir = DocumentFile.fromTreeUri(context, storageRoot)
+        val rootDir = DocumentFile.fromTreeUri(context, rootUri)
         val logsDir = rootDir?.findFile("logs") ?: rootDir?.createDirectory("logs")
         val logFile = logsDir?.findFile("errors.json")
             ?: logsDir?.createFile("application/json", "errors.json")
@@ -67,8 +79,9 @@ object ErrorLogger {
 
 
 // in util/ErrorLogger.kt
-fun readErrors(context: Context, storageRoot: Uri?): List<String> {
-    if (storageRoot == null) return listOf("❌ No storage root set.")
+fun readErrors(context: Context, storageRoot: Uri? = OrchardCache.currentRootUri): List<String> {
+
+        if (storageRoot == null) return listOf("❌ No storage root set.")
 
     val rootDir = DocumentFile.fromTreeUri(context, storageRoot)
     val logsDir = rootDir?.findFile("logs")

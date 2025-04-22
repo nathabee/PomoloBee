@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee
 
+import PomolobeeViewModels
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -85,9 +86,7 @@ import de.nathabee.pomolobee.viewmodel.OrchardViewModelFactory
 @Composable
 fun AppScaffold(
     navController: NavHostController,
-    orchardViewModel: OrchardViewModel,
-    imageViewModel: ImageViewModel,
-    settingsViewModel: SettingsViewModel
+    sharedViewModels: PomolobeeViewModels
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -113,14 +112,13 @@ fun AppScaffold(
             Box(modifier = Modifier.padding(padding)) {
                 NavGraph(
                     navController = navController,
-                    orchardViewModel = orchardViewModel,
-                    imageViewModel = imageViewModel,
-                    settingsViewModel = settingsViewModel
+                    sharedViewModels = sharedViewModels
                 )
             }
         }
     }
 }
+
 
 
 
@@ -131,23 +129,20 @@ fun AppScaffold(
         val context = LocalContext.current
         val navController = rememberNavController()
 
-        val settingsViewModel: SettingsViewModel =
-            viewModel(factory = SettingsViewModelFactory(context))
-        val orchardViewModel: OrchardViewModel = viewModel(factory = OrchardViewModelFactory(context))
+        val sharedViewModels = PomolobeeViewModels(
+            settings = viewModel(factory = SettingsViewModelFactory(context)),
+            orchard = viewModel(factory = OrchardViewModelFactory(context)),
+            image = viewModel(factory = ImageViewModelFactory(context)),
+            init = viewModel(factory = InitViewModelFactory(context))
+        )
 
-        val imageViewModel: ImageViewModel= viewModel(factory = ImageViewModelFactory(context))
+        val initDone by sharedViewModels.init.initDone.collectAsState()
 
-
-        val initViewModel: InitViewModel = viewModel(factory = InitViewModelFactory(context))
-
-        val initDone by initViewModel.initDone.collectAsState()
 
         Log.d("PomoloBeeApp", "🚀 recomposed with initDone = $initDone")
         if (!initDone) {
             InitScreen(
-                settingsViewModel = settingsViewModel,
-                orchardViewModel = orchardViewModel,
-                initViewModel = initViewModel,
+                sharedViewModels = sharedViewModels,
                 onInitFinished = {
                     // is done is made bei initScreen
                     // initViewModel.markInitDone() // ✅ Triggers recompose and shows main app
@@ -157,9 +152,7 @@ fun AppScaffold(
         } else {
             AppScaffold(
                 navController = navController,
-                orchardViewModel = orchardViewModel,
-                settingsViewModel = settingsViewModel,
-                imageViewModel = imageViewModel
+                sharedViewModels = sharedViewModels
             )
         }
     }

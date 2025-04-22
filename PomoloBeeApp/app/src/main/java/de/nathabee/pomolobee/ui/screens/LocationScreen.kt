@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee.ui.screens
 
+import PomolobeeViewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,12 +20,14 @@ import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 @Composable
 fun LocationScreen(
     navController: NavController,
-    settingsViewModel: SettingsViewModel,
-    orchardViewModel: OrchardViewModel,
-    imageViewModel: ImageViewModel
+    sharedViewModels: PomolobeeViewModels
 )
 {
     val context = LocalContext.current
+    val orchardViewModel = sharedViewModels.orchard
+    val imageViewModel = sharedViewModels.image
+    val settingsViewModel = sharedViewModels.settings
+
 
     val locations by orchardViewModel.locations.collectAsState()
     val fruits by orchardViewModel.fruits.collectAsState()

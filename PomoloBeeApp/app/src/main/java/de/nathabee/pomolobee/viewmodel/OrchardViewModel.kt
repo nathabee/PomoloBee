@@ -15,6 +15,8 @@ import androidx.lifecycle.ViewModelProvider
 import de.nathabee.pomolobee.data.UserPreferences
 import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.model.Fruit
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class OrchardViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -45,20 +47,22 @@ class OrchardViewModel : ViewModel() {
     private val _syncStatus = MutableStateFlow<String?>(null)
     val syncStatus: StateFlow<String?> = _syncStatus
 
-    fun loadLocalConfig(rootUri: Uri, context: Context) {
-        viewModelScope.launch {
-            val success = OrchardRepository.loadAllConfigFromUri(context, rootUri)
-            if (success) {
-                _fruitCount.value = OrchardCache.fruits.size
-                _fieldCount.value = OrchardCache.locations.size
-                _locations.value = OrchardCache.locations
-                _fruits.value = OrchardCache.fruits
-
-
-            }
-            _syncStatus.value = if (success) "✅ Config loaded" else "❌ Failed to load"
+    suspend fun loadConfigFromStorage(rootUri: Uri, context: Context): Boolean {
+        val success = withContext(Dispatchers.IO) {
+            OrchardRepository.loadAllConfigFromUri(context, rootUri)
         }
+
+        if (success) {
+            _fruitCount.value = OrchardCache.fruits.size
+            _fieldCount.value = OrchardCache.locations.size
+            _locations.value = OrchardCache.locations
+            _fruits.value = OrchardCache.fruits
+        }
+
+        _syncStatus.value = if (success) "✅ Config loaded" else "❌ Failed to load"
+        return success
     }
+
 
 
 }

@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee.ui.screens
 
+import PomolobeeViewModels
 import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
@@ -35,12 +36,15 @@ fun injectBase64Image(svg: String, base64Image: String): String {
 @Composable
 fun SvgMapScreen(
     location: Location,
-    settingsViewModel: SettingsViewModel,
-    orchardViewModel: OrchardViewModel,
+    sharedViewModels: PomolobeeViewModels,
     navController: NavController,
     returnKey: String
 ) {
     val context = LocalContext.current
+    val orchardViewModel = sharedViewModels.orchard
+    val settingsViewModel = sharedViewModels.settings
+
+
     val storageRootUri by settingsViewModel.storageRootUri.collectAsState()
     val fruits by orchardViewModel.fruits.collectAsState()
 

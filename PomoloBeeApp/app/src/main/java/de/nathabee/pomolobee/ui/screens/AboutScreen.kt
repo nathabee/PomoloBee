@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee.ui.screens
 
+import PomolobeeViewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -10,8 +11,10 @@ import androidx.compose.ui.unit.dp
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 
 @Composable
-fun AboutScreen(settingsViewModel: SettingsViewModel) {
+fun AboutScreen(
+    sharedViewModels: PomolobeeViewModels) {
 
+    val settingsViewModel = sharedViewModels.settings
 
     val apiVersion by settingsViewModel.apiVersion.collectAsState()
 

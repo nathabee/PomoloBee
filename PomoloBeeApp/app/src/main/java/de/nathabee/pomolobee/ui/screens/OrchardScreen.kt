@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee.ui.screens
 
+import PomolobeeViewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,8 +16,10 @@ import de.nathabee.pomolobee.navigation.Screen
 @Composable
 fun OrchardScreen(
     navController: NavController,
-    orchardViewModel: OrchardViewModel
+    sharedViewModels: PomolobeeViewModels
 ) {
+    val orchardViewModel = sharedViewModels.orchard
+
     val locations by orchardViewModel.locations.collectAsState()
 
     LazyColumn(modifier = Modifier

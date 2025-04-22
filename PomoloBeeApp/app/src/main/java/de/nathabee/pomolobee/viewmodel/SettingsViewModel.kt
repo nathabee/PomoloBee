@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee.viewmodel
 
+import PomolobeeViewModels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -18,6 +19,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
 import androidx.datastore.preferences.core.edit
 import de.nathabee.pomolobee.repository.OrchardRepository
+import de.nathabee.pomolobee.sync.SyncManager
 
 
 class SettingsViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
@@ -130,72 +132,80 @@ class SettingsViewModel(
 
 
     fun performConnectionTest(context: Context, onResult: (Boolean) -> Unit) = viewModelScope.launch {
-        val api = apiEndpoint.value ?: return@launch
-        val media = mediaEndpoint.value ?: return@launch
+        val api = apiEndpoint.value
+        val media = mediaEndpoint.value
+        val rootUri = storageRootUri.value
 
-        try {
-            val result = ConnectionRepository.testConnection(api, media) { version ->
-                updateApiVersion(version)
-            }
-            onResult(result)
-        } catch (e: Exception) {
-            ErrorLogger.logError(context, storageRootUri.value, e.message ?: "❌ Unknown connection error", e)
+        if (api.isNullOrBlank() || media.isNullOrBlank()) {
             onResult(false)
+            return@launch
         }
+
+        val result = ConnectionRepository.testConnection(context, rootUri, api, media) {
+            updateApiVersion(it)
+        }
+
+        onResult(result)
     }
 
 
 
-    fun performLocalSync(context: Context, onResult: (String) -> Unit) = viewModelScope.launch {
-        try {
-            val rootUri = storageRootUri.value ?: throw IllegalStateException("❌ Storage root not set")
-            val success = OrchardRepository.loadAllConfigFromUri(context, rootUri)
-            if (!success) {
-                onResult("❌ Failed to load configuration after sync")
-                return@launch
-            }
-            updateLastSync(System.currentTimeMillis())
-
-            onResult("✅ Orchard configuration synced")
-        } catch (e: Exception) {
-            ErrorLogger.logError(context, storageRootUri.value, e.message ?: "❌ Sync failed", e)
-            onResult(e.message ?: "❌ Unknown sync error")
+    fun performLocalSync(
+        context: Context,
+        sharedViewModels: PomolobeeViewModels,
+        onResult: (Boolean) -> Unit
+    ) = viewModelScope.launch {
+        val rootUri = storageRootUri.value ?: run {
+            onResult(false)
+            return@launch
         }
+
+        val success = SyncManager.performLocalSync(context, rootUri, sharedViewModels)
+        onResult(success)
     }
 
 
-    fun performCloudSync(context: Context, onComplete: (String) -> Unit) = viewModelScope.launch {
+
+    fun performCloudSync(
+        context: Context,
+        sharedViewModels: PomolobeeViewModels,
+        onResult: (Boolean) -> Unit
+    ) = viewModelScope.launch {
         val apiUrl = apiEndpoint.value
         val mediaUrl = mediaEndpoint.value
         val rootUri = storageRootUri.value
 
         if (apiUrl.isNullOrBlank() || mediaUrl.isNullOrBlank() || rootUri == null) {
-            onComplete("❌ Missing API, media endpoint, or storage location")
+            ErrorLogger.logError(
+                context,
+                rootUri,
+                "❌ Missing configuration: apiUrl=$apiUrl, mediaUrl=$mediaUrl, rootUri=$rootUri"
+            )
+            onResult(false)
             return@launch
         }
 
-        try {
-            // ✅ Run the connection test first
-            val connected = ConnectionRepository.testConnection(apiUrl, mediaUrl) { version ->
-                updateApiVersion(version)
-            }
 
-            if (!connected) {
-                onComplete("❌ Connection test failed — cloud sync aborted")
-                return@launch
-            }
-
-            // ✅ Proceed with cloud sync
-            val result = ConnectionRepository.performCloudSync(context, rootUri, apiUrl, mediaUrl)
-
-            updateLastSync(System.currentTimeMillis())
-            onComplete(result)
-
-        } catch (e: Exception) {
-            onComplete("❌ Cloud sync failed: ${e.message}")
-            ErrorLogger.logError(context, rootUri, "Cloud sync error", e)
+        val connected = ConnectionRepository.testConnection(context, rootUri, apiUrl, mediaUrl) {
+            updateApiVersion(it)
         }
+
+        if (!connected) {
+            onResult(false)
+            return@launch
+        }
+
+        val result = SyncManager.performCloudSync(
+            context = context,
+            rootUri = rootUri,
+            apiUrl = apiUrl,
+            mediaUrl = mediaUrl,
+            sharedViewModels = sharedViewModels
+        )
+
+        onResult(result)
     }
+
 
 
 

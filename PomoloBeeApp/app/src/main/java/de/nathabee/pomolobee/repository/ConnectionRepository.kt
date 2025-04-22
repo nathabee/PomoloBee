@@ -26,249 +26,191 @@ import de.nathabee.pomolobee.util.parseXYLocation
 
 
 object ConnectionRepository {
-
     suspend fun testConnection(
+        context: Context,
+        rootUri: Uri?,
         apiUrl: String,
         mediaUrl: String,
         onVersionRetrieved: (String) -> Unit
     ): Boolean = withContext(Dispatchers.IO) {
         Log.d("ConnectionTest", "🌐 Starting connection test...")
 
-        // --- API Check ---
-        val version = try {
-            val conn = URL("$apiUrl/ml/version/").openConnection() as HttpURLConnection
-            conn.requestMethod = "GET"
-            conn.connect()
-
-            if (conn.responseCode != 200) {
-                throw Exception("API responded with code ${conn.responseCode}")
-            }
-
-            val raw = conn.inputStream.bufferedReader().readText()
-            val json = JSONObject(raw)
-            val modelVersion = json.getJSONObject("data").getString("model_version")
-
-            Log.d("ConnectionTest", "✅ API model version: $modelVersion")
-            modelVersion
-        } catch (e: Exception) {
-            throw Exception("❌ API connection failed", e)
-        }
-
-
-        onVersionRetrieved(version)
-
-        // --- Media Check ---
         try {
-            val conn = URL("$mediaUrl/fields/svg/default_map.svg").openConnection() as HttpURLConnection
-            conn.requestMethod = "HEAD"
-            conn.connect()
+            // --- API Check ---
+            val version = try {
+                val conn = URL("$apiUrl/ml/version/").openConnection() as HttpURLConnection
+                conn.requestMethod = "GET"
+                conn.connect()
 
-            if (conn.responseCode != 200) {
-                throw Exception("Media responded with code ${conn.responseCode}")
+                if (conn.responseCode != 200) {
+                    throw Exception("API responded with code ${conn.responseCode}")
+                }
+
+                val raw = conn.inputStream.bufferedReader().readText()
+                val json = JSONObject(raw)
+                val modelVersion = json.getJSONObject("data").getString("model_version")
+
+                Log.d("ConnectionTest", "✅ API model version: $modelVersion")
+                modelVersion
+            } catch (e: Exception) {
+                ErrorLogger.logError(context, rootUri, "❌ API connection failed", e)
+                return@withContext false
             }
-        } catch (e: Exception) {
-            throw Exception("❌ Media connection failed", e)
-        }
 
-        Log.d("ConnectionTest", "✅ Connection test passed")
-        true
+            onVersionRetrieved(version)
+
+            // --- Media Check ---
+            try {
+                val conn = URL("$mediaUrl/fields/svg/default_map.svg").openConnection() as HttpURLConnection
+                conn.requestMethod = "HEAD"
+                conn.connect()
+
+                if (conn.responseCode != 200) {
+                    throw Exception("Media responded with code ${conn.responseCode}")
+                }
+            } catch (e: Exception) {
+                ErrorLogger.logError(context, rootUri, "❌ Media connection failed", e)
+                return@withContext false
+            }
+
+            Log.d("ConnectionTest", "✅ Connection test passed")
+            true
+        } catch (e: Exception) {
+            ErrorLogger.logError(context, rootUri, "💥 Unexpected connection error", e)
+            false
+        }
     }
 
 
     //CLOUD
+    suspend fun performCloudSync(
+        context: Context,
+        rootUri: Uri,
+        apiUrl: String,
+        mediaUrl: String
+    ): Boolean = withContext(Dispatchers.IO) {
 
+        val gson = Gson()
 
-    suspend fun performCloudSync(context: Context, rootUri: Uri, apiUrl: String, mediaUrl: String): String {
-
-            val gson = Gson()
-
-            // 🔗 Step 1: Fetch config JSONs
+        try {
+            // Step 1: Fetch config
             val locationsJson = try {
                 OrchardApiService.fetchLocations(apiUrl)
             } catch (e: Exception) {
-                Log.e("CloudSync", "❌ Failed to fetch locations", e)
-                return "❌ Failed to fetch locations: ${e.message}"
+                ErrorLogger.logError(context, rootUri, "❌ Failed to fetch locations", e)
+                return@withContext false
             }
 
             val fruitsJson = try {
                 OrchardApiService.fetchFruits(apiUrl)
             } catch (e: Exception) {
-                Log.e("CloudSync", "❌ Failed to fetch fruits", e)
-                return "❌ Failed to fetch fruits: ${e.message}"
+                ErrorLogger.logError(context, rootUri, "❌ Failed to fetch fruits", e)
+                return@withContext false
             }
 
-
-            // 💾 Step 2: Save to /config/
-            val savedLocations =
-                StorageUtils.saveTextFile(context, rootUri, "config/locations.json", locationsJson)
-            val savedFruits =
-                StorageUtils.saveTextFile(context, rootUri, "config/fruits.json", fruitsJson)
-
-            if (!savedLocations || !savedFruits) {
-                return "❌ Failed to save config files to local storage"
+            // Step 2: Save
+            if (!StorageUtils.saveTextFile(context, rootUri, "config/locations.json", locationsJson) ||
+                !StorageUtils.saveTextFile(context, rootUri, "config/fruits.json", fruitsJson)) {
+                ErrorLogger.logError(context, rootUri, "❌ Failed to save config files")
+                return@withContext false
             }
 
-            // 🧠 Step 3: Parse locations JSON
             val locationResponse = gson.fromJson(locationsJson, LocationResponse::class.java)
 
-            // Collect unique SVG names
+            // Step 3: SVGs
             val svgNames = locationResponse.data.locations.mapNotNull {
-                it.field.svgMapUrl?.substringAfterLast("/")
-                    ?.takeIf { name -> name.endsWith(".svg") }
+                it.field.svgMapUrl?.substringAfterLast("/")?.takeIf { name -> name.endsWith(".svg") }
             }.distinct()
 
-            try {
-                // 📥 Step 4: Download SVGs
-                for (svgName in svgNames) {
-                    try {
-                        val svgBytes =
-                            OrchardApiService.fetchBinaryFromUrl("$mediaUrl/fields/svg/$svgName")
-                        val saved = StorageUtils.saveBinaryFile(
-                            context,
-                            rootUri,
-                            "fields/svg/$svgName",
-                            svgBytes,
-                            "image/svg+xml"
-                        )
-                        if (!saved) {
-                            Log.w("CloudSync", "⚠️ Failed to save SVG: $svgName")
-                        }
-                    } catch (e: Exception) {
-                        Log.e("CloudSync", "❌ Error downloading SVG $svgName", e)
+            for (svgName in svgNames) {
+                try {
+                    val svgBytes = OrchardApiService.fetchBinaryFromUrl("$mediaUrl/fields/svg/$svgName")
+                    val saved = StorageUtils.saveBinaryFile(context, rootUri, "fields/svg/$svgName", svgBytes, "image/svg+xml")
+                    if (!saved) {
+                        ErrorLogger.logError(context, rootUri, "⚠️ Failed to save SVG: $svgName")
                     }
-                }
-
-                // 🖼 Step 5: Download Background Images
-                val backgroundNames = locationResponse.data.locations.mapNotNull {
-                    it.field.backgroundImageUrl?.substringAfterLast("/")?.takeIf { name ->
-                        name.endsWith(".jpeg", ignoreCase = true) || name.endsWith(
-                            ".jpg",
-                            ignoreCase = true
-                        )
-                    }
-                }.distinct()
-
-                for (bgName in backgroundNames) {
-                    try {
-                        val bgBytes =
-                            OrchardApiService.fetchBinaryFromUrl("$mediaUrl/fields/background/$bgName")
-                        val saved = StorageUtils.saveBinaryFile(
-                            context,
-                            rootUri,
-                            "fields/background/$bgName",
-                            bgBytes,
-                            "image/jpeg"
-                        )
-                        if (!saved) {
-                            Log.w("CloudSync", "⚠️ Failed to save background: $bgName")
-                        }
-                    } catch (e: Exception) {
-                        Log.e("CloudSync", "❌ Error downloading background $bgName", e)
-                    }
-                }
-
-                // ✅ Step 6: Load config into cache
-                val success = OrchardRepository.loadAllConfigFromUri(context, rootUri)
-                if (!success) {
-                    return "❌ Failed to load configuration after sync"
-                }
-
-                // 🖼 Step 7: Download image list
-                // 🖼 Step 7: Download image list
-                val imagesJson = try {
-                    ImageApiService.fetchImagesList(apiUrl)
                 } catch (e: Exception) {
-                    Log.e("CloudSync", "❌ Failed to fetch image list", e)
-                    return "❌ Failed to fetch image list: ${e.message}"
+                    ErrorLogger.logError(context, rootUri, "❌ Failed to download SVG $svgName", e)
                 }
-
-                val savedImages = StorageUtils.saveTextFile(
-                    context,
-                    rootUri,
-                    "image_data/images.json",
-                    imagesJson
-                )
-                if (!savedImages) {
-                    return "❌ Failed to save images.json to local storage"
-                }
-
-                // ✅ Parse and validate images before caching
-                val imageList = try {
-                    Gson().fromJson(imagesJson, ImageListResponse::class.java).data.images
-                } catch (e: Exception) {
-                    Log.e("CloudSync", "❌ Failed to parse images.json", e)
-                    return "❌ Failed to parse images.json"
-                }
-
-                // ✅ Optional: filter images that have valid xy_location
-                val validImages = imageList.filter { parseXYLocation(it.xyLocation) != null }
-                OrchardCache.loadImages(validImages)
-
-                Log.d("CloudSync", "📍 Loaded ${validImages.size} images with valid xy_location")
-
-
-                // 📊 Step 8: Download estimation data for all fields
-                val fieldIds = locationResponse.data.locations.map { it.field.fieldId }.distinct()
-
-                val allEstimations = mutableListOf<String>()
-                for (fieldId in fieldIds) {
-                    try {
-                        val estimationsJson =
-                            ImageApiService.fetchEstimationsForField(apiUrl, fieldId)
-                        allEstimations.add(estimationsJson)
-                    } catch (e: Exception) {
-                        Log.e("CloudSync", "❌ Failed to fetch estimations for field $fieldId", e)
-                    }
-                }
-
-                // Combine all estimation arrays into one if you want to merge them
-                val parsedEstimations = allEstimations
-                    .mapNotNull { json ->
-                        try {
-                            Gson().fromJson(json, EstimationResponse::class.java).data.estimations
-                        } catch (e: Exception) {
-                            Log.e("CloudSync", "❌ Failed parsing one estimation response", e)
-                            null
-                        }
-                    }.flatten()
-
-                val estimationData = EstimationData(estimations = parsedEstimations)
-                val finalEstimationJson =
-                    Gson().toJson(EstimationResponse("success", estimationData))
-
-
-                val savedEstimations = StorageUtils.saveTextFile(
-                    context,
-                    rootUri,
-                    "image_data/estimations.json",
-                    finalEstimationJson
-                )
-                if (!savedEstimations) {
-                    return "❌ Failed to save estimations.json to local storage"
-                }
-
-
-                return "✅ Cloud sync completed successfully"
-            } catch (e: Exception) {
-                Log.e("CloudSync", "💥 Unexpected cloud sync failure", e)
-                return "❌ Unexpected failure: ${e.message}"
             }
-        }
 
-}
+            // Step 4: Backgrounds
+            val bgNames = locationResponse.data.locations.mapNotNull {
+                it.field.backgroundImageUrl?.substringAfterLast("/")?.takeIf { it.endsWith(".jpg", true) || it.endsWith(".jpeg", true) }
+            }.distinct()
 
-// Generic list reader NOT USED ANYMORE
-inline fun <reified T> readListFromJson(context: Context, fileUri: Uri, gson: Gson): List<T>? {
-    return try {
-        context.contentResolver.openInputStream(fileUri)?.use { stream ->
-            val json = stream.bufferedReader().readText()
-            val type = TypeToken.getParameterized(List::class.java, T::class.java).type
-            gson.fromJson(json, type)
+            for (bgName in bgNames) {
+                try {
+                    val bgBytes = OrchardApiService.fetchBinaryFromUrl("$mediaUrl/fields/background/$bgName")
+                    val saved = StorageUtils.saveBinaryFile(context, rootUri, "fields/background/$bgName", bgBytes, "image/jpeg")
+                    if (!saved) {
+                        ErrorLogger.logError(context, rootUri, "⚠️ Failed to save background: $bgName")
+                    }
+                } catch (e: Exception) {
+                    ErrorLogger.logError(context, rootUri, "❌ Failed to download background $bgName", e)
+                }
+            }
+
+            // Step 5: Save image list
+            val imagesJson = try {
+                ImageApiService.fetchImagesList(apiUrl)
+            } catch (e: Exception) {
+                ErrorLogger.logError(context, rootUri, "❌ Failed to fetch image list", e)
+                return@withContext false
+            }
+
+            if (!StorageUtils.saveTextFile(context, rootUri, "image_data/images.json", imagesJson)) {
+                ErrorLogger.logError(context, rootUri, "❌ Failed to save images.json")
+                return@withContext false
+            }
+
+            // Step 6: Estimations
+            val fieldIds = locationResponse.data.locations.map { it.field.fieldId }.distinct()
+            val allEstimations = mutableListOf<String>()
+
+            for (fieldId in fieldIds) {
+                try {
+                    allEstimations.add(ImageApiService.fetchEstimationsForField(apiUrl, fieldId))
+                } catch (e: Exception) {
+                    ErrorLogger.logError(context, rootUri, "❌ Failed to fetch estimations for field $fieldId", e)
+                }
+            }
+
+            val parsedEstimations = allEstimations.mapNotNull { json ->
+                try {
+                    gson.fromJson(json, EstimationResponse::class.java).data.estimations
+                } catch (e: Exception) {
+                    ErrorLogger.logError(context, rootUri, "❌ Failed parsing estimation response", e)
+                    null
+                }
+            }.flatten()
+
+
+            val estimJson = gson.toJson(EstimationResponse("success", EstimationData(parsedEstimations)))
+            if (!StorageUtils.saveTextFile(context, rootUri, "image_data/estimations.json", estimJson)) {
+                ErrorLogger.logError(context, rootUri, "❌ Failed to save estimations.json")
+                return@withContext false
+            }
+
+            // Step 7: Final cache reloads
+            val configOk = OrchardRepository.loadAllConfigFromUri(context, rootUri)
+            val imageOk = ImageRepository.loadAllImageDataFromUri(context, rootUri)
+
+            if (!configOk) ErrorLogger.logError(context, rootUri, "❌ Reloading orchard config failed")
+            if (!imageOk) ErrorLogger.logError(context, rootUri, "❌ Reloading image data failed")
+
+            if (configOk && imageOk) {
+                Log.d("CloudSync", "✅ Cloud sync completed with minor warnings (see logs)")
+            }
+
+            return@withContext configOk && imageOk
+
+        } catch (e: Exception) {
+            ErrorLogger.logError(context, rootUri, "❌ Unexpected Cloud Sync error", e)
+            return@withContext false
         }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
     }
+
 
 }
 

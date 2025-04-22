@@ -1,35 +1,40 @@
 package de.nathabee.pomolobee.model
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+
+@Serializable
 data class ImageRecord(
-    @SerializedName("image_id") val imageId: Int,
-    @SerializedName("row_id") val rowId: Int,
-    @SerializedName("field_id") val fieldId: Int,
-    @SerializedName("xy_location") val xyLocation: String?,  //value is a JSON string like {"x":0.42,"y":0.75},
-    @SerializedName("fruit_type") val fruitType: String,
-    @SerializedName("user_fruit_plant") val userFruitPlant: Int,
-    @SerializedName("upload_date") val uploadDate: String,
-    @SerializedName("date") val date: String,
-    @SerializedName("image_url") val imageUrl: String,
-    @SerializedName("original_filename") val originalFilename: String?,
-    val processed: Boolean,
-    @SerializedName("processed_at") val processedAt: String?,
-    val status: String
+    @SerialName("image_id") val imageId: Int? = null,
+    @SerialName("row_id") val rowId: Int,
+    @SerialName("field_id") val fieldId: Int,
+    @SerialName("xy_location") val xyLocation: String? = null,
+    @SerialName("fruit_type") val fruitType: String,
+    @SerialName("user_fruit_plant") val userFruitPlant: Int? = null,
+    @SerialName("upload_date") val uploadDate: String? = null,
+    @SerialName("date") val date: String,
+    @SerialName("image_url") val imageUrl: String? = null,
+    @SerialName("original_filename") val originalFilename: String? = null,
+    val processed: Boolean = false,
+    @SerialName("processed_at") val processedAt: String? = null,
+    val status: String = "pending"
 )
 
+@Serializable
 data class ImageListResponse(
     val status: String,
     val data: ImageListData
 )
 
+@Serializable
 data class ImageListData(
     val total: Int,
     val limit: Int,
     val offset: Int,
     val images: List<ImageRecord>
 )
-
 
 
 

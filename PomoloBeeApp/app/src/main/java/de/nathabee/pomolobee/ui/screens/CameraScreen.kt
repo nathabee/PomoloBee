@@ -10,6 +10,7 @@ DisposableEffect(Unit) {
  */
 package de.nathabee.pomolobee.ui.screens
 
+import PomolobeeViewModels
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -29,6 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import de.nathabee.pomolobee.model.ImageListData
+import de.nathabee.pomolobee.model.ImageListResponse
+import de.nathabee.pomolobee.model.ImageRecord
 import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.model.Row
 import de.nathabee.pomolobee.navigation.Screen
@@ -37,28 +41,26 @@ import de.nathabee.pomolobee.viewmodel.OrchardViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import java.io.File
 import de.nathabee.pomolobee.util.StorageUtils
-import de.nathabee.pomolobee.util.toJsonObject
 import de.nathabee.pomolobee.viewmodel.ImageViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
 import java.util.Locale
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
 
 // name of picture <FieldShortName>_<RowShortName>_<yyyyMMdd_HHmmss>.jpg
 
 @Composable
 fun CameraScreen(
     navController: NavController,
-    settingsViewModel: SettingsViewModel,
-    orchardViewModel: OrchardViewModel,
-    imageViewModel: ImageViewModel
+    sharedViewModels: PomolobeeViewModels
 ) {
     val context = LocalContext.current
+    val orchardViewModel = sharedViewModels.orchard
+    val imageViewModel = sharedViewModels.image
+    val settingsViewModel = sharedViewModels.settings
+
 
     //val imageDirectory by settingsViewModel.imageDirectory.collectAsState()
     val selectedFieldId by settingsViewModel.selectedFieldId.collectAsState()
@@ -75,7 +77,10 @@ fun CameraScreen(
 
     //val dateFormatter = remember { java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
 
-    val latestJsonEntry = remember { mutableStateOf<Map<String, Any?>?>(null) }
+    val latestJsonEntry = remember { mutableStateOf<ImageRecord?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+
+
 
 
 
@@ -151,35 +156,51 @@ fun CameraScreen(
         }
     }
 
-    //LaunchedEffect(Unit) {
     LaunchedEffect(latestJsonEntry.value) {
-            val entry = latestJsonEntry.value ?: return@LaunchedEffect
+        val entry = latestJsonEntry.value ?: return@LaunchedEffect
 
-            //val pendingDir = StorageUtils.resolveSubDirectory(context, storageRootUri, "pending_images")
-            val pendingPath = "image_data/pending_images.json"
+        val pendingPath = "image_data/pending_images.json"
 
-            val existingJson = StorageUtils.readJsonFileFromStorage(context, storageRootUri!!, pendingPath)
-            val entries = if (!existingJson.isNullOrBlank()) {
-                Json.decodeFromString<List<Map<String, Any?>>>(existingJson)
-            } else {
+        val existingJson = StorageUtils.readJsonFileFromStorage(context, storageRootUri!!, pendingPath)
+
+        val existingEntries = if (!existingJson.isNullOrBlank()) {
+            try {
+                Json.decodeFromString<ImageListResponse>(existingJson).data.images
+            } catch (e: Exception) {
+                Log.e("CameraScreen", "❌ Failed to parse pending_images.json", e)
                 emptyList()
             }
-
-            val updatedJsonObjects = (entries + entry).map { it.toJsonObject() }
-            val newJson = Json.encodeToString(ListSerializer(JsonObject.serializer()), updatedJsonObjects)
-
-
-
-            val saved = StorageUtils.saveTextFile(context, storageRootUri!!, pendingPath, newJson)
-            if (!saved) {
-                Log.e("CameraScreen", "❌ Failed to write pending_images.json")
-            } else {
-                Log.d("CameraScreen", "✅ pending_images.json updated")
-            }
-
-            // Clear to avoid duplicate saves
-            latestJsonEntry.value = null
+        } else {
+            emptyList()
         }
+
+        val updatedEntries = existingEntries + entry
+
+        val wrapped = ImageListResponse(
+            status = "pending",
+            data = ImageListData(
+                total = updatedEntries.size,
+                limit = 100,
+                offset = 0,
+                images = updatedEntries
+            )
+        )
+
+        val newJson = Json.encodeToString(ImageListResponse.serializer(), wrapped)
+
+        val saved = StorageUtils.saveTextFile(context, storageRootUri!!, pendingPath, newJson)
+        if (!saved) {
+            Log.e("CameraScreen", "❌ Failed to write pending_images.json")
+        } else {
+            Log.d("CameraScreen", "✅ pending_images.json updated")
+        }
+
+        imageViewModel.addPendingImage(entry)
+
+        latestJsonEntry.value = null // Avoid duplicates
+    }
+
+
 
 
 
@@ -188,20 +209,7 @@ fun CameraScreen(
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
 
-        // Send row back to CameraScreen
-        /*
-        Button(
-            onClick = {
-                selectedRow?.let { sendHandle?.set("${cameraReturnKey}_rowId", it) }
-                imageViewModel.pendingXYLocation.value?.let { xy ->
-                    sendHandle?.set("${cameraReturnKey}_xy", xy)
-                }
-                navController.popBackStack()
-            },
-            enabled = selectedLocation != null && selectedRow != null
-        ) {
-            Text("✅ Confirm & Continue")
-        }*/
+
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = {
@@ -256,6 +264,7 @@ fun CameraScreen(
 
         Text("📌 Status: $locationStatus")
 
+        /*
         Button(onClick = {
             val sourceUri = imageSourceUri.value
             //val imagesDir = resolveSubDirectory(context, settingsViewModel.storageRootUri.value, "images")
@@ -293,23 +302,23 @@ fun CameraScreen(
                             Log.d("CameraScreen", "✅ Saved to: /images/$fileName")
 
                         }
-                        val jsonEntry = mapOf(
-                            "image_id" to null,
-                            "row_id" to selectedRow?.rowId,
-                            "field_id" to selectedLocation?.field?.fieldId,
-                            "xy_location" to imageViewModel.pendingXYLocation.value,
-                            "fruit_type" to selectedRow?.fruitType  ,
-                            "user_fruit_plant" to userFruitPerPlant.toIntOrNull(),
-                            "upload_date" to null,
-                            "date" to captureDate,
-                            "image_url" to null,
-                            "original_filename" to fileName,
-                            "processed" to false,
-                            "processed_at" to null,
-                            "status" to "pending"
+                        val imageRecord = ImageRecord(
+                            imageId = -1, // or null if you're using nullable Int? — make sure your class allows that!
+                            rowId = selectedRow?.rowId ?: -1,
+                            fieldId = selectedLocation?.field?.fieldId ?: -1,
+                            xyLocation = imageViewModel.pendingXYLocation.value,
+                            fruitType = selectedRow?.fruitType ?: "Unknown",
+                            userFruitPlant = userFruitPerPlant.toIntOrNull() ?: 0,
+                            uploadDate = "", // or null, depending on your model
+                            date = captureDate,
+                            imageUrl = "",
+                            originalFilename = fileName,
+                            processed = false,
+                            processedAt = null,
+                            status = "pending"
                         )
 
-                        latestJsonEntry.value = jsonEntry // ✅ save for writing JSON file
+                        latestJsonEntry.value = imageRecord  // ✅ save for writing JSON file
 
 
 
@@ -330,7 +339,79 @@ fun CameraScreen(
             }
         }) {
             Text("💾 Save Image Locally")
+        }*/
+
+        Button(onClick = {
+            val sourceUri = imageSourceUri.value
+            if (imagesDir == null || sourceUri == null) {
+                val msg = "❌ Missing image source or image directory"
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                ErrorLogger.logError(context, storageRootUri, msg)
+                return@Button
+            }
+
+            coroutineScope.launch {
+                withContext(Dispatchers.IO) {
+                    try {
+                        val resolver = context.contentResolver
+                        val inputStream = resolver.openInputStream(sourceUri)
+                        val originalBitmap = BitmapFactory.decodeStream(inputStream)
+                        val resized = Bitmap.createScaledBitmap(originalBitmap, 800, 600, true)
+
+                        val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                            .format(System.currentTimeMillis())
+
+                        val fieldShort = selectedLocation?.field?.shortName ?: "UnknownField"
+                        val rowShort = selectedRow?.shortName ?: "UnknownRow"
+                        val fileName = "${fieldShort}_${rowShort}_$timestamp.jpg"
+
+                        val imageFile = imagesDir.createFile("image/jpeg", fileName)
+
+                        if (imageFile != null) {
+                            resolver.openOutputStream(imageFile.uri)?.use { output ->
+                                resized.compress(Bitmap.CompressFormat.JPEG, 85, output)
+                            }
+
+                            val imageRecord = ImageRecord(
+                                imageId = -1,
+                                rowId = selectedRow?.rowId ?: -1,
+                                fieldId = selectedLocation?.field?.fieldId ?: -1,
+                                xyLocation = imageViewModel.pendingXYLocation.value,
+                                fruitType = selectedRow?.fruitType ?: "Unknown",
+                                userFruitPlant = userFruitPerPlant.toIntOrNull() ?: 0,
+                                uploadDate = "",
+                                date = captureDate,
+                                imageUrl = "",
+                                originalFilename = fileName,
+                                processed = false,
+                                processedAt = null,
+                                status = "pending"
+                            )
+
+                            latestJsonEntry.value = imageRecord
+
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, "✅ Saved to /images/$fileName", Toast.LENGTH_SHORT).show()
+                                Log.d("CameraScreen", "✅ Saved to: /images/$fileName")
+                            }
+                        } else {
+                            throw Exception("Could not create image file")
+                        }
+                    } catch (e: Exception) {
+                        val msg = "❌ Failed to process and save image"
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        }
+                        ErrorLogger.logError(context, storageRootUri, msg, e)
+                    }
+                }
+            }
+        })
+        {
+            Text("💾 Save Image Locally")
         }
+
+
 
 
 

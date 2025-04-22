@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee.ui.screens
 
+import PomolobeeViewModels
 import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -15,8 +16,11 @@ import java.io.File
 
 @Composable
 fun ErrorLogScreen(navController: NavController? = null,
-                   settingsViewModel: SettingsViewModel) {
+                   sharedViewModels: PomolobeeViewModels) {
     val context = LocalContext.current
+    val settingsViewModel = sharedViewModels.settings
+
+
     val errorMessages = remember { mutableStateListOf<String>() }
 
     LaunchedEffect(Unit) {

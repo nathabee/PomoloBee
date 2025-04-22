@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee.cache
 
+import android.net.Uri
 import de.nathabee.pomolobee.model.*
 
 object OrchardCache {
@@ -7,6 +8,13 @@ object OrchardCache {
     var locations: List<Location> = emptyList()
     var images: List<ImageRecord> = emptyList()
     var estimations: List<Estimation> = emptyList()
+
+    var pendingImages: List<ImageRecord> = emptyList()
+    var currentRootUri: Uri? = null
+
+    fun loadPendingImages(imageList: List<ImageRecord>) {
+        pendingImages = imageList
+    }
 
     fun isInitialized(): Boolean =
         fruits.isNotEmpty() && locations.isNotEmpty()
@@ -36,5 +44,9 @@ object OrchardCache {
 
     fun loadEstimations(estimationList: List<Estimation>) {
         estimations = estimationList
+    }
+
+    fun setRootUri(uri: Uri) {
+        currentRootUri = uri
     }
 }

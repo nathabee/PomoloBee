@@ -1,5 +1,6 @@
 package de.nathabee.pomolobee.navigation
 
+import PomolobeeViewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -17,10 +18,12 @@ import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    orchardViewModel: OrchardViewModel,
-    imageViewModel: ImageViewModel,
-    settingsViewModel: SettingsViewModel
+    sharedViewModels: PomolobeeViewModels
 ) {
+    val orchardViewModel = sharedViewModels.orchard
+    val imageViewModel = sharedViewModels.image
+    val settingsViewModel = sharedViewModels.settings
+
     val locations by orchardViewModel.locations.collectAsState()
 
     NavHost(
@@ -32,9 +35,7 @@ fun NavGraph(
         composable(Screen.Camera.route) {
             CameraScreen(
                 navController = navController,
-                orchardViewModel = orchardViewModel,
-                settingsViewModel = settingsViewModel,
-                imageViewModel = imageViewModel,
+                sharedViewModels = sharedViewModels
             )
         }
 
@@ -47,8 +48,7 @@ fun NavGraph(
         composable(Screen.Settings.route) {
             SettingsScreen(
                 navController = navController,
-                orchardViewModel = orchardViewModel,
-                settingsViewModel = settingsViewModel
+                sharedViewModels = sharedViewModels
             )
         }
 
@@ -56,7 +56,7 @@ fun NavGraph(
         composable(Screen.Orchard.route) {
             OrchardScreen(
                 navController = navController,
-                orchardViewModel = orchardViewModel
+                sharedViewModels = sharedViewModels
             )
         }
 
@@ -64,18 +64,14 @@ fun NavGraph(
         composable(Screen.Location.route) {
             LocationScreen(
                 navController = navController,
-                orchardViewModel = orchardViewModel,
-                settingsViewModel = settingsViewModel,
-                imageViewModel = imageViewModel
+                sharedViewModels = sharedViewModels
             )
         }
 
         // 🖼️ Image History
         composable(Screen.ImageHistory.route) {
             ImageHistoryScreen(
-                orchardViewModel = orchardViewModel,
-                imageViewModel = imageViewModel,
-                settingsViewModel = settingsViewModel
+                sharedViewModels = sharedViewModels
             )
         }
 
@@ -98,27 +94,27 @@ fun NavGraph(
             val returnKey = backStackEntry.arguments?.getString("returnKey") ?: "svg_return"
             val location = locations.find { it.field.fieldId == fieldId }
 
-            if (location != null) {
+            locations.find { it.field.fieldId == fieldId }?.let { location ->
                 SvgMapScreen(
                     location = location,
-                    settingsViewModel = settingsViewModel,
-                    orchardViewModel = orchardViewModel,
+                    sharedViewModels = sharedViewModels,
                     navController = navController,
                     returnKey = returnKey
                 )
-            } else {
-                Text("❌ Field not found")
-            }
+            } ?: Text("❌ Field not found")
+
         }
 
         // 🐞 Error Log
         composable(Screen.ErrorLog.route) {
-            ErrorLogScreen(settingsViewModel = settingsViewModel)
+            ErrorLogScreen(
+                sharedViewModels = sharedViewModels)
         }
 
         // ℹ️ About
         composable(Screen.About.route) {
-            AboutScreen(settingsViewModel = settingsViewModel)
+            AboutScreen(
+                sharedViewModels = sharedViewModels)
         }
     }
 }
