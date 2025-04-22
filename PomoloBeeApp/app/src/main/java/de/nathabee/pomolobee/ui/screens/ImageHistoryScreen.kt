@@ -10,9 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import de.nathabee.pomolobee.ui.component.ImageCard
 import de.nathabee.pomolobee.ui.components.ExposedDropdownMenuBoxWithLabel
-import de.nathabee.pomolobee.viewmodel.ImageViewModel
-import de.nathabee.pomolobee.viewmodel.OrchardViewModel
-import de.nathabee.pomolobee.viewmodel.SettingsViewModel
+
 
 @Composable
 fun ImageHistoryScreen(
@@ -44,31 +42,48 @@ fun ImageHistoryScreen(
             .padding(16.dp)
     ) {
         // 🌱 Field selector
+        val fieldNames = listOf("All Fields") + locations.map { it.field.name }
+
         ExposedDropdownMenuBoxWithLabel(
             label = "🌱 Field",
-            items = locations.map { it.field.name },
-            selectedItem = selectedLocation?.field?.name,
+            items = fieldNames,
+            selectedItem = selectedLocation?.field?.name ?: "All Fields",
             onItemSelected = { name ->
-                val selected = locations.find { it.field.name == name }
-                imageViewModel.selectField(selected?.field?.fieldId)
-                settingsViewModel.updateSelectedField(selected?.field?.fieldId ?: -1)
+                if (name == "All Fields") {
+                    imageViewModel.selectField(null)
+                    settingsViewModel.updateSelectedField(-1)
+                } else {
+                    val selected = locations.find { it.field.name == name }
+                    imageViewModel.selectField(selected?.field?.fieldId)
+                    settingsViewModel.updateSelectedField(selected?.field?.fieldId ?: -1)
+                }
             }
         )
+
 
         // 🌿 Row selector
         if (selectedLocation != null) {
             Spacer(Modifier.height(12.dp))
+
+            val rowNames = listOf("All Rows") + rows.map { it.name }
+
             ExposedDropdownMenuBoxWithLabel(
                 label = "🌿 Row",
-                items = rows.map { it.name },
-                selectedItem = selectedRow?.name,
+                items = rowNames,
+                selectedItem = selectedRow?.name ?: "All Rows",
                 onItemSelected = { name ->
-                    val selected = rows.find { it.name == name }
-                    imageViewModel.selectRow(selected?.rowId)
-                    settingsViewModel.updateSelectedRow(selected?.rowId ?: -1)
+                    if (name == "All Rows") {
+                        imageViewModel.selectRow(null)
+                        settingsViewModel.updateSelectedRow(-1)
+                    } else {
+                        val selected = rows.find { it.name == name }
+                        imageViewModel.selectRow(selected?.rowId)
+                        settingsViewModel.updateSelectedRow(selected?.rowId ?: -1)
+                    }
                 }
             )
         }
+
 
         Spacer(Modifier.height(16.dp))
 

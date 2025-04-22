@@ -47,9 +47,12 @@ class ImageViewModel(private val context: Context) : ViewModel() {
     val pendingXYLocation: StateFlow<String?> = _pendingXYLocation
 
     fun selectField(fieldId: Int?) {
-        _selectedFieldId.value = fieldId
-        _selectedRowId.value = null
+        if (_selectedFieldId.value != fieldId) {
+            _selectedFieldId.value = fieldId
+            _selectedRowId.value = null
+        }
     }
+
 
     fun selectRow(rowId: Int?) {
         _selectedRowId.value = rowId
@@ -62,19 +65,29 @@ class ImageViewModel(private val context: Context) : ViewModel() {
     val filteredImages: StateFlow<List<ImageRecord>> = combine(
         images, selectedFieldId, selectedRowId
     ) { images, fieldId, rowId ->
-        images.filter { image ->
+        Log.d("ImageFilter", "🔍 Filtering with fieldId=$fieldId and rowId=$rowId")
+        Log.d("ImageFilter", "📷 Available images: ${images.map { "field=${it.fieldId}, row=${it.rowId}" }}")
+
+        val filtered = images.filter { image ->
             (fieldId == null || image.fieldId == fieldId) &&
                     (rowId == null || image.rowId == rowId)
         }
+        Log.d("ImageFilter", "✅ Found ${filtered.size} matching images: ${filtered.map { it.imageId }}")
+        filtered
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+
 
     val filteredPendingImages: StateFlow<List<ImageRecord>> = combine(
         pendingImages, selectedFieldId, selectedRowId
     ) { images, fieldId, rowId ->
-        images.filter { image ->
+        Log.d("PendingImageFilter", "🔍 Filtering with fieldId=$fieldId and rowId=$rowId")
+        val filtered = images.filter { image ->
             (fieldId == null || image.fieldId == fieldId) &&
                     (rowId == null || image.rowId == rowId)
         }
+        Log.d("ImageFilter", "✅ Found ${filtered.size} matching images")
+        filtered
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun addPendingImage(image: ImageRecord) {

@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _173 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _174 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -597,14 +597,15 @@ Here’s a polished and grammatically improved version of your worklog:
 ---
 
 ### April 21 2025
-- **Hours Worked**: 3 hours  
+- **Hours Worked**: 4 hours  
 - **Tasks Completed**:  
   - ✅ **App** – Ensured naming consistency for synchronization-related components: image files, pending images, and other local configuration data.  
   - ✅ **App** – Refactored error logging to access the URI directly from the cache, removing dependency on the view layer.  
   - ✅ **App** – Standardized error logging: detailed messages are written to the log at the point of failure, while only boolean success/failure is propagated back to the screen level.  
   - ✅ **App** – Implemented the `sharedViewModels` concept so screens can work with a unified view model container, reducing boilerplate.  
-  - 🐞 **BUG 1 (Pending)** – In `HistoryImageScreen`, images display correctly initially, but selecting a field results in no images shown. Needs investigation: likely a filtering issue by ID or description. Consider adding an "All Fields / All Rows" option.  
-  - 🐞 **BUG 2 (Pending)** – `LocationScreen` shows two “Save and Continue” buttons. Needs cleanup.  
+  - 🐞 **BUG 1** – In `HistoryImageScreen`, images display correctly initially, but selecting a field results in no images shown. Needs investigation: likely a filtering issue by ID or description. Consider adding an "All Fields / All Rows" option.   
+  - **BUG1 correction**: add "all field" and "all row". problem was due to inconsistency   : two different JSON serialization systems:GSON and Kotlin serialisation change ImageData.kt and CameraScreen to save image in json file
+  - 🐞 **BUG 2 (Pending)** – `LocationScreen` shows two “Save and Continue” buttons. Needs cleanup. 
  
 ---
 

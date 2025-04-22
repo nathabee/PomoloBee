@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.google.gson.Gson
 import de.nathabee.pomolobee.model.ImageListData
 import de.nathabee.pomolobee.model.ImageListResponse
 import de.nathabee.pomolobee.model.ImageRecord
@@ -186,7 +187,8 @@ fun CameraScreen(
             )
         )
 
-        val newJson = Json.encodeToString(ImageListResponse.serializer(), wrapped)
+        val newJson = Gson().toJson(wrapped)
+
 
         val saved = StorageUtils.saveTextFile(context, storageRootUri!!, pendingPath, newJson)
         if (!saved) {
