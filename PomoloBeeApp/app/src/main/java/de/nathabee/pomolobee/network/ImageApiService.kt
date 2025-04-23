@@ -2,7 +2,11 @@
 //
 package de.nathabee.pomolobee.network
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
+import de.nathabee.pomolobee.util.ErrorLogger
+import de.nathabee.pomolobee.util.StorageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -63,4 +67,51 @@ object ImageApiService {
 
         connection.inputStream.bufferedReader().use(BufferedReader::readText)
     }
+
+
+    suspend fun fetchImageFromCloud(
+        context: Context,
+        rootUri: Uri,
+        mediaUrl: String,
+        imageUrl: String,
+        filename: String
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val fullUrl = mediaUrl.trimEnd('/') + imageUrl
+            Log.d("ImageApiService", "☁️ Fetching image from $fullUrl")
+
+            val conn = URL(fullUrl).openConnection() as HttpURLConnection
+            conn.requestMethod = "GET"
+            conn.connect()
+
+            if (conn.responseCode != 200) {
+                Log.e("ImageApiService", "❌ Failed to download image. Code: ${conn.responseCode}")
+                return@withContext false
+            }
+
+            val bytes = conn.inputStream.readBytes()
+
+            val success = StorageUtils.saveBinaryFile(
+                context = context,
+                baseUri = rootUri,
+                relativePath = "images/$filename",
+                data = bytes,
+                mimeType = "image/jpeg"
+            )
+
+
+            if (success) {
+                Log.d("ImageApiService", "✅ Saved cloud image to images/$filename")
+            } else {
+                Log.e("ImageApiService", "❌ Failed to save image locally")
+            }
+
+            return@withContext success
+        } catch (e: Exception) {
+            ErrorLogger.logError(context, rootUri, "❌ Error downloading image: $imageUrl", e)
+            return@withContext false
+        }
+    }
+
+
 }

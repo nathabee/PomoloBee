@@ -52,6 +52,7 @@ class SettingsViewModel(
         viewModelScope, SharingStarted.Eagerly, "local"
     )
 
+
     val mediaEndpoint = prefs.getMediaEndpoint().stateIn(
         viewModelScope, SharingStarted.Eagerly, ""
     )

@@ -13,6 +13,7 @@ import de.nathabee.pomolobee.model.EstimationResponse
 import de.nathabee.pomolobee.model.ImageListResponse
 import de.nathabee.pomolobee.util.ErrorLogger
 
+
 object ImageRepository {
 
     fun loadAllImageDataFromUri(context: Context, rootUri: Uri): Boolean {
@@ -128,5 +129,7 @@ object ImageRepository {
             false
         }
     }
+
+
 }
 

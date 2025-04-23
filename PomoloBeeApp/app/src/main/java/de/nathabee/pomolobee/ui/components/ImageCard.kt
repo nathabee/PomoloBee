@@ -1,5 +1,7 @@
 package de.nathabee.pomolobee.ui.component
 
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,22 +9,66 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.documentfile.provider.DocumentFile
 import coil.compose.rememberAsyncImagePainter
 import de.nathabee.pomolobee.model.ImageRecord
+import de.nathabee.pomolobee.network.ImageApiService
+import de.nathabee.pomolobee.util.StorageUtils
 import de.nathabee.pomolobee.util.parseXYLocation
+import kotlinx.coroutines.launch
+
 
 @Composable
 fun ImageCard(
     image: ImageRecord,
+    rootUri : Uri?,
+    imagesDir: DocumentFile?,
+    mediaUrl: String,
+    isCloudMode: Boolean = false,
     onPreview: (ImageRecord) -> Unit,
     onAnalyze: (ImageRecord) -> Unit,
     onDelete: (ImageRecord) -> Unit
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+
+    val (imageUri, hasLocalImage) = remember(image, imagesDir, mediaUrl) {
+        var localUri: Uri? = null
+        var localFound = false
+
+        if (!image.originalFilename.isNullOrBlank()) {
+            val file = imagesDir?.findFile(image.originalFilename!!)
+            if (file != null && file.exists()) {
+                Log.d("ImageCard", "🗂️ Using local image: ${file.uri}")
+                localUri = file.uri
+                localFound = true
+            } else {
+                Log.w("ImageCard", "❌ Local file not found: ${image.originalFilename}")
+            }
+        }
+
+        // If not found locally, try remote
+        // If not found locally, try remote
+        if (localUri == null && !image.imageUrl.isNullOrBlank() && image.imageId != null) {
+            val sanitizedPath = image.imageUrl.removePrefix("/media") // ✅ Remove duplicate
+            val fullUrl = mediaUrl.trimEnd('/') + sanitizedPath
+            Log.d("ImageCard", "🌐 Using remote image: $fullUrl")
+            return@remember fullUrl to false
+        }
+
+
+        return@remember localUri to localFound
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -32,15 +78,24 @@ fun ImageCard(
     ) {
         Row(modifier = Modifier.padding(8.dp)) {
             // Image thumbnail
-            Image(
-                painter = rememberAsyncImagePainter(image.imageUrl),
-                contentDescription = "Image thumbnail",
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.Gray),
-                contentScale = ContentScale.Crop
-            )
+            if (imageUri != null) {
+                Image(
+                    painter = rememberAsyncImagePainter(imageUri),
+                    contentDescription = "Image thumbnail",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.Gray),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.LightGray)
+                )
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -48,30 +103,45 @@ fun ImageCard(
                 Text("📅 ${image.date}", style = MaterialTheme.typography.labelMedium)
                 Text("🧪 Status: ${image.status}", style = MaterialTheme.typography.labelSmall)
                 Text("🌿 ${image.fruitType}", style = MaterialTheme.typography.bodyMedium)
-                if (!image.xyLocation.isNullOrEmpty()) {
-                    val xyCoords = parseXYLocation(image.xyLocation)
-                    if (xyCoords != null) {
-                        Text("📍 Location: (${(xyCoords.x * 100).toInt()}%, ${(xyCoords.y * 100).toInt()}%)",
+
+                image.xyLocation?.let {
+                    val coords = parseXYLocation(it)
+                    coords?.let {
+                        Text("📍 Location: (${(it.x * 100).toInt()}%, ${(it.y * 100).toInt()}%)",
                             style = MaterialTheme.typography.labelSmall)
                     }
                 }
 
-
-
-
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { onPreview(image) }) {
-                        Text("Preview")
-                    }
-                    TextButton(onClick = { onAnalyze(image) }) {
-                        Text("Analyze")
-                    }
+                    TextButton(onClick = { onPreview(image) }) { Text("Preview") }
+                    TextButton(onClick = { onAnalyze(image) }) { Text("Analyze") }
                     TextButton(onClick = { onDelete(image) }) {
                         Text("Delete", color = Color.Red)
                     }
                 }
+
+                if (!hasLocalImage && isCloudMode && image.imageId != null && rootUri != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Button(
+                        onClick = {
+                            coroutineScope.launch {
+                                ImageApiService.fetchImageFromCloud(
+                                    context = context,
+                                    rootUri = rootUri,
+                                    mediaUrl = mediaUrl,
+                                    imageUrl = image.imageUrl.removePrefix("/media"),
+                                    filename = image.originalFilename ?: "image-${image.imageId}.jpg"
+                                )
+                            }
+                        },
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Text("☁️ Retrieve from Cloud")
+                    }
+                }
+
             }
         }
     }

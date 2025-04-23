@@ -48,8 +48,8 @@
     - [April 19 2025](#april-19-2025)
   - [Dates from April 21 to Avril 27 2025](#dates-from-april-21-to-avril-27-2025)
     - [April 21 2025](#april-21-2025)
-    - [April 21 2025](#april-21-2025)
-    - [April 21 2025](#april-21-2025)
+    - [April 22 2025](#april-22-2025)
+    - [April 23 2025](#april-23-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -589,25 +589,33 @@ Week 7
 
 ---
 
-###  April 21 2025
-- **Hours Worked**: 3 hours
-- **Tasks**:
-Here’s a polished and grammatically improved version of your worklog:
 
----
-
-### April 21 2025
+### April 22 2025
 - **Hours Worked**: 4 hours  
 - **Tasks Completed**:  
-  - ✅ **App** – Ensured naming consistency for synchronization-related components: image files, pending images, and other local configuration data.  
-  - ✅ **App** – Refactored error logging to access the URI directly from the cache, removing dependency on the view layer.  
-  - ✅ **App** – Standardized error logging: detailed messages are written to the log at the point of failure, while only boolean success/failure is propagated back to the screen level.  
-  - ✅ **App** – Implemented the `sharedViewModels` concept so screens can work with a unified view model container, reducing boilerplate.  
-  - 🐞 **BUG 1** – In `HistoryImageScreen`, images display correctly initially, but selecting a field results in no images shown. Needs investigation: likely a filtering issue by ID or description. Consider adding an "All Fields / All Rows" option.   
-  - **BUG1 correction**: add "all field" and "all row". problem was due to inconsistency   : two different JSON serialization systems:GSON and Kotlin serialisation change ImageData.kt and CameraScreen to save image in json file
-  - 🐞 **BUG 2 (Pending)** – `LocationScreen` shows two “Save and Continue” buttons. Needs cleanup. 
+  - App – Ensured naming consistency for synchronization-related components: image files, pending images, and other local configuration data.  
+  - App  – Refactored error logging to access the URI directly from the cache, removing dependency on the view layer.  
+  - App  – Standardized error logging: detailed messages are written to the log at the point of failure, while only boolean success/failure is propagated back to the screen level.  
+  - App  – Implemented the `sharedViewModels` concept so screens can work with a unified view model container, reducing boilerplate.  
+  - App BUG 1 detection – In `HistoryImageScreen`, images display correctly initially, but selecting a field results in no images shown. Needs investigation: likely a filtering issue by ID or description. Consider adding an "All Fields / All Rows" option.   
+  - App BUG1 correction: add "all field" and "all row". problem was due to inconsistency   : two different JSON serialization systems:GSON and Kotlin serialisation change ImageData.kt and CameraScreen to save image in json file
+  - App BUG 2 detection – `LocationScreen` shows two “Save and Continue” buttons. Needs cleanup. 
  
 ---
+
+---
+
+
+### April 23 2025
+- **Hours Worked**: 3 hours  
+- **Tasks Completed**:  
+  - App Unit Test after `HistoryImageScreen` add on 
+  - App - BUG3 detection  (Pending) : after start app again, still ask permission on uri
+  - App - BUG4 detection  (Pending) : a waiting uhr would be nice after saving file on camera
+  - App - BUG5 detection  : in HistoryImage we could see images in small if they are available locally 
+  - App - BUG6 detection  : in HistoryImage fetch images that are available remote but not local (if cloud mode) 
+  - App - BUG7 detection : scroll just on images but no scroll on pending images in imageHistoryScreen
+  - App - BUG2, BUG5, BUG6, BUG7 corrected
 
 </details>
 

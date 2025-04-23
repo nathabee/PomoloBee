@@ -1,6 +1,7 @@
 package de.nathabee.pomolobee.ui.screens
 
 import PomolobeeViewModels
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -93,19 +94,7 @@ fun LocationScreen(
 
     }
 
-    // Send row back to CameraScreen
-    Button(
-        onClick = {
-            selectedRow?.let { sendHandle?.set("${cameraReturnKey}_rowId", it) }
-            imageViewModel.pendingXYLocation.value?.let { xy ->
-                sendHandle?.set("${cameraReturnKey}_xy", xy)
-            }
-            navController.popBackStack()
-        },
-        enabled = selectedLocation != null && selectedRow != null
-    ) {
-        Text("✅ Confirm & Continue")
-    }
+
 
 
     Column(
@@ -197,7 +186,12 @@ fun LocationScreen(
         // ✅ Confirm Button
         Button(
             onClick = {
-                println("✅ Field: ${selectedLocation?.field?.name}, Row: ${selectedRow?.name}")
+                selectedRow?.rowId?.let { sendHandle?.set("${cameraReturnKey}_rowId", it) }
+                imageViewModel.pendingXYLocation.value?.let { xy ->
+                    sendHandle?.set("${cameraReturnKey}_xy", xy)
+                }
+
+                Toast.makeText(context, "✅ Location selected", Toast.LENGTH_SHORT).show()
                 navController.popBackStack()
             },
             enabled = selectedLocation != null && selectedRow != null

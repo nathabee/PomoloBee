@@ -216,7 +216,8 @@ object StorageUtils {
             "config/locations.json",
             "image_data/estimations.json",
             "image_data/images.json",
-            "image_data/pending_images.json"
+            "image_data/pending_images.json",
+            "images/image_default.jpg"
         )
 
         val assetFoldersToCopy = listOf(
@@ -225,7 +226,7 @@ object StorageUtils {
         )
 
         val foldersToCreateEmpty = listOf(
-            "images", "logs", "results"
+            "logs", "results"
         )
 
         val rootDoc = DocumentFile.fromTreeUri(context, treeUri)
