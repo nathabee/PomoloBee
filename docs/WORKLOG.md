@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _174 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _177 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -50,6 +50,7 @@
     - [April 21 2025](#april-21-2025)
     - [April 22 2025](#april-22-2025)
     - [April 23 2025](#april-23-2025)
+    - [April 24 2025](#april-24-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -602,8 +603,7 @@ Week 7
   - App BUG 2 detection – `LocationScreen` shows two “Save and Continue” buttons. Needs cleanup. 
  
 ---
-
----
+ 
 
 
 ### April 23 2025
@@ -615,11 +615,26 @@ Week 7
   - App - BUG5 detection  : in HistoryImage we could see images in small if they are available locally 
   - App - BUG6 detection  : in HistoryImage fetch images that are available remote but not local (if cloud mode) 
   - App - BUG7 detection : scroll just on images but no scroll on pending images in imageHistoryScreen
+  - App - BUG8 detection  (Pending) : should not fetch image_default.jpg (is when image created without image => "original_filename": null => use local  image_default.jpg ffetch if not there )
   - App - BUG2, BUG5, BUG6, BUG7 corrected
+
+
+---
+ 
+
+
+### April 24 2025
+- **Hours Worked**: 3 hours  
+- **Tasks Completed**:  
+  - App - add on : add the imagecard/preview button in ImageHistoryScreen to open SvgMapScreen in read only mode and put a red cross where the image was taken
+  - App - refactor initViewModel into SettingsViewModel, plus initScreen and initDone in mainActivity (see BUG3)
+
+---
 
 </details>
 
 
+---
 
 <details>
 <summary>
@@ -627,20 +642,8 @@ PENDING
 </summary>
 
 ----
-
-  - App : Sync cloud : send pending image, manage image status in app (store image id, store in json image send, read json in cache at app startup) 
- 
-
----
-rqiase error to fix in views.py:
-⚠️ Views With Hidden Risks
-These are okay-ish, but could fail in edge cases (e.g., filesystem issues, malformed request data, etc.)
-🧠 ImageView.post(...)
-Risk areas:
-default_storage.save(...) → may fail if disk full or permission denied
-os.rename(...) → raises FileNotFoundError, PermissionError, etc.
-image_file.name may be weird if it's manually crafted
-
+  - App - BUG3 detection  (Pending) : after start app again, still ask permission on uri
+  - App - BUG4 detection  (Pending) : a waiting uhr would be nice after saving file on camera 
  
 
 </details>

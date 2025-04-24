@@ -32,8 +32,6 @@ import de.nathabee.pomolobee.viewmodel.ImageViewModelFactory
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import de.nathabee.pomolobee.viewmodel.SettingsViewModelFactory
 import de.nathabee.pomolobee.viewmodel.OrchardViewModel
-import de.nathabee.pomolobee.viewmodel.InitViewModel
-import de.nathabee.pomolobee.viewmodel.InitViewModelFactory
 import de.nathabee.pomolobee.viewmodel.OrchardViewModelFactory
 
 
@@ -132,11 +130,10 @@ fun AppScaffold(
         val sharedViewModels = PomolobeeViewModels(
             settings = viewModel(factory = SettingsViewModelFactory(context)),
             orchard = viewModel(factory = OrchardViewModelFactory(context)),
-            image = viewModel(factory = ImageViewModelFactory(context)),
-            init = viewModel(factory = InitViewModelFactory(context))
+            image = viewModel(factory = ImageViewModelFactory(context))
         )
 
-        val initDone by sharedViewModels.init.initDone.collectAsState()
+        val initDone by sharedViewModels.settings.initDone.collectAsState()
 
 
         Log.d("PomoloBeeApp", "🚀 recomposed with initDone = $initDone")
@@ -145,8 +142,7 @@ fun AppScaffold(
                 sharedViewModels = sharedViewModels,
                 onInitFinished = {
                     // is done is made bei initScreen
-                    // initViewModel.markInitDone() // ✅ Triggers recompose and shows main app
-                    //initViewModel.markInitDone()
+                   sharedViewModels.settings.markInitDone()
                 }
             )
         } else {

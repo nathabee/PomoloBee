@@ -2,42 +2,121 @@ package de.nathabee.pomolobee.viewmodel
 
 import PomolobeeViewModels
 import android.content.Context
+import android.net.Uri
+import android.util.Log
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import de.nathabee.pomolobee.cache.OrchardCache
 import de.nathabee.pomolobee.data.UserPreferences
 import de.nathabee.pomolobee.repository.ConnectionRepository
-
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import android.net.Uri
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
+import de.nathabee.pomolobee.sync.SyncManager
 import de.nathabee.pomolobee.util.ErrorLogger
 import de.nathabee.pomolobee.util.StorageUtils
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.flow.first
-import androidx.datastore.preferences.core.edit
-import de.nathabee.pomolobee.repository.OrchardRepository
-import de.nathabee.pomolobee.sync.SyncManager
-
 
 class SettingsViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val prefs = UserPreferences(context)
-        return SettingsViewModel(prefs, context.getExternalFilesDir(null)?.absolutePath + "/PomoloBee") as T
-
+        return SettingsViewModel(prefs, context) as T
     }
 }
+
+enum class StartupStatus {
+    MissingUri,
+    InvalidUri,
+    MissingConfig,
+    InitConfig,
+    Ready
+}
+
 class SettingsViewModel(
     private val prefs: UserPreferences,
-    private val defaultStorageRoot: String
+    private val context: Context
 ) : ViewModel() {
 
-    // Add a new StateFlow for the URI
     val storageRootUri: StateFlow<Uri?> = prefs.getRawStorageRoot()
         .map { it?.let { Uri.parse(it) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    private val _startupStatus = MutableStateFlow(StartupStatus.MissingUri)
+    val startupStatus: StateFlow<StartupStatus> = _startupStatus
+
+    private val _initDone = MutableStateFlow(false)
+    val initDone: StateFlow<Boolean> = _initDone
+
+    fun updateStartupStatus(isCacheReady: Boolean) {
+        val uri = storageRootUri.value
+        _startupStatus.value = computeStatus(uri, isCacheReady)
+    }
+
+    private fun computeStatus(uri: Uri?, cacheIsReady: Boolean): StartupStatus {
+        Log.d("SettingsViewModel", "🔍 Checking URI: $uri")
+
+        if (_initDone.value) {
+            if (uri == null || !StorageUtils.hasAccessToUri(context, uri)) {
+                Log.w("SettingsViewModel", "⚠️ Storage was lost! Forcing re-init.")
+                _initDone.value = false
+                return StartupStatus.InvalidUri
+            }
+            return StartupStatus.Ready
+        }
+
+        if (uri == null) return StartupStatus.MissingUri
+        if (!StorageUtils.hasAccessToUri(context, uri)) return StartupStatus.InvalidUri
+
+        val docFile = DocumentFile.fromTreeUri(context, uri)
+        val configDir = docFile?.findFile("config")
+        val fruits = configDir?.findFile("fruits.json")
+        val locations = configDir?.findFile("locations.json")
+
+        return when {
+            fruits == null || locations == null -> StartupStatus.MissingConfig
+            !cacheIsReady -> StartupStatus.InitConfig
+            else -> StartupStatus.Ready
+        }
+    }
+
+    fun markInitDone() {
+        _initDone.value = true
+        _startupStatus.value = StartupStatus.Ready
+    }
+
+    suspend fun loadStorageRootFromPrefs(): Uri? {
+        val raw = prefs.getRawStorageRoot().firstOrNull()
+        val uri = raw?.let { Uri.parse(it) }
+        if (uri != null && StorageUtils.hasAccessToUri(context, uri)) {
+            OrchardCache.setRootUri(uri)
+            return uri
+        }
+        return null
+    }
+
+
+    init {
+        viewModelScope.launch {
+            prefs.initializeDefaultsIfNeeded()
+
+            prefs.getRawStorageRoot().firstOrNull()?.let { rawUri ->
+                val uri = Uri.parse(rawUri)
+                if (StorageUtils.hasAccessToUri(context, uri)) {
+                    OrchardCache.setRootUri(uri)
+                    // 🚫 Don't call updateStartupStatus here
+                    Log.d("SettingsViewModel", "✅ Preloaded valid URI into OrchardCache: $uri")
+                } else {
+                    Log.w("SettingsViewModel", "❌ URI found in prefs but access denied: $uri")
+                }
+            } ?: Log.d("SettingsViewModel", "ℹ️ No URI found in prefs at startup")
+        }
+    }
+
+
+
 
 
     val lastSyncDate: StateFlow<Long?> = prefs.lastSyncDate.stateIn(
@@ -231,11 +310,8 @@ class SettingsViewModel(
         }
     }
 
-    init {
-        viewModelScope.launch {
-            prefs.initializeDefaultsIfNeeded()
-        }
-    }
+
+
 
 
 

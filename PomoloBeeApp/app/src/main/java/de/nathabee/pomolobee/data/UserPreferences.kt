@@ -25,7 +25,11 @@ class UserPreferences(private val context: Context) {
         private val MEDIA_ENDPOINT_KEY = stringPreferencesKey("media_endpoint")
         private val DEBUG_MODE_KEY = booleanPreferencesKey("debug_enabled")
         private val API_VERSION_KEY = stringPreferencesKey("api_version")
+        private val INIT_DONE_KEY = booleanPreferencesKey("init_done")
     }
+
+
+
 
 
 
@@ -103,6 +107,13 @@ class UserPreferences(private val context: Context) {
     suspend fun setApiVersion(version: String) {
         context.dataStore.edit { it[API_VERSION_KEY] = version }
 
+    }
+
+    fun isInitDone(): Flow<Boolean> =
+        context.dataStore.data.map { it[INIT_DONE_KEY] ?: false }
+
+    suspend fun setInitDone(value: Boolean) {
+        context.dataStore.edit { it[INIT_DONE_KEY] = value }
     }
 
     suspend fun initializeDefaultsIfNeeded() {

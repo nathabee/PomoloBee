@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
 import coil.compose.rememberAsyncImagePainter
 import de.nathabee.pomolobee.model.ImageRecord
+import de.nathabee.pomolobee.navigation.Screen
 import de.nathabee.pomolobee.network.ImageApiService
 import de.nathabee.pomolobee.util.StorageUtils
 import de.nathabee.pomolobee.util.parseXYLocation
@@ -45,18 +46,21 @@ fun ImageCard(
         var localUri: Uri? = null
         var localFound = false
 
-        if (!image.originalFilename.isNullOrBlank()) {
-            val file = imagesDir?.findFile(image.originalFilename!!)
-            if (file != null && file.exists()) {
-                Log.d("ImageCard", "🗂️ Using local image: ${file.uri}")
-                localUri = file.uri
-                localFound = true
-            } else {
-                Log.w("ImageCard", "❌ Local file not found: ${image.originalFilename}")
-            }
+        val fallbackFilename = "image_default.jpg"
+        val filename = image.originalFilename?.takeIf { it.isNotBlank() } ?: fallbackFilename
+
+        val file = imagesDir?.findFile(filename)
+
+        if (file != null && file.exists()) {
+            Log.d("ImageCard", "🗂️ Using local image: ${file.uri}")
+            localUri = file.uri
+            localFound = true
+        } else {
+            Log.w("ImageCard", "❌ Local file not found: $filename")
+            // Optionally, trigger cloud fetch if filename == fallback and cloud mode is on (you handle this later)
         }
 
-        // If not found locally, try remote
+
         // If not found locally, try remote
         if (localUri == null && !image.imageUrl.isNullOrBlank() && image.imageId != null) {
             val sanitizedPath = image.imageUrl.removePrefix("/media") // ✅ Remove duplicate

@@ -5,14 +5,11 @@ This repository contains the mobile app, backend server, and ML microservice for
 
 ---
 
-✅ For full documentation, see the [GitHub Pages Portal](https://nathabee.github.io/PomoloBee/)
-
----
 <p align="center">
     <img src="https://raw.githubusercontent.com/nathabee/PomoloBee/main/docs/PomoloBee.webp" alt="PomoloBee Logo" width="300px">
 </p>
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _174 hours_ (Auto-generated)  
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _177 hours_ (Auto-generated)  
 
 ---
 
@@ -51,15 +48,9 @@ This repository contains the mobile app, backend server, and ML microservice for
 
 ## **Documentation**
 
-📖 **Scope and Requirements:** [Requirements](docs/Requirements.md)  
-📖 **API, Interface Definition:** [API](docs/API.md)  
-📖 **Data Model:** [Data Model](docs/Django_DataModel.md)  
-📖 **Workflow:** [Workflow](docs/Workflow.md)  
-📖 **ML Specification:** [ML Specification](docs/ML_Specification.md)  
-📖 **App Specification:** [App Specification](docs/App_Specification.md)  [App Structure](docs/App_Structure.md)  
-📖 **Database Specification:** [PostgresSQL Specification](docs/Django_PostgreSQL.md)    
-📖 **Tests Django** [Django Test](docs/Django_Test.md)   **and ML:** [ML Test](docs/ML_Test.md)   
 
+✅ For full documentation, see the [GitHub Pages Portal](https://nathabee.github.io/PomoloBee/)
+ 
 
 ---
 

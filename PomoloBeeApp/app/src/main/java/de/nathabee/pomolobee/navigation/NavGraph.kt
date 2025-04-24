@@ -71,39 +71,74 @@ fun NavGraph(
         // 🖼️ Image History
         composable(Screen.ImageHistory.route) {
             ImageHistoryScreen(
-                sharedViewModels = sharedViewModels
+                sharedViewModels = sharedViewModels,
+                navController =  navController
             )
         }
 
         // 🗺️ SVG Map (returns row + xy via returnKey)
         composable(
-            route = "${Screen.SvgMap.route}?fieldId={fieldId}&returnKey={returnKey}",
+            /*route = "${Screen.SvgMap.route}?fieldId={fieldId}&returnKey={returnKey}",*/
+            route = "${Screen.SvgMap.route}?fieldId={fieldId}&returnKey={returnKey}&xyMarker={xyMarker}&readOnly={readOnly}",
+
             arguments = listOf(
-                navArgument("fieldId") {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument("returnKey") {
-                    type = NavType.StringType
-                    nullable = true
-                }
+                navArgument("fieldId") { type = NavType.StringType },
+                navArgument("returnKey") { type = NavType.StringType },
+                navArgument("xyMarker") { type = NavType.StringType; nullable = true },
+                navArgument("readOnly") { type = NavType.BoolType; defaultValue = false }
             )
+
         ) { backStackEntry ->
 
             val fieldId = backStackEntry.arguments?.getString("fieldId")?.toIntOrNull()
             val returnKey = backStackEntry.arguments?.getString("returnKey") ?: "svg_return"
             val location = locations.find { it.field.fieldId == fieldId }
+            val xyMarker = backStackEntry.arguments?.getString("xyMarker")
+            val readOnly = backStackEntry.arguments?.getBoolean("readOnly") ?: false
 
             locations.find { it.field.fieldId == fieldId }?.let { location ->
                 SvgMapScreen(
                     location = location,
                     sharedViewModels = sharedViewModels,
                     navController = navController,
-                    returnKey = returnKey
+                    returnKey = returnKey,
+                    xyMarker = xyMarker,
+                    readOnly = readOnly
                 )
+
             } ?: Text("❌ Field not found")
 
         }
+
+        composable(
+            route = "${Screen.ImagePreviewMap.route}?fieldId={fieldId}&xyMarker={xyMarker}&readOnly={readOnly}",
+            arguments = listOf(
+                navArgument("fieldId") { type = NavType.IntType },
+                navArgument("xyMarker") { type = NavType.StringType; nullable = true },
+                navArgument("readOnly") { type = NavType.BoolType; defaultValue = true } // default true for readonly view
+            )
+        ) { backStackEntry ->
+
+            val fieldId = backStackEntry.arguments?.getInt("fieldId")
+            val xyMarker = backStackEntry.arguments?.getString("xyMarker")
+            val readOnly = backStackEntry.arguments?.getBoolean("readOnly") ?: true
+
+            val location = locations.find { it.field.fieldId == fieldId }
+
+            if (location != null) {
+                SvgMapScreen(
+                    location = location,
+                    xyMarker = xyMarker,
+                    readOnly = readOnly,
+                    sharedViewModels = sharedViewModels,
+                    navController = navController,
+                    returnKey = "readonly" // no return expected
+                )
+            } else {
+                Text("❌ Field not found")
+            }
+        }
+
 
         // 🐞 Error Log
         composable(Screen.ErrorLog.route) {

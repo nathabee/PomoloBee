@@ -36,6 +36,8 @@ fun injectBase64Image(svg: String, base64Image: String): String {
 @Composable
 fun SvgMapScreen(
     location: Location,
+    xyMarker: String? = null,      // ⬅ where to place the red cross (if not null)
+    readOnly: Boolean = false,      // ⬅ disables interaction true :display location of an image , false : click to select a location
     sharedViewModels: PomolobeeViewModels,
     navController: NavController,
     returnKey: String
@@ -51,6 +53,8 @@ fun SvgMapScreen(
     var xySelected by remember { mutableStateOf<String?>(null) }
     var selectedRowInfo by remember { mutableStateOf<Row?>(null) }
     var showFruitInfo by remember { mutableStateOf(false) }
+
+
 
     val svgUri = remember(storageRootUri, location) {
         storageRootUri?.let { StorageUtils.getSvgUriForLocation(context, it, location) }
@@ -128,21 +132,55 @@ fun SvgMapScreen(
                             </style></head>
                             <body>$svgContent
                                 <script>
-                                    document.addEventListener("DOMContentLoaded", function() {
-                                        const paths = document.querySelectorAll("path[id^='row_']");
-                                        paths.forEach(function(p) {
-                                            p.style.stroke = "blue";
-                                            p.addEventListener("click", function(event) {
-                                                const svg = event.target.ownerSVGElement;
-                                                const rect = svg.getBoundingClientRect();
-                                                const x = (event.clientX - rect.left) / rect.width;
-                                                const y = (event.clientY - rect.top) / rect.height;
-                                                const xy = JSON.stringify({ x: x, y: y });
-                                                Android.onRowClickedWithXY(p.id, xy);
-                                            });
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    const svg = document.querySelector("svg");
+                                
+                                    // ⛔ Skip interactive click handler in read-only mode
+                                    ${if (!readOnly) """
+                                    const paths = document.querySelectorAll("path[id^='row_']");
+                                    paths.forEach(function(p) {
+                                        p.style.stroke = "blue";
+                                        p.addEventListener("click", function(event) {
+                                            const rect = svg.getBoundingClientRect();
+                                            const x = (event.clientX - rect.left) / rect.width;
+                                            const y = (event.clientY - rect.top) / rect.height;
+                                            const xy = JSON.stringify({ x: x, y: y });
+                                            Android.onRowClickedWithXY(p.id, xy);
                                         });
                                     });
+                                    """ else "// read-only mode, no interaction" }
+                                
+                                    // ➕ Draw red cross if xyMarker is provided
+                                    ${xyMarker?.let {
+                                        val coords = de.nathabee.pomolobee.util.parseXYLocation(it)
+                            if (coords != null)
+                                """ 
+                                    // ADD THIS BLOCK INSTEAD OF THE OLD ONE
+                                    const size = 10;
+                                    const line1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                                    line1.setAttribute("x1", ${coords.x} * svg.viewBox.baseVal.width - size);
+                                    line1.setAttribute("y1", ${coords.y} * svg.viewBox.baseVal.height - size);
+                                    line1.setAttribute("x2", ${coords.x} * svg.viewBox.baseVal.width + size);
+                                    line1.setAttribute("y2", ${coords.y} * svg.viewBox.baseVal.height + size);
+                                    line1.setAttribute("stroke", "red");
+                                    line1.setAttribute("stroke-width", "2");
+                            
+                                    const line2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                                    line2.setAttribute("x1", ${coords.x} * svg.viewBox.baseVal.width - size);
+                                    line2.setAttribute("y1", ${coords.y} * svg.viewBox.baseVal.height + size);
+                                    line2.setAttribute("x2", ${coords.x} * svg.viewBox.baseVal.width + size);
+                                    line2.setAttribute("y2", ${coords.y} * svg.viewBox.baseVal.height - size);
+                                    line2.setAttribute("stroke", "red");
+                                    line2.setAttribute("stroke-width", "2");
+                            
+                                    svg.appendChild(line1);
+                                    svg.appendChild(line2);
+                                    """ else ""
+                                                        }}
+                                });
                                 </script>
+
+                                
                             </body></html>
                         """.trimIndent()
 

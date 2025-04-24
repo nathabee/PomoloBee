@@ -1,6 +1,7 @@
 package de.nathabee.pomolobee.navigation
 
 
+
 sealed class Screen(val route: String, val title: String) {
     object Camera : Screen("camera", "Camera")
     object Processing : Screen("processing", "Processing")
@@ -11,10 +12,15 @@ sealed class Screen(val route: String, val title: String) {
     object Init : Screen("init", "Initialisation")
     object ImageHistory : Screen("imagehistory", "Image History")
 
+    object ImagePreviewMap : Screen("svgPreviewMap", "Image Preview Map")
+
+
     // Parametrized screen
 
 
     object SvgMap : Screen("svgmap", "SVG Map") {
+
+
         fun createRoute(fieldId: Int) = "svgmap?fieldId=$fieldId"
 
         fun withArgs(vararg args: Pair<String, String?>): String {

@@ -12,11 +12,14 @@ import de.nathabee.pomolobee.ui.component.ImageCard
 import de.nathabee.pomolobee.ui.components.ExposedDropdownMenuBoxWithLabel
 import de.nathabee.pomolobee.util.StorageUtils
 import androidx.compose.foundation.lazy.items
+import androidx.navigation.NavController
+import de.nathabee.pomolobee.navigation.Screen
 
 
 @Composable
 fun ImageHistoryScreen(
-    sharedViewModels: PomolobeeViewModels
+    sharedViewModels: PomolobeeViewModels,
+    navController: NavController
 ) {
     val context = LocalContext.current
     val orchardViewModel = sharedViewModels.orchard
@@ -116,7 +119,16 @@ fun ImageHistoryScreen(
                     imagesDir = imagesDir,
                     mediaUrl = "",
                     isCloudMode = isCloudMode,
-                    onPreview = {},
+                    onPreview = {
+                        navController?.navigate(
+                            Screen.SvgMap.withArgs(
+                                "fieldId" to it.fieldId.toString(),
+                                "returnKey" to "readonly_preview",
+                                "xyMarker" to (it.xyLocation ?: ""),
+                                "readOnly" to "true"
+                            )
+                        )
+                    },
                     onAnalyze = {},
                     onDelete = {}
                 )
@@ -142,7 +154,16 @@ fun ImageHistoryScreen(
                     rootUri = storageRootUri,
                     mediaUrl = mediaUrl ?: "",
                     isCloudMode = isCloudMode,
-                    onPreview = {},
+                    onPreview = {
+                        navController?.navigate(
+                            Screen.SvgMap.withArgs(
+                                "fieldId" to it.fieldId.toString(),
+                                "returnKey" to "readonly_preview",
+                                "xyMarker" to (it.xyLocation ?: ""),
+                                "readOnly" to "true"
+                            )
+                        )
+                    },
                     onAnalyze = {},
                     onDelete = {}
                 )
