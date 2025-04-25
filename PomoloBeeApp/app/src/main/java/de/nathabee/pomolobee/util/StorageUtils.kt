@@ -7,6 +7,8 @@ import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import de.nathabee.pomolobee.model.Location
 import kotlinx.serialization.json.*
+import java.io.File
+
 /*
 Function	                Purpose
 resolveSubDirectory	        Creates or returns a folder (used for navigation/setup)
@@ -44,6 +46,9 @@ object StorageUtils {
             "Interner Speicher/$folderName"
         }
     }
+
+
+
 
 
 //==================

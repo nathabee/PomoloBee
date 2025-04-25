@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _177 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _181 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -51,6 +51,7 @@
     - [April 22 2025](#april-22-2025)
     - [April 23 2025](#april-23-2025)
     - [April 24 2025](#april-24-2025)
+    - [April 25 2025](#april-25-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -627,9 +628,19 @@ Week 7
 - **Hours Worked**: 3 hours  
 - **Tasks Completed**:  
   - App - add on : add the imagecard/preview button in ImageHistoryScreen to open SvgMapScreen in read only mode and put a red cross where the image was taken
-  - App - refactor initViewModel into SettingsViewModel, plus initScreen and initDone in mainActivity (see BUG3)
+  - App - refactor initViewModel into SettingsViewModel, plus initScreen and initDone in mainActivity (see BUG3) (pending)
 
 ---
+
+
+
+### April 25 2025
+- **Hours Worked**: 4 hours  
+- **Tasks Completed**:   
+  - App - refactor initViewModel into SettingsViewModel, plus initScreen and initDone in mainActivity (add radio button)
+  - App - BUG9 (pending) if no file selected in camerascreen and save, we should not save with unknown field but force choice
+
+  ---
 
 </details>
 

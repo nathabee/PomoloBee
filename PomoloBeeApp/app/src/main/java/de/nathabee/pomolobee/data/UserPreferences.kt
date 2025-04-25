@@ -25,7 +25,7 @@ class UserPreferences(private val context: Context) {
         private val MEDIA_ENDPOINT_KEY = stringPreferencesKey("media_endpoint")
         private val DEBUG_MODE_KEY = booleanPreferencesKey("debug_enabled")
         private val API_VERSION_KEY = stringPreferencesKey("api_version")
-        private val INIT_DONE_KEY = booleanPreferencesKey("init_done")
+       // private val INIT_DONE_KEY = booleanPreferencesKey("init_done")
     }
 
 
@@ -109,12 +109,14 @@ class UserPreferences(private val context: Context) {
 
     }
 
-    fun isInitDone(): Flow<Boolean> =
-        context.dataStore.data.map { it[INIT_DONE_KEY] ?: false }
+    // do not persist initDone : each Activity will be created with initDone =False
+    // and it will go in intScreen for uri test,change if necessary and copy asset if necessary and init cache if necessary
+    //fun isInitDone(): Flow<Boolean> =
+   //     context.dataStore.data.map { it[INIT_DONE_KEY] ?: false }
 
-    suspend fun setInitDone(value: Boolean) {
-        context.dataStore.edit { it[INIT_DONE_KEY] = value }
-    }
+    //suspend fun setInitDone(value: Boolean) {
+    //    context.dataStore.edit { it[INIT_DONE_KEY] = value }
+    //}
 
     suspend fun initializeDefaultsIfNeeded() {
         val current = context.dataStore.data.first()

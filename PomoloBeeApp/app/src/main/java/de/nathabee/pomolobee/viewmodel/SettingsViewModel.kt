@@ -82,38 +82,42 @@ class SettingsViewModel(
         }
     }
 
+
     fun markInitDone() {
         _initDone.value = true
         _startupStatus.value = StartupStatus.Ready
     }
 
-    suspend fun loadStorageRootFromPrefs(): Uri? {
-        val raw = prefs.getRawStorageRoot().firstOrNull()
-        val uri = raw?.let { Uri.parse(it) }
-        if (uri != null && StorageUtils.hasAccessToUri(context, uri)) {
-            OrchardCache.setRootUri(uri)
-            return uri
-        }
-        return null
-    }
 
+    // init is done by factorizing view in mainActivity, we set isDone to true here if uri acessible and cache not empty
 
     init {
         viewModelScope.launch {
             prefs.initializeDefaultsIfNeeded()
 
-            prefs.getRawStorageRoot().firstOrNull()?.let { rawUri ->
-                val uri = Uri.parse(rawUri)
-                if (StorageUtils.hasAccessToUri(context, uri)) {
-                    OrchardCache.setRootUri(uri)
-                    // 🚫 Don't call updateStartupStatus here
-                    Log.d("SettingsViewModel", "✅ Preloaded valid URI into OrchardCache: $uri")
-                } else {
-                    Log.w("SettingsViewModel", "❌ URI found in prefs but access denied: $uri")
-                }
-            } ?: Log.d("SettingsViewModel", "ℹ️ No URI found in prefs at startup")
+            val rawUri = prefs.getRawStorageRoot().firstOrNull()
+            val uri = rawUri?.let { Uri.parse(it) }
+
+            if (uri != null && StorageUtils.hasAccessToUri(context, uri)) {
+                OrchardCache.setRootUri(uri)
+                Log.d("SettingsViewModel", "✅ Preloaded valid URI into OrchardCache: $uri")
+            } else {
+                Log.w("SettingsViewModel", "❌ URI found in prefs but access denied: $uri")
+            }
+
+            val cacheReady = OrchardCache.locations.isNotEmpty()
+            updateStartupStatus(cacheReady)
+
+            // ✅ 👇 After updating status, decide if ready
+            if (computeStatus(uri, cacheReady) == StartupStatus.Ready) {
+                markInitDone()
+                Log.d("SettingsViewModel", "✅ Storage and config valid — marking init done")
+            } else {
+                Log.d("SettingsViewModel", "ℹ️ Init not ready yet")
+            }
         }
     }
+
 
 
 
@@ -174,18 +178,6 @@ class SettingsViewModel(
 
 
 
-
-    fun clearStorageRoot() = viewModelScope.launch {
-        prefs.setStorageRoot("") // or null, depending on your implementation
-    }
-
-    // check URI in blocking mode from preference and check for access : at start to see if initialisation must be done
-    fun getStartupStorageUri(context: Context): Uri? {
-        val rawPath = runBlocking {
-            prefs.getRawStorageRoot().first() // <== direct read of latest value
-        }
-        return rawPath?.let { Uri.parse(it) }?.takeIf { StorageUtils.hasAccessToUri(context, it) }
-    }
 
 
 

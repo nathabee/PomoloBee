@@ -49,4 +49,9 @@ object OrchardCache {
     fun setRootUri(uri: Uri) {
         currentRootUri = uri
     }
+
+
+    // do not persist initDone : each Activity will be created with initDone =False
+    // and it will go in intScreen for uri test,change if necessary and copy asset if necessary and init cache if necessary
+
 }

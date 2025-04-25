@@ -138,6 +138,7 @@ fun AppScaffold(
 
         Log.d("PomoloBeeApp", "🚀 recomposed with initDone = $initDone")
         if (!initDone) {
+            Log.d("PomoloBeeApp", "Start InitScreen")
             InitScreen(
                 sharedViewModels = sharedViewModels,
                 onInitFinished = {
@@ -146,9 +147,24 @@ fun AppScaffold(
                 }
             )
         } else {
+            Log.d("PomoloBeeApp", "Scaffolding app")
             AppScaffold(
                 navController = navController,
                 sharedViewModels = sharedViewModels
             )
         }
+
+
     }
+
+        /* INFO :If you ever face double UI (e.g. InitScreen + MainScreen flashing),
+           you can debounce init like this:
+                val hasStartedMainScreen = remember { mutableStateOf(false) }
+
+                if (!initDone && !hasStartedMainScreen.value) {
+                    InitScreen(...)
+                } else {
+                    hasStartedMainScreen.value = true
+                    MainAppScaffold(...)
+                }
+         */

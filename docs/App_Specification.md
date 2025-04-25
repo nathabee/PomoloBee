@@ -48,15 +48,14 @@ Since **video processing is not in scope right now**, we will focus only on **im
   - [**`OrchardScreen`**](#orchardscreen)
     - [**Purpose**](#purpose)
     - [**Wireframe**](#wireframe)
-  - [**`InitScreen`**](#initscreen)
-    - [**Purpose**](#purpose)
-    - [What It Ensures](#what-it-ensures)
-    - [**Startup Status Behavior Matrix**](#startup-status-behavior-matrix)
-    - [What It Does in code](#what-it-does-in-code)
-    - [Startup Logic Flow](#startup-logic-flow)
-    - [Wireframe](#wireframe)
-    - [Required Permissions Requested via Composable](#required-permissions-requested-via-composable)
-    - [HOW STATE EVOLVES SCENARIO-BASED](#how-state-evolves-scenario-based)
+  - [**InitScreen**](#initscreen)
+    - [Purpose](#purpose)
+    - [Flowchart](#flowchart)
+    - [Behavior Summary](#behavior-summary)
+    - [UI Design](#ui-design)
+    - [Initialization Spinner](#initialization-spinner)
+  - [Permissions](#permissions)
+    - [️ Recomposition Safety](#recomposition-safety)
   - [**ℹ️ `AboutScreen`**](#i-aboutscreen)
     - [**Purpose**](#purpose)
     - [**Wireframe**](#wireframe)
@@ -651,190 +650,122 @@ The "Visualize" button allows users to preview the layout of a field. Unlike the
 ---
 
  
-
-## **`InitScreen`**
-
-### **Purpose**
-
-`InitScreen` is the **first screen displayed** after permission is granted, when the app detects that the required **storage root URI** or **orchard config cache** is missing or invalid.
-
-This screen guides users through:
-
-- 📂 **Selecting a folder** (SD card or internal) to store config/images/results
-- 🧠 **Restoring local cache** if it was cleared
-- 🛡 **Requesting and handling Android permissions**  
-- ✅ Ensures app cannot continue until setup is complete and valid
-
 ---
 
-### What It Ensures
+## **InitScreen**
 
-- 🔒 All required permissions are granted (`CAMERA`, `READ/WRITE_EXTERNAL_STORAGE`)
-- 📂 A valid, accessible `storageRootUri` is set in preferences
-- 📥 Orchard config files (`fruits.json`, `locations.json`) exist in `/config/`
-- 🧠 In-memory `OrchardCache` is restored on app start
-- 🚫 No navigation to main UI until setup is completed
+### Purpose
 
----
+The `InitScreen` is a one-time or recovery screen that runs when PomoloBee cannot proceed due to missing, inaccessible, or uninitialized storage. It ensures the app:
 
-### **Startup Status Behavior Matrix**
+- Has access to a valid SAF storage folder (chosen by the user)
+- Initializes required assets and configuration files
+- Rebuilds the image/cache state
+- Marks the app as ready (`initDone = true`) to allow access to the main UI
 
-| 🧪 Scenario | 📂 Storage Available? | 🧠 Config Cache Present? | ⚠️ User Sees | 🛠 App Behavior |
-|------------|-----------------------|--------------------------|--------------|----------------|
-| 1️⃣ First install | ❌ No | ❌ No | Folder picker | Prompt user to pick folder, copy assets |
-| 2️⃣ Restart after cache cleared | ✅ Yes | ❌ No | Init screen briefly | Silently reload config from disk |
-| 3️⃣ Restart after cache + storage removed | ❌ No | ❌ No | Folder picker | Show picker, reset storage root |
-| 4️⃣ Cache OK, SD card removed | ❌ No | ✅ Yes | Error prompt | Show dialog, prompt folder re-pick and reload cache |
-| 5️⃣ Normal startup | ✅ Yes | ✅ Yes | — (skipped) | Go directly to CameraScreen no cache reload no folder picker |
-| 6️⃣ Reinstall, SD still present | ✅ Yes | ❌ No | Init screen | Reload config from disk |
+### Flowchart
 
----
-
-### What It Does in code
-
-| Feature                    | Description |
-|----------------------------|-------------|
-| 📂 Folder selection        | User can pick any SAF-accessible directory |
-| 📥 Config copying          | `copyAssetsIfNotExists()` copies `fruits.json`, `locations.json` from assets |
-| 🧠 Smart restore           | If config exists but cache is empty, it reloads silently |
-| 🧾 Permission guard        | Uses `rememberLauncherForActivityResult(...)` |
-| 🪵 Logging                 | All actions and errors are logged via `ErrorLogger` |
-| 🔒 Persistable URI access | Uses `takePersistableUriPermission(...)` |
-| 🧭 Status logic            | Based on `InitViewModel.getStartupStatusFromUri(...)` |
-| ✅ Finalize setup          | Triggers `onInitFinished()` after config is valid and cache is restored |
-
----
-
-### Startup Logic Flow
-
-```mermaid
+```mermaid 
 flowchart TD
-    A[InitScreen appears]
-    B{Permissions granted?}
-    C[Request permissions]
-    D[Check StartupStatus]
-    E{Storage OK?}
-    F{Config files present?}
-    G{Cache present?}
-    H[Reload config from disk]
-    I[Prompt Folder Picker]
-    J[Show Recovery Dialog]
-    K[Complete Initialization]
-    L[Continue to main UI]
+    A[App starts]
+    B{InitDone = true?}
+    B -- No --> C[Show InitScreen]
+    C --> D{Has valid URI?}
+    D -- No --> E[Show Welcome UI with folder picker]
+    E --> F[User selects SAF folder]
+    F --> G[Take URI permission]
+    G --> H[Init: copy assets + load config/cache]
+    H --> I[markInitDone()]
+    I --> Z[Enter main UI]
 
-    A --> B
-    B -- Yes --> D
-    B -- No --> C
-    D --> E
-    E -- No --> I
-    E -- Yes --> F
-    F -- No --> I
-    F -- Yes --> G
-    G -- No --> H
-    G -- Yes --> K
-    H --> K
-    I --> K
-    J --> I
-    K --> L
+    D -- Yes --> H
+    B -- Yes --> Z
+
+
 ```
 
 ---
 
-### Wireframe
+### Behavior Summary
 
-```
-+---------------------------------------------+
-| 🐝 Welcome to PomoloBee                    |
-|---------------------------------------------|
-| Configure your storage location             |
-| 📂 Current URI: /storage/XXXX/...           |
-|---------------------------------------------|
-| [ 📁 Select Folder ]   [ Use Existing ]     |
-| [ Save and Continue ]                       |
-+---------------------------------------------+
-| If config missing: show reload logic        |
-| If invalid: show AlertDialog                |
-+---------------------------------------------+
-```
+| # | URI Present | SAF Access | Config Exists | 📱 User Sees | 🛠 Action | 🔁 On Recompose |
+|--|-------------|------------|----------------|--------------|-----------|------------------|
+| **1️⃣ First install** | ❌ | — | ❌ | Welcome screen + “Select Folder” | User picks folder via SAF | → **Case 4** after user picks folder |
+| **2️⃣ Valid setup** | ✅ | ✅ | ✅ | — | InitScreen skipped | ✅ App launches normally |
+| **3️⃣ URI set, but no SAF access** | ✅ | ❌ | ✅ |   | Retry access or pick new folder | → **Case 4** after user picks again |
+| **4️⃣ URI valid, SAF granted, but no config** (e.g. fresh setup or wiped cache) | ✅ | ✅ | ❌ | Spinner (CircularProgressIndicator) | `initialize()` runs: assets copied, config/image loaded | ✅ If success → mark as done → skip InitScreen next time |
+| **5️⃣ Edge case: Config already exists but not marked done** | ✅ | ✅ | ✅ | Spinner | Call markInitDone() silently	 | ✅ Same as case 4 outcome |
 
 ---
 
-### Required Permissions Requested via Composable
-```kotlin
-<uses-permission android:name="android.permission.CAMERA"/>
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+### UI Design
+
+Because we use the **Storage Access Framework**, we **cannot** prefill or list storage options like “Internal” or “SD card” directly.
+
+
+```
++------------------------------------------------+
+| 🐝 Welcome to PomoloBee                       |
+|------------------------------------------------|
+| Please choose a folder to store your app data. |
+| This is required to continue.                  |
+|                                                |
+| 📂 A folder is required to proceed.            |
+|                                                |
+| [ Select Folder ]                              |
++------------------------------------------------+
 ```
 
-These are requested dynamically in `InitScreen` via:
-
-```kotlin
-val permissionLauncher = rememberLauncherForActivityResult(
-    ActivityResultContracts.RequestMultiplePermissions()
-) { result -> ... }
-```
+- ✅ Button launches **SAF folder picker**
+- ✅ After folder is selected, app checks permission and initializes
 
 ---
 
-### HOW STATE EVOLVES SCENARIO-BASED
+### Initialization Spinner
 
-Here’s your **status state machine in practice**:
+Once initialization starts:
 
-#### 1 **Fresh install no URI no cache**
-
-```mermaid
-stateDiagram-v2
-    [*] --> MissingUri : URI == null
-    MissingUri --> FolderPicker : User picks folder
-    FolderPicker --> MissingConfig : Config files not there yet
-    MissingConfig --> InitConfig : copyAssetsIfNotExists + loadLocalConfig
-    InitConfig --> Ready : cache is now ready
-    Ready --> Done : markInitDone
+```
+if (isLoading) {
+    Box {
+        CircularProgressIndicator()
+        Text("Daten werden vorbereitet…")
+    }
+}
 ```
 
-#### 2 **Reinstall URI exists but no cache**
-
-```mermaid
-stateDiagram-v2
-    [*] --> InitConfig : URI valid, but orchardViewModel.locations is empty
-    InitConfig --> Ready : config loaded from disk into cache
-    Ready --> Done
-```
-
-#### 3 **SD removed after install no URI**
-
-```mermaid
-stateDiagram-v2
-    [*] --> MissingUri
-    MissingUri --> FolderPicker : manual reselect needed
-```
-
-#### 4 **Cache ok but no folder access**
-
-```mermaid
-stateDiagram-v2
-    [*] --> InvalidUri : hasAccessToUri = false
-    InvalidUri --> ShowDialog : user must act
-```
-
-#### 5 **Normal startup everything OK**
-
-```mermaid
-stateDiagram-v2
-    [*] --> Ready
-    Ready --> Done
-```
-
-#### 6 **Reinstall SD still mounted but cache cleared**
-
-```mermaid
-stateDiagram-v2
-    [*] --> InitConfig : URI valid, cache empty
-    InitConfig --> Ready : after reloading config
-    Ready --> Done
-```
+- Spinner shown while `initialize()` runs
+- When done, `markInitDone()` is called and `onInitFinished()` transitions to app
  
+
+
 ---
+
+## Permissions
+
+SAF automatically handles folder access  
+Camera permission requested via:
+
+```kotlin
+val cameraPermission = rememberLauncherForActivityResult(
+    ActivityResultContracts.RequestPermission()
+) { granted -> ... }
+```
+
+--- 
+
+### ️ Recomposition Safety
+
+- All UI is driven by `startupStatus` from `SettingsViewModel`
+- The Composable only reacts to:
+  - `startupStatus`
+  - `initDone`
+  - `isLoading` (local state)
+- `showInitUI` is a derived value (`derivedStateOf`)
+- Initialization runs only once per valid status change (`LaunchedEffect(startupStatus)`)
+- Picker fallback re-evaluates status after failure
+
+--- 
  
  
 ## **ℹ️ `AboutScreen`**
