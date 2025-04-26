@@ -26,48 +26,30 @@ fun LocationScreen(
 {
     val context = LocalContext.current
     val orchardViewModel = sharedViewModels.orchard
-    val imageViewModel = sharedViewModels.image
-    val settingsViewModel = sharedViewModels.settings
+    val cameraViewModel = sharedViewModels.camera
 
 
-    val locations by orchardViewModel.locations.collectAsState()
-    val fruits by orchardViewModel.fruits.collectAsState()
 
     // ✅ To receive data from SvgMapScreen
     val svgReturnKey = "fromSvg_Location"
     val receiveHandle = navController.currentBackStackEntry?.savedStateHandle
 
-// ✅ To return data to CameraScreen
-    val cameraReturnKey = "fromLocation"
-    val sendHandle = navController.previousBackStackEntry?.savedStateHandle
 
 
+    val tempImageRecord by cameraViewModel.tempImageRecord.collectAsState()
+    val locations by orchardViewModel.locations.collectAsState()
+    val fruits by orchardViewModel.fruits.collectAsState()
 
-
-    var selectedLocation by remember { mutableStateOf<Location?>(null) }
-    var selectedRow by remember { mutableStateOf<Row?>(null) }
-
-    val selectedRowId by settingsViewModel.selectedRowId.collectAsState()
-    val selectedFieldId by settingsViewModel.selectedFieldId.collectAsState()
+    val selectedLocation = remember(tempImageRecord, locations) {
+        locations.find { it.field.fieldId == tempImageRecord.fieldId }
+    }
+    val selectedRow = remember(tempImageRecord, selectedLocation) {
+        selectedLocation?.rows?.find { it.rowId == tempImageRecord.rowId }
+    }
 
     val rows = selectedLocation?.rows ?: emptyList()
 
 
-    LaunchedEffect(locations) {
-        println("🌍 Locations loaded: ${locations.size}")
-        println("🍎 Fruits loaded: ${fruits.size}")
-
-        locations.forEach { loc ->
-            println("📦 Field: ${loc.field.name} — Rows: ${loc.rows.size}")
-            loc.rows.forEach { row ->
-                println("  🌿 Row: ${row.name}, fruitId=${row.fruitId}")
-            }
-        }
-        println("🍎 Fruits loaded: ${fruits.size}")
-        fruits.forEach { f ->
-            println("  🍏 Fruit ID=${f.fruitId}, Name=${f.name}")
-        }
-    }
 
 
     // Handle row coming from SVG Map
@@ -75,25 +57,30 @@ fun LocationScreen(
         val rowId = receiveHandle?.get<Int>("${svgReturnKey}_rowId")
         val xy = receiveHandle?.get<String>("${svgReturnKey}_xy")
 
-        if (rowId != null) {
-            selectedLocation = locations.find { it.rows.any { row -> row.rowId == rowId } }
-            selectedRow = selectedLocation?.rows?.find { it.rowId == rowId }
-
-            settingsViewModel.updateSelectedRow(rowId)
-            selectedLocation?.field?.fieldId?.let {
-                settingsViewModel.updateSelectedField(it)
-            }
-
-            // Optionally store XY
-            xy?.let { imageViewModel.setPendingXYLocation(it) }
-
-            // Clean up
-            receiveHandle.remove<Int>("${svgReturnKey}_rowId")
-            receiveHandle.remove<String>("${svgReturnKey}_xy")
+        if (rowId == null) {
+            return@LaunchedEffect // nothing selected -> keep previous state
         }
 
-    }
+        val newLocation = locations.find { it.rows.any { row -> row.rowId == rowId } }
+        val newRow = newLocation?.rows?.find { it.rowId == rowId }
 
+        if (newLocation != null) {
+            cameraViewModel.updateSelectedFieldAndRow(
+                fieldId = newLocation.field.fieldId,
+                rowId = newRow?.rowId,
+                fieldShort = newLocation.field.shortName,
+                rowShort = newRow?.shortName ?: "UnknownRow",
+                fruitType = newRow?.fruitType
+            )
+        }
+
+        xy?.let {
+            cameraViewModel.updatePendingXYLocation(it)
+        }
+
+        receiveHandle.remove<Int>("${svgReturnKey}_rowId")
+        receiveHandle.remove<String>("${svgReturnKey}_xy")
+    }
 
 
 
@@ -109,31 +96,46 @@ fun LocationScreen(
             items = locations.map { it.field.name },
             selectedItem = selectedLocation?.field?.name,
             onItemSelected = { name ->
-                selectedLocation = locations.find { it.field.name == name }
-                selectedRow = null // reset row when field changes
+                val newLocation = locations.find { it.field.name == name }
+                if (newLocation != null) {
+                    cameraViewModel.updateSelectedFieldAndRow(
+                        fieldId = newLocation.field.fieldId,
+                        rowId = null, // Reset row
+                        fieldShort = newLocation.field.shortName,
+                        rowShort = "UnknownRow",
+                        fruitType =  null
+                    )
+                    cameraViewModel.updatePendingXYLocation("")
 
-                println("🔄 Selected Location: ${selectedLocation?.field?.name}")
-                selectedLocation?.rows?.forEach { row ->
-                    val fruitMatch = fruits.find { it.fruitId == row.fruitId }
-                    println("  🔍 Row '${row.name}' → Fruit match: ${fruitMatch?.name ?: "❌ Not found"}")
+                    /* cameraViewModel.setTempImageRecord(
+                         tempImageRecord.copy(
+                             fieldId = newLocation.field.fieldId,
+                             rowId = -1, // reset selected row
+                             fruitType = "Unbestimmt"
+                         )
+                     )
+
+                     */
                 }
             }
-
         )
 
+
         // 🔄 Sync field to preferences
+        /*
         LaunchedEffect(selectedLocation?.field?.fieldId) {
-            selectedLocation?.field?.fieldId?.let { settingsViewModel.updateSelectedField(it) }
-        }
-
-        // 🔁 Restore location from stored fieldId
-
-        LaunchedEffect(selectedFieldId) {
-            if (selectedFieldId != null) {
-                selectedLocation = locations.find { it.field.fieldId == selectedFieldId }
+            selectedLocation?.field?.fieldId?.let {
+                //cameraViewModel.updateSelectedField(it)
+                cameraViewModel.updateSelectedFieldAndRow(
+                    fieldId = it ???.field.fieldId,
+                    rowId = null, // Reset row
+                    fieldShort = it  ??? .field.shortName,
+                    rowShort = "UnknownRow",
+                    fruitType =  it .field.fruitType
+                )
+            //  newLocation.field.fruitType
             }
-        }
-
+        }*/
 
 
 
@@ -144,18 +146,31 @@ fun LocationScreen(
                 items = rows.map { it.name },
                 selectedItem = selectedRow?.name,
                 onItemSelected = { rowName ->
-                    selectedRow = rows.find { it.name == rowName }
-                    selectedRow?.rowId?.let { settingsViewModel.updateSelectedRow(it) }
+                    val newRow = selectedLocation.rows.find { it.name == rowName }
+                    if (newRow != null) {
+                        cameraViewModel.updateSelectedFieldAndRow(
+                            fieldId = selectedLocation.field.fieldId,
+                            rowId = newRow.rowId,
+                            fieldShort = selectedLocation.field.shortName,
+                            rowShort = newRow.shortName,
+                            fruitType = newRow.fruitType
+                        )
+                    }
+
                 }
             )
         }
 
+
         // 🧠 Restore selected row after SVG map or reload
+        /*
         LaunchedEffect(selectedRowId, selectedLocation) {
             if (selectedRowId != null && selectedLocation != null) {
                 selectedRow = selectedLocation!!.rows.find { it.rowId == selectedRowId }
             }
         }
+
+         */
 
         // 📝 Status
         Text("📌 Status: ${
@@ -186,11 +201,6 @@ fun LocationScreen(
         // ✅ Confirm Button
         Button(
             onClick = {
-                selectedRow?.rowId?.let { sendHandle?.set("${cameraReturnKey}_rowId", it) }
-                imageViewModel.pendingXYLocation.value?.let { xy ->
-                    sendHandle?.set("${cameraReturnKey}_xy", xy)
-                }
-
                 Toast.makeText(context, "✅ Location selected", Toast.LENGTH_SHORT).show()
                 navController.popBackStack()
             },
@@ -198,5 +208,8 @@ fun LocationScreen(
         ) {
             Text("✅ Confirm & Continue")
         }
+
+
+
     }
 }

@@ -71,11 +71,11 @@ fun ImageHistoryScreen(
                 onItemSelected = { name ->
                     if (name == "All Fields") {
                         imageViewModel.selectField(null)
-                        settingsViewModel.updateSelectedField(-1)
+                        //settingsViewModel.updateSelectedField(-1)
                     } else {
                         val selected = locations.find { it.field.name == name }
                         imageViewModel.selectField(selected?.field?.fieldId)
-                        settingsViewModel.updateSelectedField(selected?.field?.fieldId ?: -1)
+                        //settingsViewModel.updateSelectedField(selected?.field?.fieldId ?: -1)
                     }
                 }
             )
@@ -93,11 +93,11 @@ fun ImageHistoryScreen(
                     onItemSelected = { name ->
                         if (name == "All Rows") {
                             imageViewModel.selectRow(null)
-                            settingsViewModel.updateSelectedRow(-1)
+                            //settingsViewModel.updateSelectedRow(-1)
                         } else {
                             val selected = rows.find { it.name == name }
                             imageViewModel.selectRow(selected?.rowId)
-                            settingsViewModel.updateSelectedRow(selected?.rowId ?: -1)
+                            //settingsViewModel.updateSelectedRow(selected?.rowId ?: -1)
                         }
                     }
                 )

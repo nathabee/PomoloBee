@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _181 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _190 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -52,6 +52,7 @@
     - [April 23 2025](#april-23-2025)
     - [April 24 2025](#april-24-2025)
     - [April 25 2025](#april-25-2025)
+    - [April 26 2025](#april-26-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -611,8 +612,8 @@ Week 7
 - **Hours Worked**: 3 hours  
 - **Tasks Completed**:  
   - App Unit Test after `HistoryImageScreen` add on 
-  - App - BUG3 detection  (Pending) : after start app again, still ask permission on uri
-  - App - BUG4 detection  (Pending) : a waiting uhr would be nice after saving file on camera
+  - App - BUG3 detection  : after start app again, still ask permission on uri
+  - App - BUG4 detection  : a waiting uhr would be nice after saving file on camera
   - App - BUG5 detection  : in HistoryImage we could see images in small if they are available locally 
   - App - BUG6 detection  : in HistoryImage fetch images that are available remote but not local (if cloud mode) 
   - App - BUG7 detection : scroll just on images but no scroll on pending images in imageHistoryScreen
@@ -628,17 +629,32 @@ Week 7
 - **Hours Worked**: 3 hours  
 - **Tasks Completed**:  
   - App - add on : add the imagecard/preview button in ImageHistoryScreen to open SvgMapScreen in read only mode and put a red cross where the image was taken
-  - App - refactor initViewModel into SettingsViewModel, plus initScreen and initDone in mainActivity (see BUG3) (pending)
+  - App - refactor initViewModel into SettingsViewModel, plus initScreen and initDone in mainActivity (see BUG3) 
 
 ---
 
 
 
 ### April 25 2025
-- **Hours Worked**: 4 hours  
+- **Hours Worked**: 7 hours  
 - **Tasks Completed**:   
   - App - refactor initViewModel into SettingsViewModel, plus initScreen and initDone in mainActivity (add radio button)
-  - App - BUG9 (pending) if no file selected in camerascreen and save, we should not save with unknown field but force choice
+  - App - BUG9  if no file selected in camerascreen and save, we should not save with unknown field but force choice
+  - App - refactor camera screen to display pending image as a imageCard component in order to visualize data before saving
+  - App - camera screen has a imageCard component event if no image is selected
+  - APP BUG10 camerascreen : image selection reseted after select location retrieve data
+  - APP BUG11 camerascreen : processingimage not seen in imagehistory anymore : must be problem with json save or read
+  - APP BUG12 camerascreen : capturedate no initiualise today, not capturable from calendar, 
+  - App - correction BUG3 corrected
+
+  ---
+
+
+### April 26 2025
+- **Hours Worked**: 6 hours  
+- **Tasks Completed**:   
+  - App - created cameraViewModel  and refactor cameraScreen to use imageRecord beased oth this view, modev selecxted field_id and row from setting view to cameraview
+  - App - correction BUG4, BUG9,BUG10, BUG11, BUG12
 
   ---
 

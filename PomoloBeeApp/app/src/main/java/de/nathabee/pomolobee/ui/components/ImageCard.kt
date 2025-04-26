@@ -41,7 +41,7 @@ fun ImageCard(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-
+/*
     val (imageUri, hasLocalImage) = remember(image, imagesDir, mediaUrl) {
         var localUri: Uri? = null
         var localFound = false
@@ -69,6 +69,36 @@ fun ImageCard(
             return@remember fullUrl to false
         }
 
+
+        return@remember localUri to localFound
+    }
+*/
+    val (imageUri, hasLocalImage) = remember(image, imagesDir, mediaUrl) {
+        var localUri: Uri? = null
+        var localFound = false
+
+        val fallbackFilename = "image_default.jpg"
+        val filename = image.originalFilename?.takeIf { it.isNotBlank() } ?: fallbackFilename
+
+        val file = imagesDir?.findFile(filename)
+
+        if (file != null && file.exists()) {
+            localUri = file.uri
+            localFound = true
+        } else {
+            // check if imageUrl is a local Uri already
+            if (!image.imageUrl.isNullOrBlank() && (image.imageUrl.startsWith("content://") || image.imageUrl.startsWith("file://"))) {
+                Log.d("ImageCard", "📸 Using temporary local Uri: ${image.imageUrl}")
+                return@remember Uri.parse(image.imageUrl) to true
+            }
+
+            if (!image.imageUrl.isNullOrBlank() && image.imageId != null) {
+                val sanitizedPath = image.imageUrl.removePrefix("/media")
+                val fullUrl = mediaUrl.trimEnd('/') + sanitizedPath
+                Log.d("ImageCard", "🌐 Using remote image: $fullUrl")
+                return@remember fullUrl to false
+            }
+        }
 
         return@remember localUri to localFound
     }

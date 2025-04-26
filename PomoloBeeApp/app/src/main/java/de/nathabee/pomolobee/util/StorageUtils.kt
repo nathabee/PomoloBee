@@ -6,8 +6,8 @@ import android.net.Uri
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import de.nathabee.pomolobee.model.Location
-import kotlinx.serialization.json.*
-import java.io.File
+//import kotlinx.serialization.json.*
+//import java.io.File
 
 /*
 Function	                Purpose
@@ -302,6 +302,8 @@ object StorageUtils {
 
         return target?.uri ?: svgDir?.findFile("default_map.svg")?.uri
     }
+
+
 
 
 

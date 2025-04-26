@@ -7,5 +7,6 @@ import de.nathabee.pomolobee.viewmodel.*
 data class PomolobeeViewModels(
     val settings: SettingsViewModel,
     val orchard: OrchardViewModel,
-    val image: ImageViewModel
+    val image: ImageViewModel,
+    val camera: CameraViewModel
 )

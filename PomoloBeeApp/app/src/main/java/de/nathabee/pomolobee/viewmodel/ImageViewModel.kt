@@ -97,6 +97,7 @@ class ImageViewModel(private val context: Context) : ViewModel() {
     }
 
 
+
     suspend fun loadImageCacheFromStorage(rootUri: Uri): Boolean {
         val success = withContext(Dispatchers.IO) {
             ImageRepository.loadAllImageDataFromUri(context, rootUri)

@@ -10,6 +10,10 @@ DisposableEffect(Unit) {
  */
 package de.nathabee.pomolobee.ui.screens
 
+
+
+
+
 import PomolobeeViewModels
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -29,26 +33,33 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import com.google.gson.Gson
 import de.nathabee.pomolobee.model.ImageListData
 import de.nathabee.pomolobee.model.ImageListResponse
 import de.nathabee.pomolobee.model.ImageRecord
 import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.model.Row
 import de.nathabee.pomolobee.navigation.Screen
+import de.nathabee.pomolobee.ui.component.ImageCard
 import de.nathabee.pomolobee.util.ErrorLogger
-import de.nathabee.pomolobee.viewmodel.OrchardViewModel
-import de.nathabee.pomolobee.viewmodel.SettingsViewModel
 import java.io.File
 import de.nathabee.pomolobee.util.StorageUtils
-import de.nathabee.pomolobee.viewmodel.ImageViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.builtins.ListSerializer
 import java.util.Locale
-import kotlinx.serialization.json.Json
+
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardOptions
+import android.app.DatePickerDialog
+import android.content.Context
+import java.util.Calendar
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
 
 // name of picture <FieldShortName>_<RowShortName>_<yyyyMMdd_HHmmss>.jpg
 
@@ -57,16 +68,20 @@ fun CameraScreen(
     navController: NavController,
     sharedViewModels: PomolobeeViewModels
 ) {
+
+
+    /*************************************************************************/
+    /* variable */
+    /*************************************************************************/
+
     val context = LocalContext.current
     val orchardViewModel = sharedViewModels.orchard
     val imageViewModel = sharedViewModels.image
     val settingsViewModel = sharedViewModels.settings
+    val cameraViewModel = sharedViewModels.camera
 
 
-    //val imageDirectory by settingsViewModel.imageDirectory.collectAsState()
-    val selectedFieldId by settingsViewModel.selectedFieldId.collectAsState()
-    val selectedRowId by settingsViewModel.selectedRowId.collectAsState()
-    val locations by orchardViewModel.locations.collectAsState()
+
 
     val imageSourceUri = rememberSaveable { mutableStateOf<Uri?>(null) }
     val photoTempUri = rememberSaveable { mutableStateOf<Uri?>(null) }
@@ -78,7 +93,6 @@ fun CameraScreen(
 
     //val dateFormatter = remember { java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
 
-    val latestJsonEntry = remember { mutableStateOf<ImageRecord?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
 
@@ -86,32 +100,23 @@ fun CameraScreen(
 
 
 
-
-    // Gallery picker
-    val pickImageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        imageSourceUri.value = uri
-    }
-
-
-    // Camera capture
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) {
-            imageSourceUri.value = photoTempUri.value
-
-        }
-    }
-
     // Build location string
+    /*
     var selectedLocation by remember { mutableStateOf<Location?>(null) }
     var selectedRow by remember { mutableStateOf<Row?>(null) }
 
-    LaunchedEffect(selectedFieldId, selectedRowId, locations) {
-        selectedLocation = locations.find { it.field.fieldId == selectedFieldId }
-        selectedRow = selectedLocation?.rows?.find { it.rowId == selectedRowId }
+    val selectedFieldId by cameraViewModel.selectedFieldId.collectAsState()
+    val selectedRowId by cameraViewModel.selectedRowId.collectAsState()
+
+     */
+    val tempImageRecord by cameraViewModel.tempImageRecord.collectAsState()
+    val locations by orchardViewModel.locations.collectAsState()
+
+    val selectedLocation = remember(tempImageRecord, locations) {
+        locations.find { it.field.fieldId == tempImageRecord.fieldId }
+    }
+    val selectedRow = remember(tempImageRecord, selectedLocation) {
+        selectedLocation?.rows?.find { it.rowId == tempImageRecord.rowId }
     }
 
     val locationStatus = selectedLocation?.let { loc ->
@@ -122,89 +127,137 @@ fun CameraScreen(
 
 
 
-    val svgReturnKey = "fromSvg_Location"
-    val receiveHandle = navController.currentBackStackEntry?.savedStateHandle
+   // val svgReturnKey = "fromSvg_Location"
+   // val receiveHandle = navController.currentBackStackEntry?.savedStateHandle
 
-    val cameraReturnKey = "fromLocation"
-    val sendHandle = navController.previousBackStackEntry?.savedStateHandle
+
+
+    /*************************************************************************/
+    /* FUNCTION*/
+    /*************************************************************************/
+    /*
+    fun generateFilename(selectedLocation: Location?, selectedRow: Row?): String {
+        val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+            .format(System.currentTimeMillis())
+        val fieldShort = selectedLocation?.field?.shortName ?: "UnknownField"
+        val rowShort = selectedRow?.shortName ?: "UnknownRow"
+        return "${fieldShort}_${rowShort}_$timestamp.jpg"
+    }*/
+
+
 
     fun getTodayDateString(): String {
         return java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(System.currentTimeMillis())
     }
 
-// Handle row coming from Location (forwarding data from SVG Map)
-    LaunchedEffect(receiveHandle?.get<Int>("${svgReturnKey}_rowId")) {
-        val rowId = receiveHandle?.get<Int>("${svgReturnKey}_rowId")
-        val xy = receiveHandle?.get<String>("${svgReturnKey}_xy")
-
-        if (rowId != null) {
-            selectedLocation = locations.find { it.rows.any { it.rowId == rowId } }
-            selectedRow = selectedLocation?.rows?.find { it.rowId == rowId }
-
-            settingsViewModel.updateSelectedRow(rowId)
-            selectedLocation?.field?.fieldId?.let {
-                settingsViewModel.updateSelectedField(it)
-            }
-
-            // Optionally store XY
-            if (xy != null) {
-                imageViewModel.setPendingXYLocation(xy)
-            }
-
-            // Clean up
-            receiveHandle.remove<Int>("${svgReturnKey}_rowId")
-            receiveHandle.remove<String>("${svgReturnKey}_xy")
-        }
-    }
-
-    LaunchedEffect(latestJsonEntry.value) {
-        val entry = latestJsonEntry.value ?: return@LaunchedEffect
-
-        val pendingPath = "image_data/pending_images.json"
-
-        val existingJson = StorageUtils.readJsonFileFromStorage(context, storageRootUri!!, pendingPath)
-
-        val existingEntries = if (!existingJson.isNullOrBlank()) {
-            try {
-                Json.decodeFromString<ImageListResponse>(existingJson).data.images
-            } catch (e: Exception) {
-                Log.e("CameraScreen", "❌ Failed to parse pending_images.json", e)
-                emptyList()
-            }
-        } else {
-            emptyList()
-        }
-
-        val updatedEntries = existingEntries + entry
-
-        val wrapped = ImageListResponse(
-            status = "pending",
-            data = ImageListData(
-                total = updatedEntries.size,
-                limit = 100,
-                offset = 0,
-                images = updatedEntries
-            )
+    fun createEmptyImageRecord(): ImageRecord {
+        return ImageRecord(
+            imageId = -1,
+            rowId = -1,
+            fieldId = -1,
+            xyLocation = null,
+            fruitType = "No Fruit",
+            userFruitPlant = 0,
+            uploadDate = "",
+            date = getTodayDateString(),
+            imageUrl = "", // No image
+            originalFilename = "empty_placeholder.jpg",
+            processed = false,
+            processedAt = null,
+            status = "No Status"
         )
-
-        val newJson = Gson().toJson(wrapped)
-
-
-        val saved = StorageUtils.saveTextFile(context, storageRootUri!!, pendingPath, newJson)
-        if (!saved) {
-            Log.e("CameraScreen", "❌ Failed to write pending_images.json")
-        } else {
-            Log.d("CameraScreen", "✅ pending_images.json updated")
-        }
-
-        imageViewModel.addPendingImage(entry)
-
-        latestJsonEntry.value = null // Avoid duplicates
     }
 
 
 
+    suspend fun savePendingImage(context: Context, rootUri: Uri, newImage: ImageRecord): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val pendingPath = "image_data/pending_images.json"
+                val existingJson = StorageUtils.readJsonFileFromStorage(context, rootUri, pendingPath)
+                val existingEntries = if (!existingJson.isNullOrBlank()) {
+                    Gson().fromJson(existingJson, ImageListResponse::class.java).data.images
+                } else {
+                    emptyList()
+                }
 
+                val updatedEntries = existingEntries + newImage
+                val wrapped = ImageListResponse(
+                    status = "pending",
+                    data = ImageListData(
+                        total = updatedEntries.size,
+                        limit = 100,
+                        offset = 0,
+                        images = updatedEntries
+                    )
+                )
+
+                val newJson = Gson().toJson(wrapped)
+                StorageUtils.saveTextFile(context, rootUri, pendingPath, newJson)
+            } catch (e: Exception) {
+                Log.e("SavePendingImage", "❌ Failed to save pending image", e)
+                false
+            }
+        }
+    }
+
+
+    //var captureDate by rememberSaveable { mutableStateOf(getTodayDateString()) }
+    var userFruitPerPlant by rememberSaveable { mutableStateOf("") }
+
+
+    val isSaveEnabled by remember(tempImageRecord) {
+        derivedStateOf { cameraViewModel.canSaveRecord() }
+    }
+
+
+    /*************************************************************************/
+    /* LaunchedEffect*/
+    /*************************************************************************/
+
+    // Gallery picker
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            imageSourceUri.value = it
+            cameraViewModel.updateAfterPicture(
+                it,
+                fieldShort = selectedLocation?.field?.shortName ?: "UnknownField",
+                rowShort = selectedRow?.shortName ?: "UnknownRow",
+                xyLocation = imageViewModel.pendingXYLocation.value
+            )
+
+
+
+        }
+    }
+
+
+
+    // Camera capture
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            photoTempUri.value?.let { uri ->
+                imageSourceUri.value = uri
+                cameraViewModel.updateAfterPicture(
+                    uri,
+                    fieldShort = selectedLocation?.field?.shortName ?: "UnknownField",
+                    rowShort = selectedRow?.shortName ?: "UnknownRow",
+                    xyLocation = imageViewModel.pendingXYLocation.value
+                )
+
+            }
+        }
+    }
+
+
+
+    /*************************************************************************/
+    /* UI */
+    /*************************************************************************/
 
 
 
@@ -231,34 +284,87 @@ fun CameraScreen(
             }
         }
 
-        imageSourceUri.value?.let { uri ->
-            Text("🖼️ Selected: ${uri.lastPathSegment}")
-            AsyncImage(
-                model = uri,
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .fillMaxWidth()
-                    .height(200.dp)
+
+        ImageCard(
+            image = tempImageRecord  ,
+            rootUri = storageRootUri,
+            imagesDir = imagesDir,
+            mediaUrl = "",
+            isCloudMode = false,
+            onPreview = {
+                navController.navigate(
+                    Screen.SvgMap.withArgs(
+                        "fieldId" to cameraViewModel.tempImageRecord.value.fieldId.toString(),
+                        "returnKey" to "readonly_preview",
+                        "xyMarker" to (cameraViewModel.tempImageRecord.value.xyLocation ?: ""),
+                        "readOnly" to "true"
+                    )
+                )},
+            onAnalyze = {},
+            onDelete = { cameraViewModel.clearTempImageRecord() }
+        )
+
+
+
+        // OutlinedTextField that opens DatePickerDialog
+
+        val calendar = remember { Calendar.getInstance() }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    val dateParts = tempImageRecord.date.split("-")
+                    val year = dateParts.getOrNull(0)?.toIntOrNull() ?: calendar.get(Calendar.YEAR)
+                    val month = dateParts.getOrNull(1)?.toIntOrNull()?.minus(1) ?: calendar.get(Calendar.MONTH)
+                    val day = dateParts.getOrNull(2)?.toIntOrNull() ?: calendar.get(Calendar.DAY_OF_MONTH)
+
+                    DatePickerDialog(
+                        context,
+                        { _, selectedYear, selectedMonth, selectedDayOfMonth ->
+                            val newDate = String.format(
+                                Locale.getDefault(),
+                                "%04d-%02d-%02d",
+                                selectedYear,
+                                selectedMonth + 1,
+                                selectedDayOfMonth
+                            )
+                            cameraViewModel.updateCaptureDate(newDate)
+                        },
+                        year,
+                        month,
+                        day
+                    ).show()
+                },
+            contentAlignment = Alignment.CenterStart // So text is nicely aligned
+        ) {
+            OutlinedTextField(
+                value = tempImageRecord.date,
+                onValueChange = {}, // No manual editing
+                label = { Text("📅 Capture Date (yyyy-MM-dd)") },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true, // Important
+                enabled = false // Disable typing, only show picker on click
             )
         }
 
-        var captureDate by rememberSaveable { mutableStateOf(getTodayDateString()) }
-        var userFruitPerPlant by rememberSaveable { mutableStateOf("") }
-
-        OutlinedTextField(
-            value = captureDate,
-            onValueChange = { captureDate = it },
-            label = { Text("📅 Capture Date (yyyy-MM-dd)") },
-            modifier = Modifier.fillMaxWidth()
-        )
 
         OutlinedTextField(
             value = userFruitPerPlant,
-            onValueChange = { userFruitPerPlant = it },
+            onValueChange = { input ->
+                // Filter out non-digit characters if needed (optional extra safety)
+                val filtered = input.filter { it.isDigit() }
+                userFruitPerPlant = filtered
+                cameraViewModel.updateUserFruitPerPlant(filtered.toIntOrNull() ?: 0)
+            },
             label = { Text("🍎 Estimated Fruit per Plant") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            )
         )
+
 
         Button(onClick = { navController.navigate(Screen.Location.route) }) {
             Text("📍 Select Location")
@@ -266,138 +372,54 @@ fun CameraScreen(
 
         Text("📌 Status: $locationStatus")
 
-        /*
-        Button(onClick = {
-            val sourceUri = imageSourceUri.value
-            //val imagesDir = resolveSubDirectory(context, settingsViewModel.storageRootUri.value, "images")
 
 
+        var isSaving by remember { mutableStateOf(false) }
 
-            if (imagesDir == null) {
-                val msg = "❌ Image directory is not available"
-                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                ErrorLogger.logError(context, storageRootUri, msg)
-                return@Button
-            }
-
-            try {
-                if (sourceUri != null) {
-                    val resolver = context.contentResolver
-
-                    val inputStream = resolver.openInputStream(sourceUri)
-                    val originalBitmap = BitmapFactory.decodeStream(inputStream)
-                    val resized = Bitmap.createScaledBitmap(originalBitmap, 800, 600, true)
-
-                    val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-                        .format(System.currentTimeMillis())
-
-                    val fieldShort = selectedLocation?.field?.shortName ?: "UnknownField"
-                    val rowShort = selectedRow?.shortName ?: "UnknownRow"
-                    val fileName = "${fieldShort}_${rowShort}_$timestamp.jpg"
-
-                    val imageFile = imagesDir!!.createFile("image/jpeg", fileName)
-
-                    if (imageFile != null) {
-                        resolver.openOutputStream(imageFile.uri)?.use { output ->
-                            resized.compress(Bitmap.CompressFormat.JPEG, 85, output)
-                            Toast.makeText(context, "✅ Saved to /images/$fileName", Toast.LENGTH_SHORT).show()
-                            Log.d("CameraScreen", "✅ Saved to: /images/$fileName")
-
-                        }
-                        val imageRecord = ImageRecord(
-                            imageId = -1, // or null if you're using nullable Int? — make sure your class allows that!
-                            rowId = selectedRow?.rowId ?: -1,
-                            fieldId = selectedLocation?.field?.fieldId ?: -1,
-                            xyLocation = imageViewModel.pendingXYLocation.value,
-                            fruitType = selectedRow?.fruitType ?: "Unknown",
-                            userFruitPlant = userFruitPerPlant.toIntOrNull() ?: 0,
-                            uploadDate = "", // or null, depending on your model
-                            date = captureDate,
-                            imageUrl = "",
-                            originalFilename = fileName,
-                            processed = false,
-                            processedAt = null,
-                            status = "pending"
-                        )
-
-                        latestJsonEntry.value = imageRecord  // ✅ save for writing JSON file
-
-
-
-                    } else {
-                        val msg = "❌ Could not create image file"
-                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                        ErrorLogger.logError(context, settingsViewModel.storageRootUri.value, msg)
-                    }
-                } else {
-                    val msg = "❌ No image or storage path"
+        Button(
+            onClick = {
+                val sourceUri = imageSourceUri.value
+                if (imagesDir == null || sourceUri == null) {
+                    val msg = "❌ Missing image source, storage directory, or temp record"
                     Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                    ErrorLogger.logError(context, settingsViewModel.storageRootUri.value, msg)
+                    ErrorLogger.logError(context, storageRootUri, msg)
+                    return@Button
                 }
-            } catch (e: Exception) {
-                val msg = "❌ Failed to process and save image"
-                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                ErrorLogger.logError(context, settingsViewModel.storageRootUri.value, msg, e)
-            }
-        }) {
-            Text("💾 Save Image Locally")
-        }*/
 
-        Button(onClick = {
-            val sourceUri = imageSourceUri.value
-            if (imagesDir == null || sourceUri == null) {
-                val msg = "❌ Missing image source or image directory"
-                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                ErrorLogger.logError(context, storageRootUri, msg)
-                return@Button
-            }
-
-            coroutineScope.launch {
-                withContext(Dispatchers.IO) {
+                coroutineScope.launch {
+                    isSaving = true
                     try {
                         val resolver = context.contentResolver
                         val inputStream = resolver.openInputStream(sourceUri)
                         val originalBitmap = BitmapFactory.decodeStream(inputStream)
                         val resized = Bitmap.createScaledBitmap(originalBitmap, 800, 600, true)
 
-                        val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-                            .format(System.currentTimeMillis())
-
-                        val fieldShort = selectedLocation?.field?.shortName ?: "UnknownField"
-                        val rowShort = selectedRow?.shortName ?: "UnknownRow"
-                        val fileName = "${fieldShort}_${rowShort}_$timestamp.jpg"
-
-                        val imageFile = imagesDir.createFile("image/jpeg", fileName)
+                        val filename = cameraViewModel.tempImageRecord.value.originalFilename ?: "default_image.jpg"
+                        val imageFile = imagesDir.createFile("image/jpeg", filename)
 
                         if (imageFile != null) {
                             resolver.openOutputStream(imageFile.uri)?.use { output ->
                                 resized.compress(Bitmap.CompressFormat.JPEG, 85, output)
                             }
 
-                            val imageRecord = ImageRecord(
-                                imageId = -1,
-                                rowId = selectedRow?.rowId ?: -1,
-                                fieldId = selectedLocation?.field?.fieldId ?: -1,
-                                xyLocation = imageViewModel.pendingXYLocation.value,
-                                fruitType = selectedRow?.fruitType ?: "Unknown",
-                                userFruitPlant = userFruitPerPlant.toIntOrNull() ?: 0,
-                                uploadDate = "",
-                                date = captureDate,
-                                imageUrl = "",
-                                originalFilename = fileName,
-                                processed = false,
-                                processedAt = null,
-                                status = "pending"
+                            val newPendingImage = cameraViewModel.tempImageRecord.value.copy(
+                                imageUrl = "" // Now local
                             )
 
-                            latestJsonEntry.value = imageRecord
+                            val saved = savePendingImage(context, storageRootUri!!, newPendingImage)
 
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(context, "✅ Saved to /images/$fileName", Toast.LENGTH_SHORT).show()
-                                Log.d("CameraScreen", "✅ Saved to: /images/$fileName")
+                                if (saved) {
+                                    sharedViewModels.image.addPendingImage(newPendingImage)
+                                    Toast.makeText(context, "✅ Image saved and pending_images updated", Toast.LENGTH_SHORT).show()
+                                    cameraViewModel.clearTempImageRecord()
+                                    imageSourceUri.value = null
+                                } else {
+                                    Toast.makeText(context, "❌ Failed to update pending_images.json", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         } else {
-                            throw Exception("Could not create image file")
+                            throw Exception("❌ Could not create image file")
                         }
                     } catch (e: Exception) {
                         val msg = "❌ Failed to process and save image"
@@ -405,12 +427,21 @@ fun CameraScreen(
                             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                         }
                         ErrorLogger.logError(context, storageRootUri, msg, e)
+                    } finally {
+                        isSaving = false
                     }
                 }
+            },
+            enabled = isSaveEnabled && !isSaving
+        ) {
+            if (isSaving) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text("💾 Save Image Locally")
             }
-        })
-        {
-            Text("💾 Save Image Locally")
         }
 
 

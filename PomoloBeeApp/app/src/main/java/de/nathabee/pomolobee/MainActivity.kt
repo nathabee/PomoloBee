@@ -27,6 +27,7 @@ import de.nathabee.pomolobee.ui.components.DrawerMenu
 import de.nathabee.pomolobee.ui.theme.PomoloBeeTheme
 import de.nathabee.pomolobee.ui.screens.InitScreen
 import de.nathabee.pomolobee.ui.components.PermissionManager
+import de.nathabee.pomolobee.viewmodel.CameraViewModelFactory
 import de.nathabee.pomolobee.viewmodel.ImageViewModel
 import de.nathabee.pomolobee.viewmodel.ImageViewModelFactory
 import de.nathabee.pomolobee.viewmodel.SettingsViewModel
@@ -130,7 +131,8 @@ fun AppScaffold(
         val sharedViewModels = PomolobeeViewModels(
             settings = viewModel(factory = SettingsViewModelFactory(context)),
             orchard = viewModel(factory = OrchardViewModelFactory(context)),
-            image = viewModel(factory = ImageViewModelFactory(context))
+            image = viewModel(factory = ImageViewModelFactory(context)),
+            camera = viewModel(factory = CameraViewModelFactory( ))
         )
 
         val initDone by sharedViewModels.settings.initDone.collectAsState()

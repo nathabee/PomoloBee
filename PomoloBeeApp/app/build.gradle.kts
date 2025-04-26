@@ -61,6 +61,7 @@ android {
 }
 
 dependencies {
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -91,7 +92,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
 
-    implementation(libs.kotlinx.serialization.json)
+   // implementation(libs.kotlinx.serialization.json)
 
     // Coil for SVG support
     implementation(libs.coil)
@@ -111,6 +112,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+
+    //implementation(libs.androidx.placeholder)
+
+    //implementation("androidx.compose.foundation:foundation")
+
+    implementation(libs.compose.material3)
 
 }
 

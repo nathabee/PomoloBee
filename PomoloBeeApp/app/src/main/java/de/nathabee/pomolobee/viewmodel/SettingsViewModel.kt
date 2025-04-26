@@ -149,12 +149,6 @@ class SettingsViewModel(
     )
 
 
-    val selectedFieldId: StateFlow<Int?> = prefs.getSelectedFieldId()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-    val selectedRowId: StateFlow<Int?> = prefs.getSelectedRowId()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
 
 
 
@@ -194,6 +188,7 @@ class SettingsViewModel(
         prefs.updateLastSyncDate(timestamp)
     }
 
+    /*
     fun updateSelectedField(fieldId: Int) = viewModelScope.launch {
         prefs.saveSelectedField(fieldId)
     }
@@ -201,6 +196,8 @@ class SettingsViewModel(
     fun updateSelectedRow(rowId: Int) = viewModelScope.launch {
         prefs.saveSelectedRow(rowId)
     }
+
+     */
 
 
     fun performConnectionTest(context: Context, onResult: (Boolean) -> Unit) = viewModelScope.launch {
