@@ -22,12 +22,14 @@ import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
 import coil.compose.rememberAsyncImagePainter
 import de.nathabee.pomolobee.model.Estimation
+import de.nathabee.pomolobee.model.Fruit
 import de.nathabee.pomolobee.model.ImageRecord
+import de.nathabee.pomolobee.model.Location
 import de.nathabee.pomolobee.navigation.Screen
 import de.nathabee.pomolobee.network.ImageApiService
-import de.nathabee.pomolobee.ui.preview.EstimationPreviewProvider
-import de.nathabee.pomolobee.ui.preview.ImageRecordPreviewProvider
+import de.nathabee.pomolobee.ui.preview.ImageEstimationProvider
 import de.nathabee.pomolobee.util.StorageUtils
+import de.nathabee.pomolobee.util.findEstimationForImage
 import de.nathabee.pomolobee.util.parseXYLocation
 import kotlinx.coroutines.launch
 
@@ -35,16 +37,20 @@ import kotlinx.coroutines.launch
 @Composable
 fun ImageCard(
     image: ImageRecord,
+    estimation: Estimation?,
     rootUri : Uri?,
     imagesDir: DocumentFile?,
     mediaUrl: String,
     isCloudMode: Boolean = false,
     onPreview: (ImageRecord) -> Unit,
-    onAnalyze: (ImageRecord) -> Unit,
+    onAnalyze: (Estimation) -> Unit,
     onDelete: (ImageRecord) -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
+
+
 
 
     val (imageUri, hasLocalImage) = remember(image, imagesDir, mediaUrl) {
@@ -129,7 +135,12 @@ fun ImageCard(
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = { onPreview(image) }) { Text("Preview") }
-                    TextButton(onClick = { onAnalyze(image) }) { Text("Analyze") }
+                    if (estimation != null) {
+                        TextButton(onClick = { onAnalyze(estimation) }) { Text("Analyze") }
+                    }
+
+
+
                     TextButton(onClick = { onDelete(image) }) {
                         Text("Delete", color = Color.Red)
                     }
@@ -165,17 +176,18 @@ fun ImageCard(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewImageCard(
-    @PreviewParameter(ImageRecordPreviewProvider::class) image: ImageRecord
+fun PreviewImageEstimationCard(
+    @PreviewParameter(ImageEstimationProvider::class) data: Pair<ImageRecord, Estimation>
 ) {
     ImageCard(
-        image = image,
-        rootUri = null ,
+        image = data.first,
+        estimation = data.second,
+        rootUri = null,
         imagesDir = null,
         mediaUrl = "http://192.168.178.71:8000/media",
-        isCloudMode  = false,
+        isCloudMode = false,
         onPreview = {},
-        onAnalyze = {},
+        onAnalyze = { _ -> },   // <-- accept estimation but do nothing
         onDelete = {}
     )
 }

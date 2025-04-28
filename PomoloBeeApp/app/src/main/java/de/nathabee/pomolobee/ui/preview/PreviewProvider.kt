@@ -47,6 +47,47 @@ class ImageRecordPreviewProvider : PreviewParameterProvider<ImageRecord> {
     )
 }
 
+
+class ImageEstimationProvider : PreviewParameterProvider<Pair<ImageRecord, Estimation>> {
+    override val values = sequenceOf(
+        Pair(
+            ImageRecord(
+                imageId = 123,
+                fieldId = 1,
+                rowId = 11,
+                xyLocation = "{\"x\":0.5,\"y\":0.5}",
+                fruitType = "Cultivar Gallwa",
+                userFruitPlant = 20,
+                uploadDate = "2025-04-20",
+                date = "2025-04-18",
+                imageUrl = "",
+                originalFilename = "sample.jpg",
+                processed = true,
+                processedAt = "2025-04-20T12:00:00",
+                status = "done"
+            ),
+            Estimation(
+                estimationId = 1,
+                imageId = 123,
+                date = "2025-04-18",
+                timestamp = "2025-04-18T12:00:00",
+                rowId = 11,
+                rowName = "Rang 11",
+                fieldId = 1,
+                fieldName = "ChampMaison",
+                fruitType = "Cultivar Gallwa",
+                plantKg = 18f,
+                rowKg = 702f,
+                maturationGrade = 2,
+                confidenceScore = 0.85f,
+                source = "Machine Learning (Image)",
+                fruitPlant = 100,
+                status = "done"
+            )
+        )
+    )
+}
+
 class EstimationPreviewProvider : PreviewParameterProvider<Estimation> {
     override val values = sequenceOf(
         Estimation(

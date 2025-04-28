@@ -1,7 +1,25 @@
 package de.nathabee.pomolobee.util
 
+import android.util.Log
 import org.json.JSONObject
 
+
+import de.nathabee.pomolobee.model.Estimation
+import de.nathabee.pomolobee.cache.OrchardCache
+
+fun findEstimationForImage(imageId: Int?): Estimation? {
+    if (imageId == null) {
+        Log.d("ImageUtils", "❌ ImageId is null.")
+        return null
+    }
+    val estimation = OrchardCache.estimations.find { it.imageId == imageId }
+    if (estimation != null) {
+        Log.d("ImageUtils", "✅ Found estimation for imageId=$imageId")
+    } else {
+        Log.d("ImageUtils", "❌ No estimation found for imageId=$imageId")
+    }
+    return estimation
+}
 
 data class Coordinates(val x: Float, val y: Float)
 

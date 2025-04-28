@@ -9,11 +9,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import de.nathabee.pomolobee.ui.component.ImageCard
+import de.nathabee.pomolobee.ui.component.EstimationCard
 import de.nathabee.pomolobee.ui.components.ExposedDropdownMenuBoxWithLabel
 import de.nathabee.pomolobee.util.StorageUtils
 import androidx.compose.foundation.lazy.items
 import androidx.navigation.NavController
 import de.nathabee.pomolobee.navigation.Screen
+import de.nathabee.pomolobee.model.Estimation
+import de.nathabee.pomolobee.util.findEstimationForImage
 
 
 @Composable
@@ -33,7 +36,6 @@ fun ImageHistoryScreen(
         StorageUtils.resolveSubDirectory(context, storageRootUri, "images")
     }
 
-
     val locations by orchardViewModel.locations.collectAsState()
     val processedImages by imageViewModel.filteredImages.collectAsState()
     val pendingImages by imageViewModel.filteredPendingImages.collectAsState()
@@ -51,8 +53,8 @@ fun ImageHistoryScreen(
     val syncMode by settingsViewModel.syncMode.collectAsState()
     val isCloudMode = syncMode == "cloud"
 
-
-
+    // ✅ FIX: selectedEstimation must be OUTSIDE of the LazyColumn
+    var selectedEstimation by remember { mutableStateOf<Estimation?>(null) }
 
     LazyColumn(
         modifier = Modifier
@@ -63,7 +65,6 @@ fun ImageHistoryScreen(
         // 🌱 Field selector
         item {
             val fieldNames = listOf("All Fields") + locations.map { it.field.name }
-
             ExposedDropdownMenuBoxWithLabel(
                 label = "🌱 Field",
                 items = fieldNames,
@@ -71,11 +72,9 @@ fun ImageHistoryScreen(
                 onItemSelected = { name ->
                     if (name == "All Fields") {
                         imageViewModel.selectField(null)
-                        //settingsViewModel.updateSelectedField(-1)
                     } else {
                         val selected = locations.find { it.field.name == name }
                         imageViewModel.selectField(selected?.field?.fieldId)
-                        //settingsViewModel.updateSelectedField(selected?.field?.fieldId ?: -1)
                     }
                 }
             )
@@ -85,7 +84,6 @@ fun ImageHistoryScreen(
         if (selectedLocation != null) {
             item {
                 val rowNames = listOf("All Rows") + rows.map { it.name }
-
                 ExposedDropdownMenuBoxWithLabel(
                     label = "🌿 Row",
                     items = rowNames,
@@ -93,11 +91,9 @@ fun ImageHistoryScreen(
                     onItemSelected = { name ->
                         if (name == "All Rows") {
                             imageViewModel.selectRow(null)
-                            //settingsViewModel.updateSelectedRow(-1)
                         } else {
                             val selected = rows.find { it.name == name }
                             imageViewModel.selectRow(selected?.rowId)
-                            //settingsViewModel.updateSelectedRow(selected?.rowId ?: -1)
                         }
                     }
                 )
@@ -110,25 +106,18 @@ fun ImageHistoryScreen(
                 Text("🕒 Pending Images", style = MaterialTheme.typography.titleMedium)
             }
 
-            items(  pendingImages,
-                    key = { it.imageId?.toString() ?: it.originalFilename ?: "unknown-${it.hashCode()}" }
-                    ) { image ->
+            items(
+                pendingImages,
+                key = { it.imageId?.toString() ?: it.originalFilename ?: "unknown-${it.hashCode()}" }
+            ) { image ->
                 ImageCard(
                     image = image,
+                    estimation = null, // 🚫 pending images have no estimation
                     rootUri = storageRootUri,
                     imagesDir = imagesDir,
-                    mediaUrl = "",
+                    mediaUrl = mediaUrl ?: "",
                     isCloudMode = isCloudMode,
-                    onPreview = {
-                        navController?.navigate(
-                            Screen.SvgMap.withArgs(
-                                "fieldId" to it.fieldId.toString(),
-                                "returnKey" to "readonly_preview",
-                                "xyMarker" to (it.xyLocation ?: ""),
-                                "readOnly" to "true"
-                            )
-                        )
-                    },
+                    onPreview = { /* TODO */ },
                     onAnalyze = {},
                     onDelete = {}
                 )
@@ -145,17 +134,23 @@ fun ImageHistoryScreen(
                 Text("❌ No processed images found for this selection.")
             }
         } else {
-            items(processedImages,
+            items(
+                processedImages,
                 key = { it.imageId?.toString() ?: it.originalFilename ?: "unknown-${it.hashCode()}" }
             ) { image ->
+                val estimation = remember(image.imageId) {
+                    findEstimationForImage(image.imageId)
+                }
+
                 ImageCard(
                     image = image,
+                    estimation = estimation,
                     imagesDir = imagesDir,
                     rootUri = storageRootUri,
                     mediaUrl = mediaUrl ?: "",
                     isCloudMode = isCloudMode,
                     onPreview = {
-                        navController?.navigate(
+                        navController.navigate(
                             Screen.SvgMap.withArgs(
                                 "fieldId" to it.fieldId.toString(),
                                 "returnKey" to "readonly_preview",
@@ -164,10 +159,30 @@ fun ImageHistoryScreen(
                             )
                         )
                     },
-                    onAnalyze = {},
+                    onAnalyze = { selectedEstimation = estimation },
                     onDelete = {}
                 )
             }
         }
+    }
+
+    // ✅ Show the EstimationCard in a dialog if selected
+    selectedEstimation?.let { estimation ->
+        AlertDialog(
+            onDismissRequest = { selectedEstimation = null },
+            title = { Text("Estimation Detail") },
+            text = {
+                EstimationCard(
+                    estimation = estimation,
+                    onPreview = {},
+                    onDelete = { selectedEstimation = null }
+                )
+            },
+            confirmButton = {
+                Button(onClick = { selectedEstimation = null }) {
+                    Text("Close")
+                }
+            }
+        )
     }
 }

@@ -65,7 +65,6 @@ import androidx.compose.ui.tooling.preview.Preview
 // name of picture <FieldShortName>_<RowShortName>_<yyyyMMdd_HHmmss>.jpg
 
 
-@Preview
 @Composable
 fun CameraScreen(
     navController: NavController,
@@ -290,6 +289,7 @@ fun CameraScreen(
 
         ImageCard(
             image = tempImageRecord  ,
+            estimation = null,
             rootUri = storageRootUri,
             imagesDir = imagesDir,
             mediaUrl = "",
