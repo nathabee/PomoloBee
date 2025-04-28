@@ -43,8 +43,8 @@ fun ErrorLogScreen(navController: NavController? = null,
         } else {
             LazyColumn {
                 items(errorMessages) { line ->
-                    Text("• $line", modifier = Modifier.padding(vertical = 4.dp))
-                    Divider()
+                    Text("• $line", modifier = Modifier.padding(vertical = 4.dp)                    )
+
                 }
             }
         }

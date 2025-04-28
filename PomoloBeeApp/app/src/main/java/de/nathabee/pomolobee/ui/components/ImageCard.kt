@@ -16,12 +16,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
 import coil.compose.rememberAsyncImagePainter
+import de.nathabee.pomolobee.model.Estimation
 import de.nathabee.pomolobee.model.ImageRecord
 import de.nathabee.pomolobee.navigation.Screen
 import de.nathabee.pomolobee.network.ImageApiService
+import de.nathabee.pomolobee.ui.preview.EstimationPreviewProvider
+import de.nathabee.pomolobee.ui.preview.ImageRecordPreviewProvider
 import de.nathabee.pomolobee.util.StorageUtils
 import de.nathabee.pomolobee.util.parseXYLocation
 import kotlinx.coroutines.launch
@@ -41,38 +46,7 @@ fun ImageCard(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-/*
-    val (imageUri, hasLocalImage) = remember(image, imagesDir, mediaUrl) {
-        var localUri: Uri? = null
-        var localFound = false
 
-        val fallbackFilename = "image_default.jpg"
-        val filename = image.originalFilename?.takeIf { it.isNotBlank() } ?: fallbackFilename
-
-        val file = imagesDir?.findFile(filename)
-
-        if (file != null && file.exists()) {
-            Log.d("ImageCard", "🗂️ Using local image: ${file.uri}")
-            localUri = file.uri
-            localFound = true
-        } else {
-            Log.w("ImageCard", "❌ Local file not found: $filename")
-            // Optionally, trigger cloud fetch if filename == fallback and cloud mode is on (you handle this later)
-        }
-
-
-        // If not found locally, try remote
-        if (localUri == null && !image.imageUrl.isNullOrBlank() && image.imageId != null) {
-            val sanitizedPath = image.imageUrl.removePrefix("/media") // ✅ Remove duplicate
-            val fullUrl = mediaUrl.trimEnd('/') + sanitizedPath
-            Log.d("ImageCard", "🌐 Using remote image: $fullUrl")
-            return@remember fullUrl to false
-        }
-
-
-        return@remember localUri to localFound
-    }
-*/
     val (imageUri, hasLocalImage) = remember(image, imagesDir, mediaUrl) {
         var localUri: Uri? = null
         var localFound = false
@@ -138,6 +112,11 @@ fun ImageCard(
                 Text("🧪 Status: ${image.status}", style = MaterialTheme.typography.labelSmall)
                 Text("🌿 ${image.fruitType}", style = MaterialTheme.typography.bodyMedium)
 
+
+                image.userFruitPlant?.let {
+                    Text("🍏 Estimated fruit per plant: ${image.userFruitPlant}", style = MaterialTheme.typography.labelSmall)
+                }
+
                 image.xyLocation?.let {
                     val coords = parseXYLocation(it)
                     coords?.let {
@@ -179,4 +158,24 @@ fun ImageCard(
             }
         }
     }
+}
+
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewImageCard(
+    @PreviewParameter(ImageRecordPreviewProvider::class) image: ImageRecord
+) {
+    ImageCard(
+        image = image,
+        rootUri = null ,
+        imagesDir = null,
+        mediaUrl = "http://192.168.178.71:8000/media",
+        isCloudMode  = false,
+        onPreview = {},
+        onAnalyze = {},
+        onDelete = {}
+    )
 }

@@ -1,7 +1,7 @@
 
 #  Project Work Log
 
-![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _190 hours_ (Auto-generated)
+![⏱️](https://img.icons8.com/emoji/48/stopwatch-emoji.png) **Total Hours Worked**: _194 hours_ (Auto-generated)
 ---
 <details>
 <summary>Table of Content</summary>
@@ -53,6 +53,8 @@
     - [April 24 2025](#april-24-2025)
     - [April 25 2025](#april-25-2025)
     - [April 26 2025](#april-26-2025)
+  - [Dates from April 28 to Mai 04 2025](#dates-from-april-28-to-mai-04-2025)
+    - [April 28 2025](#april-28-2025)
   - [Tips for Using This Log](#tips-for-using-this-log)
 <!-- TOC END -->
  
@@ -660,7 +662,34 @@ Week 7
 
 </details>
 
+ 
+---
 
+<details>
+<summary>
+Week 8
+</summary>
+
+## Dates from April 28 to Mai 04 2025
+
+---
+
+###  April 28 2025
+- **Hours Worked**: 4 hours
+- **Tasks**:
+  - App : add previewProvider to preview components, add new component : FieldCard, RowCard, FruitCard and EstimationCard
+  - App : add expandable rowcard and expandable fruitcard ...then use the new components in orchardScreen
+
+  to do
+  - App - synchronistaion : send pending to cloud, remove from image_data/pending_images.json and add in images.json
+
+
+
+---
+
+
+
+</details>
 ---
 
 <details>

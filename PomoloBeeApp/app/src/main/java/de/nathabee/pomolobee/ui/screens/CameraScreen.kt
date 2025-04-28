@@ -60,9 +60,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.tooling.preview.Preview
 
 // name of picture <FieldShortName>_<RowShortName>_<yyyyMMdd_HHmmss>.jpg
 
+
+@Preview
 @Composable
 fun CameraScreen(
     navController: NavController,
